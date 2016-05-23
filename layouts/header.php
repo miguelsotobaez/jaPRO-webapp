@@ -9,7 +9,7 @@
                         </a>
                     </div>
                 </div>
-                <a class="navbar-brand" href="index.html">
+                <a class="navbar-brand" href="index.php">
                     <?php echo NAME; ?>
                     <span><?php echo VERSION; ?></span>
                 </a>

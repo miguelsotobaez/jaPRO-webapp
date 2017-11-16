@@ -1,3 +1,8 @@
+:root {
+   --myBaseColor: #f5a212;
+}
+
+
 .btn:active,
 .btn.active {
     box-shadow: none;
@@ -39,14 +44,14 @@
 .btn-accent {
     color: #949ba2;
     background-color: transparent;
-    border-color: #f6a821;
+    border-color: var(--myBaseColor);
 }
 
 .btn-accent:focus,
 .btn-accent.focus {
     color: #ffffff;
     background-color: rgba(246, 168, 33, 0.1);
-    border-color: #f6a821;
+    border-color: var(--myBaseColor);
     outline: 0;
     box-shadow: none;
 }
@@ -54,7 +59,7 @@
 .btn-accent:hover {
     color: #ffffff;
     background-color: rgba(246, 168, 33, 0.1);
-    border-color: #f6a821;
+    border-color: var(--myBaseColor);
 }
 
 .btn-accent:active,
@@ -62,7 +67,7 @@
 .open > .dropdown-toggle.btn-accent {
     color: #ffffff;
     background-color: rgba(246, 168, 33, 0.1);
-    border-color: #f6a821;
+    border-color: var(--myBaseColor);
 }
 
 .btn-accent:active:hover,
@@ -97,7 +102,7 @@ fieldset[disabled] .btn-accent:focus,
 .btn-accent[disabled].focus,
 fieldset[disabled] .btn-accent.focus {
     background-color: rgba(246, 168, 33, 0.1);
-    border-color: #f6a821;
+    border-color: var(--myBaseColor);
 }
 
 .btn-accent .badge {
@@ -532,7 +537,7 @@ fieldset[disabled] .btn-danger.focus {
 .btn-link:active:focus,
 .btn-link:focus,
 .btn-link.active {
-    color: #f6a821;
+    color: var(--myBaseColor);
     text-decoration: none;
 }
 
@@ -578,7 +583,7 @@ fieldset[disabled] .btn-danger.focus {
     right: 100%;
     height: 100%;
     width: 100%;
-    background: #f6a821;
+    background: var(--myBaseColor);
 }
 
 .pace.pace-inactive {
@@ -594,7 +599,7 @@ fieldset[disabled] .btn-danger.focus {
 }
 
 .text-accent {
-    color: #f6a821;
+    color: var(--myBaseColor);
 }
 
 .text-primary {
@@ -939,7 +944,7 @@ fieldset[disabled] .btn-danger.focus {
 }
 
 .label-accent {
-    background-color: #f6a821;
+    background-color: var(--myBaseColor);
 }
 
 body {
@@ -1066,7 +1071,7 @@ body.blank .content {
 
 /* Various */
 a {
-    color: #f6a821;
+    color: var(--myBaseColor);
     text-decoration: none;
 }
 
@@ -1086,7 +1091,7 @@ hr {
 code {
     padding: 2px 4px;
     font-size: 90%;
-    color: #f6a821;
+    color: var(--myBaseColor);
     background-color: #24262d;
     border-radius: 3px;
 }
@@ -1242,7 +1247,7 @@ sup {
 .navbar-default .navbar-brand,
 .navbar-default .navbar-brand:focus {
     width: 200px;
-    background-color: #f6a821;
+    background-color: var(--myBaseColor);
     height: 60px;
     padding: 20px 25px;
     font-weight: 400;
@@ -1256,7 +1261,7 @@ sup {
 
 .navbar-default .navbar-brand:hover {
     color: #FFFFFF;
-    background-color: #f5a212;
+    background-color: var(--myBaseColor);
 }
 
 .navbar-brand span {
@@ -1278,7 +1283,7 @@ sup {
 }
 
 .left-nav-toggle:hover a {
-    color: #f6a821;
+    color: var(--myBaseColor);
 }
 
 .left-nav-toggle a {
@@ -1421,7 +1426,7 @@ sup {
 }
 
 .jk-nav.nav li.active a {
-    border-left: 6px solid #f6a821;
+    border-left: 6px solid var(--myBaseColor);
     padding-left: 19px;
     color: #c0c4c8;
 }
@@ -1495,7 +1500,7 @@ sup {
 }
 
 .panel.panel-c-accent {
-    border-left: 3px solid #f6a821;
+    border-left: 3px solid var(--myBaseColor);
 }
 
 .panel.panel-c-primary {
@@ -1519,7 +1524,7 @@ sup {
 }
 
 .panel.panel-b-accent {
-    background-color: #f6a821;
+    background-color: var(--myBaseColor);
     color: #ffffff;
 }
 
@@ -1548,7 +1553,7 @@ sup {
 
 .view-header .header-icon {
     font-size: 60px;
-    color: #f6a821;
+    color: var(--myBaseColor);
     width: 68px;
     float: left;
     margin-top: -8px;
@@ -1729,7 +1734,7 @@ h3,
 }
 
 .c-accent {
-    color: #f6a821;
+    color: var(--myBaseColor);
 }
 
 .c-white {
@@ -2603,7 +2608,7 @@ fieldset[disabled] .form-control {
 }
 
 .support-question.active {
-    border-left: 3px solid #f6a821;
+    border-left: 3px solid var(--myBaseColor);
 }
 
 .support-question.active .panel-body {
@@ -2614,7 +2619,7 @@ fieldset[disabled] .form-control {
     padding: 5px !important;
     border: none !important;
     border-radius: 10px;
-    background-color: #f6a821 !important;
+    background-color: var(--myBaseColor) !important;
     width: auto !important;
     height: auto !important;
 }
@@ -2646,7 +2651,7 @@ fieldset[disabled] .form-control {
 }
 
 .hoverinfo {
-    background-color: #f6a821 !important;
+    background-color: var(--myBaseColor) !important;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
     -webkit-box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
     border: none !important;

@@ -56,14 +56,14 @@ switch ($option) {
 
 	case "ladder_race_rank":
 		$newArray = null;
-	    $query ="SELECT * FROM RaceRanks WHERE style = 1 ORDER BY rank DESC";
+	    $query ="SELECT * FROM RaceRanks ORDER BY score DESC";
 
 	    $arr = sql2arr($query);
 	    $count = 1;
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("id"=>$value["id"],"position"=>$count,"username"=>$value["username"],"style"=>$value["style"],"score"=>$value["score"],"percentilesum"=>$value["percentilesum"],"percentilesum"=>$value["percentilesum"],"ranksum"=>$value["ranksum"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
+		    	$newArray[]=array("id"=>$value["id"],"username"=>$value["username"],"position"=>$count,"style"=>$value["style"],"score"=>$value["score"],"percentilesum"=>$value["percentilesum"],"ranksum"=>$value["ranksum"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
 		    	$count++;
 		    }
 	    }

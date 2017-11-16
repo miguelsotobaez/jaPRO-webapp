@@ -368,6 +368,173 @@ function ladder_race_title(){
     $("#main-content").append(HTML);
 }
 
+function ladder_race_rank(){
+
+    var panel;
+    panel = '<div id="second_row" class="row">';
+    panel += '  <div class="col-md-8">';
+    panel += '      <div class="panel panel-filled">';
+    panel += '          <div class="panel-heading">';
+    panel += '              Race Rank List';
+    panel += '          </div>';
+    panel += '          <div class="panel-body">';
+    panel += '              <p>This is the race rank list, ordered by score.</p>';
+    panel += '              <div class="table-responsive">';
+    panel += '                  <div class="col-sm-6" id="selectRaceRankStyle"><label>Style:</label></div>';
+    panel += '                  <table id="datatable_ladder_race_rank" class="table table-striped table-hover"></table>';
+    panel += '              </div>';
+    panel += '          </div>';
+    panel += '      </div>';
+    panel += '  </div>';
+    panel += '</div>';
+
+    $("#main-content").append(panel);
+
+    var item = "ladder_race_rank";
+    var content = "";
+    var header = "";
+    var url = "ajax/getJSON.php";
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "JSON",
+        async: false,
+        data: { option: item},
+        success: function(res) {
+            header = "<thead>";
+            header += "<tr>";
+                header += "<th>Position</th>";
+                header += "<th>Player</th>";
+                
+                header += "<th>Style</th>";
+                header += "<th>Score</th>";
+                header += "<th>Average Score</th>";
+                
+                header += "<th>Average Percentile</th>";
+                
+                header += "<th>Average Rank</th>";
+                header += "<th>Golds</th>";
+
+                header += "<th>Silvers</th>";
+                header += "<th>Bronzes</th>";
+                header += "<th>Count</th>";
+                
+            header += "</tr>";
+            header += "</thead>";
+            content = "<tbody>";
+            if(res){
+                $.each( res, function( key, value ) {
+                    content += "<tr class='table' id='"+value.id+"'>";
+                        content += "<td>"+value.position+"</td>";
+                        content += "<td>"+value.username+"</td>";
+                        
+                        content += "<td>"+value.style+"</td>";
+                        content += "<td>"+Math.round(value.score, 1)+"</td>";
+                        
+                        content += "<td>"+(value.score / value.count).toFixed(2)+"</td>";
+                        content += "<td>"+(value.percentilesum / value.count).toFixed(2)+"</td>";
+                        
+                        content += "<td>"+(value.ranksum / value.count).toFixed(2)+"</td>";
+                        content += "<td>"+value.golds+"</td>";
+                        
+                        content += "<td>"+value.silvers+"</td>";
+                        content += "<td>"+value.bronzes+"</td>";
+                        content += "<td>"+value.count+"</td>";
+                        
+                    content += "</tr>";
+                });
+            }
+            content += "</tbody>";
+            $("#datatable_ladder_race_rank").html(header+content);
+        }
+    });
+
+    $('#datatable_ladder_race_rank').DataTable({
+        "dom": "<'row'<'col-sm-6'l><'col-sm-6'f>>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
+        "responsive": true,
+        "order": [[ 0, "asc" ]],
+
+            initComplete: function () {
+                var columnStyle = this.api().column(2);
+
+                var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectRaceRankStyle').on('change', function () {
+                    var valStyle = $(this).val();
+                    columnStyle.search(valStyle, false, false).draw();
+                });
+
+                columnStyle.data().unique().sort().each(function (d, j) {
+                    var styleName = StyleToString(d);
+                    selectStyle.append('<option value="' + d + '">' + styleName + '</option>');
+                });
+            }
+
+
+    });
+}
+
+function ladder_race_count(){
+    var panel = "";
+    panel += '  <div class="col-md-4">';
+    panel += '                    <div class="panel panel-filled">';
+    panel += '                      <div class="panel-heading">';
+    panel += '                          Race Count';
+    panel += '                      </div>';
+    panel += '                        <div class="panel-body">';
+    panel += '                            <p>Most active racers.</p>';
+    panel += '                            <div id="chart_race_count">';
+    panel += '                            </div>';
+    panel += '                        </div>';
+    panel += '                    </div>';
+    panel += '                </div>';
+    $("#main-content #second_row").append(panel);
+
+    var data = null;
+    var item = "ladder_race_count";
+    var url = "ajax/getJSON.php";
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "JSON",
+        async: false,
+        data: { option: item},
+        success: function(res) {
+            data = res;
+        }
+    });
+
+    //Loda fixme, this can use the json from datatable_ladder_duel_rank maybe and avoid a query?
+
+    var chart;
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'chart_race_count',
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: null,
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Race count',
+                data: data
+            }]
+        });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_race').addClass("active");
+}
+
 function ladder_race_list(){
 
     var panel;
@@ -375,10 +542,10 @@ function ladder_race_list(){
     panel += '  <div class="col-md-12">';
     panel += '      <div class="panel panel-filled">';
     panel += '          <div class="panel-heading">';
-    panel += '              Guns Rank List';
+    panel += '              Race List';
     panel += '          </div>';
     panel += '          <div class="panel-body">';
-    panel += '              <p>This is the guns rank list, ordered by ELO.</p>';
+    panel += '              <p>This is the race list, ordered by date.</p>'; //Loda fixme - on first load it should be ordered by date to show recent times? But once we start to filter we want to sort by duration
     panel += '              <div class="table-responsive">';
     panel += '                  <div class="col-sm-6" id="selectTriggerMap"><label>Map:</label></div>';
     panel += '                  <div class="col-sm-6" id="selectTriggerStyle"><label>Style:</label></div>';
@@ -501,145 +668,6 @@ function ladder_race_list(){
    
 }
 
-function ladder_race_rank(){
-
-    var panel;
-    panel = '<div id="second_row" class="row">';
-    panel += '  <div class="col-md-8">';
-    panel += '      <div class="panel panel-filled">';
-    panel += '          <div class="panel-heading">';
-    panel += '              Race Rank List';
-    panel += '          </div>';
-    panel += '          <div class="panel-body">';
-    panel += '              <p>This is the race rank list, ordered by ELO.</p>';
-    panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_race_rank" class="table table-striped table-hover"></table>';
-    panel += '              </div>';
-    panel += '          </div>';
-    panel += '      </div>';
-    panel += '  </div>';
-    panel += '</div>';
-
-    $("#main-content").append(panel);
-
-    var item = "ladder_race_rank";
-    var content = "";
-    var header = "";
-    var url = "ajax/getJSON.php";
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item},
-        success: function(res) {
-            header = "<thead>";
-            header += "<tr>";
-                header += "<th>Position</th>";
-                header += "<th>Player</th>";
-                header += "<th>Style</th>";
-                header += "<th>Score</th>";
-                header += "<th>Percentilesum</th>";
-                header += "<th>Ranksum</th>";
-                header += "<th>Golds</th>";
-                header += "<th>Silvers</th>";
-                header += "<th>Bronzes</th>";
-                header += "<th>Count</th>";
-            header += "</tr>";
-            header += "</thead>";
-            content = "<tbody>";
-            if(res){
-                $.each( res, function( key, value ) {
-                    content += "<tr class='table' id='"+value.id+"'>";
-                        content += "<td>"+value.position+"</td>";
-                        content += "<td>"+value.username+"</td>";
-                        content += "<td>"+value.style+"</td>";
-                        content += "<td>"+value.score+"</td>";
-                        content += "<td>"+value.percentilesum+"</td>";
-                        content += "<td>"+value.ranksum+"</td>";
-                        content += "<td>"+value.golds+"</td>";
-                        content += "<td>"+value.silvers+"</td>";
-                        content += "<td>"+value.bronzes+"</td>";
-                        content += "<td>"+value.count+"</td>";
-                    content += "</tr>";
-                });
-            }
-            content += "</tbody>";
-            $("#datatable_ladder_race_rank").html(header+content);
-        }
-    });
-
-    $('#datatable_ladder_race_rank').DataTable({
-        "dom": "<'row'<'col-sm-6'l><'col-sm-6'f>>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
-        "responsive": true,
-        "order": [[ 0, "asc" ]]
-    });
-}
-
-function ladder_race_count(){
-    var panel = "";
-    panel += '  <div class="col-md-4">';
-    panel += '                    <div class="panel panel-filled">';
-    panel += '                      <div class="panel-heading">';
-    panel += '                          Race Count';
-    panel += '                      </div>';
-    panel += '                        <div class="panel-body">';
-    panel += '                            <p>Most active racers.</p>';
-    panel += '                            <div id="chart_race_count">';
-    panel += '                            </div>';
-    panel += '                        </div>';
-    panel += '                    </div>';
-    panel += '                </div>';
-    $("#main-content #second_row").append(panel);
-
-    var data = null;
-    var item = "ladder_race_count";
-    var url = "ajax/getJSON.php";
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item},
-        success: function(res) {
-            data = res;
-        }
-    });
-
-    //Loda fixme, this can use the json from datatable_ladder_duel_rank maybe and avoid a query?
-
-    var chart;
-        chart = new Highcharts.Chart({
-            chart: {
-                renderTo: 'chart_race_count',
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
-            },
-            title: null,
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        color: '#000000',
-                        connectorColor: '#000000'
-                    }
-                }
-            },
-            series: [{
-                type: 'pie',
-                name: 'Race count',
-                data: data
-            }]
-        });
-
-    $('.jk-nav li').removeClass("active");
-    $('#menu_race').addClass("active");
-}
-
-
 function maps(){
         HTML='<div class="row">';
         HTML+='<div class="col-md-4">';
@@ -728,4 +756,35 @@ function DuelToString(type) {
   else if (type == 20)
     typeStr =  "All weapons";
   return typeStr;
+}
+
+function StyleToString(val){
+    style="Unknown";
+    if (val==0)
+        style="0-SIEGE";
+    else if(val==1)
+        style="1-JKA";
+    else if(val==2)
+        style="2-QW";
+    else if(val==3)
+        style="3-CPM";
+    else if(val==4)
+        style="4-Q3";
+    else if(val==5)
+        style="5-PJK";
+    else if(val==6)
+        style="6-WSW";
+    else if(val==7)
+        style="7-RJQ3";
+    else if(val==8)
+        style="8-RJCPM";
+    else if(val==9)
+        style="9-SWOOP";
+    else if(val==10)
+        style="10-JETPACK";
+    else if(val==11)
+        style="11-SPEED";
+    else if(val==12)
+        style="12-SP";
+    return style;
 }

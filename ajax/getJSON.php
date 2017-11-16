@@ -14,7 +14,7 @@ switch ($option) {
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("id"=>$value["id"],"position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"rank"=>number_format($value["rank"], 0, ',', ''),"TSSUM"=>$value["TSSUM"]); 
+		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"rank"=>number_format($value["rank"], 0, ',', ''),"TSSUM"=>$value["TSSUM"]); 
 		    	$count++;
 		    }
 	    }
@@ -51,7 +51,7 @@ switch ($option) {
 		    foreach ($arr as $key => $value) {
 		    	$duration = date("i:s", $value["duration"] / 1000);
 		    	$end_time = date('Y-m-d H:i:s', $value["end_time"]);
-		    	$newArray[]=array("id"=>$value["id"],"winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$value["type"],"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
+		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$value["type"],"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
 		    }
 	    }
 
@@ -67,7 +67,7 @@ switch ($option) {
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("id"=>$value["id"],"username"=>$value["username"],"position"=>$count,"style"=>$value["style"],"score"=>$value["score"],"percentilesum"=>$value["percentilesum"],"ranksum"=>$value["ranksum"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
+		    	$newArray[]=array("username"=>$value["username"],"position"=>$count,"style"=>$value["style"],"score"=>$value["score"],"percentilesum"=>$value["percentilesum"],"ranksum"=>$value["ranksum"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
 		    	$count++;
 		    }
 	    }
@@ -92,12 +92,8 @@ switch ($option) {
 
 	case "ladder_race_list":
 		$newArray = null;
-	    $query ="SELECT id, username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, end_time 
-	    		FROM LocalRun 
-	    		GROUP BY username, style, coursename 
-	    		ORDER BY duration_ms ASC 
-	    		LIMIT 500
-	    ";
+
+	    $query ="SELECT id, username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY duration_ms ASC LIMIT 1000";
 
 	    $arr = sql2arr($query);
 
@@ -106,7 +102,7 @@ switch ($option) {
 		    	$duration = TimeToString($value["duration_ms"]);
 		    	$end_time = date('Y-m-d H:i:s', $value["end_time"]);
 		    	$style = getStyle($value["style"]);
-		    	$newArray[]=array("id"=>$value["id"],"username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"end_time"=>$end_time);
+		    	$newArray[]=array("username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"end_time"=>$end_time);
 		    }
 	    }
 

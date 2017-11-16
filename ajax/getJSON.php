@@ -39,7 +39,11 @@ switch ($option) {
 
 	case "ladder_duel_list":
 		$newArray = null;
-	    $query ="SELECT * FROM LocalDuel";
+	    $query ="SELECT id, winner, loser, type, winner_hp, winner_shield, duration, end_time 
+	    		FROM LocalDuel 
+	    		ORDER BY end_time DESC
+	    		LIMIT 500
+	    ";
 
 	    $arr = sql2arr($query);
 
@@ -88,7 +92,12 @@ switch ($option) {
 
 	case "ladder_race_list":
 		$newArray = null;
-	    $query ="SELECT id, username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY duration_ms ASC LIMIT 500";
+	    $query ="SELECT id, username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, end_time 
+	    		FROM LocalRun 
+	    		GROUP BY username, style, coursename 
+	    		ORDER BY duration_ms ASC 
+	    		LIMIT 500
+	    ";
 
 	    $arr = sql2arr($query);
 

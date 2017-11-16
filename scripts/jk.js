@@ -172,7 +172,7 @@ function ladder_duel_rank(){
                 $.each( res, function( key, value ) {
                     var TS = value.TSSUM / value.count;
 
-                    content += "<tr class='table' id='"+value.id+"'>";
+                    content += "<tr class='table'>";
                         content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
                         content += "<td>"+value.rank+"</td>";
@@ -301,7 +301,7 @@ function ladder_duel_list(){
             header += "</thead>";
             content = "<tbody>";
             $.each( res, function( key, value ) {
-                content += "<tr class='table' id='"+value.id+"'>";
+                content += "<tr class='table'>";
                     content += "<td>"+value.winner+"</td>";
                     content += "<td>"+value.loser+"</td>";
                     content += "<td>"+value.type+"</td>";
@@ -424,7 +424,7 @@ function ladder_race_rank(){
             content = "<tbody>";
             if(res){
                 $.each( res, function( key, value ) {
-                    content += "<tr class='table' id='"+value.id+"'>";
+                    content += "<tr class='table'>";
                         content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
                         
@@ -583,7 +583,7 @@ function ladder_race_list(){
             content = "<tbody>";
             if(res){
                 $.each( res, function( key, value ) {
-                    content += "<tr class='table' id='"+value.id+"'>";
+                    content += "<tr class='table'>";
                         content += "<td></td>";
                         content += "<td>"+value.username+"</td>";
                         content += "<td>"+value.coursename+"</td>";

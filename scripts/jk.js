@@ -172,7 +172,7 @@ function ladder_duel_rank(){
                 $.each( res, function( key, value ) {
                     var TS = value.TSSUM / value.count;
 
-                    content += "<tr class='table' id='"+value.id+"'>";
+                    content += "<tr class='table'>";
                         content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
                         content += "<td>"+value.rank+"</td>";
@@ -268,6 +268,7 @@ function ladder_duel_list(){
     panel += '          <div class="panel-body">';
     panel += '              <p>Here you can see the registri of all saber duels in japro server.</p>';
     panel += '              <div class="table-responsive">';
+    panel += '                  <div class="col-sm-6" id="selectDuelPlayer"><label>Player:</label></div>';
     panel += '                  <table id="datatable_ladder_duel_list" class="table table-striped table-hover"></table>';
     panel += '              </div>';
     panel += '          </div>';
@@ -301,7 +302,7 @@ function ladder_duel_list(){
             header += "</thead>";
             content = "<tbody>";
             $.each( res, function( key, value ) {
-                content += "<tr class='table' id='"+value.id+"'>";
+                content += "<tr class='table'>";
                     content += "<td>"+value.winner+"</td>";
                     content += "<td>"+value.loser+"</td>";
                     content += "<td>"+value.type+"</td>";
@@ -322,15 +323,25 @@ function ladder_duel_list(){
 
         initComplete: function () {
             var columnStyle = this.api().column(2);
+            var columnPlayer = this.api().column(1); //Should be joined between winner and loser (0,1) ?
 
             var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectDuelStyle').on('change', function () {
                 var valStyle = $(this).val();
                 columnStyle.search(valStyle, false, false).draw();
             });
 
+            var selectPlayer = $('<select class="filter form-control"></select>').appendTo('#selectDuelPlayer').on('change', function () {
+                var valPlayer = $(this).val();
+                columnPlayer.search(valPlayer, false, false).draw();
+            });
+
             columnStyle.data().unique().sort().each(function (d, j) {
                 var duelName = DuelToString(d);
                 selectStyle.append('<option value="' + d + '">' + duelName + '</option>');
+            });
+
+            columnPlayer.data().unique().sort().each(function (d, j) {
+                selectStyle.append('<option value="' + d + '">' + d + '</option>');
             });
         }
 
@@ -424,11 +435,11 @@ function ladder_race_rank(){
             content = "<tbody>";
             if(res){
                 $.each( res, function( key, value ) {
-                    content += "<tr class='table' id='"+value.id+"'>";
+                    content += "<tr class='table'>";
                         content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
                         
-                        content += "<td>"+value.style+"</td>";
+                        content += "<td>"+StyleToString(value.style)+"</td>";
                         content += "<td>"+Math.round(value.score, 1)+"</td>";
                         
                         content += "<td>"+(value.score / value.count).toFixed(2)+"</td>";
@@ -463,8 +474,7 @@ function ladder_race_rank(){
                 });
 
                 columnStyle.data().unique().sort().each(function (d, j) {
-                    var styleName = StyleToString(d);
-                    selectStyle.append('<option value="' + d + '">' + styleName + '</option>');
+                    selectStyle.append('<option value="' + d + '">' + d + '</option>');
                 });
             }
 
@@ -548,7 +558,7 @@ function ladder_race_list(){
     panel += '              <p>This is the race list, ordered by date.</p>'; //Loda fixme - on first load it should be ordered by date to show recent times? But once we start to filter we want to sort by duration
     panel += '              <div class="table-responsive">';
     panel += '                  <div class="col-sm-6" id="selectTriggerMap"><label>Map:</label></div>';
-    panel += '                  <div class="col-sm-6" id="selectTriggerStyle"><label>Style:</label></div>';
+    panel += '                  <div class="col-sm-6" id="selectTriggerPlayer"><label>Player:</label></div>';
     panel += '                  <table id="datatable_ladder_race_list" class="table table-striped table-hover"></table>';
     panel += '              </div>';
     panel += '          </div>';
@@ -583,7 +593,7 @@ function ladder_race_list(){
             content = "<tbody>";
             if(res){
                 $.each( res, function( key, value ) {
-                    content += "<tr class='table' id='"+value.id+"'>";
+                    content += "<tr class='table'>";
                         content += "<td></td>";
                         content += "<td>"+value.username+"</td>";
                         content += "<td>"+value.coursename+"</td>";
@@ -637,24 +647,24 @@ function ladder_race_list(){
             "aaSorting": [[ 1, 'asc' ]],
             initComplete: function () {
                 var columnMap = this.api().column(2);
-                var columnStyle = this.api().column(3);
+                var columnPlayer = this.api().column(1);
 
                 var selectMap = $('<select class="filter form-control"></select>').appendTo('#selectTriggerMap').on('change', function () {
                     var valMap = $(this).val();
                     columnMap.search(valMap, false, false).draw();
                 });
 
-                var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectTriggerStyle').on('change', function () {
-                    var valStyle = $(this).val();
-                    columnStyle.search(valStyle, false, false).draw();
+                var selectPlayer = $('<select class="filter form-control"></select>').appendTo('#selectTriggerPlayer').on('change', function () {
+                    var valPlayer = $(this).val();
+                    columnPlayer.search(valPlayer, false, false).draw();
                 });
 
                 columnMap.data().unique().sort().each(function (d, j) {
                     selectMap.append('<option value="' + d + '">' + d + '</option>');
                 });
 
-                columnStyle.data().unique().sort().each(function (d, j) {
-                    selectStyle.append('<option value="' + d + '">' + d + '</option>');
+                columnPlayer.data().unique().sort().each(function (d, j) {
+                    selectPlayer.append('<option value="' + d + '">' + d + '</option>');
                 });
             }
 

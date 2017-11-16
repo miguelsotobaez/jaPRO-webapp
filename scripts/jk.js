@@ -5,10 +5,8 @@
 
 $(document).ready(function () {
     //home
-    //ladder_saber
-    //ladder_fullforce
-    //ladder_guns
-    //ladder_run
+    //ladder_duels
+    //ladder_race
     //download
 
     if(option=="home"){
@@ -27,7 +25,7 @@ $(document).ready(function () {
         ladder_race_count();
         ladder_race_list();
     }else if(option=="maps"){
-       maps();
+        maps();
     }else{
 
     }
@@ -82,7 +80,11 @@ $(document).ready(function () {
 //////////////////////////////////////////////////////////////////////////
 
 function home(){
-    $("#main-content").html('<div class="container"><h1>!Bienvenidos a JKLATAM!</h1><p>JKLATAM es una comunidad Jedi Knight Latina que tiene como proposito juntar a los mejores players para competir en un sistema de ranking, este sistema de ranking solo es posibles gracias al mod JAPRO. Agradecimientos a Loda y su equipo por sus contribuciones a este magnifico mod.</p><p><a class="btn btn-warning btn-lg" href="mod/japro3.pk3" role="button">Descargar JAPRO</a></p></div>');
+    var p1 = '<h1>Welcome to jaPRO Mod!</h1><p>It is a mod started by loda from modbase put together by raz0r and other jacoders with the security fixes. There are alot of features and new ideas taken from popular mods.</p>';
+    var p2 = '<h4>What does jaPRO do for me?</h4><p>A better sabering environment from base, ranking system, lag compensation either using guns or force, tweaking current weapons for different effects, non abusive admin commands from JA+, voting system, 2 admin levels fullAdmin or junior. From FFA, TFFA and CTF gamemodes there are lots of things to toggle to get the server with no force or with force how you want to run it. Better client smoothing when you have the client installed in the japro directory.</p>';
+    var p3 = '<h4>Why should I even bother using jaPRO?</h4><p>Those who maybe looking for another option other than running JA+ or any other mod which is old and can be crashed, DoS attacked or exploited.</p>';
+    var p4 = '<p><a class="btn btn-default btn-lg" href="mod/japro3.pk3" role="button">Download jaPRO Client</a></p>';
+    $("#main-content").html('<div class="container">'+p1+' <br> '+p2+' '+p3+' '+p3+'</div>');
     $('.jk-nav li').removeClass("active");
     $('#menu_home').addClass("active");
 }
@@ -685,43 +687,43 @@ function maps(){
         HTML='<div class="row">';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>The Academy v2</h2>';
-        HTML+='  <p>Muy usado por la comunidad  </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/the_academy_v2.pk3" role="button">Descargar</a></p>';
+        HTML+='  <p>A map recomended for duels</p>';
+        HTML+='  <p><a class="btn btn-default" href="maps/the_academy_v2.pk3" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 1</h2>';
-        HTML+='  <p>Mapa de carreras usado por UPS Gaming </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapRacepack1.pk3" role="button">Descargar</a></p>';
+        HTML+='  <p>Map for race </p>';
+        HTML+='  <p><a class="btn btn-default" href="maps/mapRacepack1.pk3" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 2</h2>';
-        HTML+='  <p>Mapa de carreras usado por UPS Gaming </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapRacepack2.pk3" role="button">Descargar</a></p>';
+        HTML+='  <p>Map for race </p>';
+        HTML+='  <p><a class="btn btn-default" href="maps/mapRacepack2.pk3" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 3</h2>';
-        HTML+='  <p>Mapa de carreras usado por UPS Gaming </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapRacepack3.pk3" role="button">Descargar</a></p>';
+        HTML+='  <p>Map for race </p>';
+        HTML+='  <p><a class="btn btn-default" href="maps/mapRacepack3.pk3" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 4</h2>';
-        HTML+='  <p>Mapa de carreras usado por UPS Gaming </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapRacepack4.pk3" role="button">Descargar</a></p>';
+        HTML+='  <p>Map for race </p>';
+        HTML+='  <p><a class="btn btn-default" href="maps/mapRacepack4.pk3" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Arena</h2>';
-        HTML+='  <p>Mapa de carreras usado por UPS Gaming </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapRaceArena.pk3" role="button">Descargar</a></p>';
+        HTML+='  <p>Map for race </p>';
+        HTML+='  <p><a class="btn btn-default" href="maps/mapRaceArena.pk3" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Tritoch Pack</h2>';
-        HTML+='  <p>Mapa de carreras usado por UPS Gaming </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapTritoch_pack.pk3" role="button">Descargar</a></p>';
+        HTML+='  <p>Map for race </p>';
+        HTML+='  <p><a class="btn btn-default" href="maps/mapTritoch_pack.pk3" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>JK2 MP Maps</h2>';
-        HTML+='  <p>Un mapa para nostalgicos </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapJK2MultiplayerMaps.pk3" role="button">Descargar</a></p>';
+        HTML+='  <p>JK Multiplayer map pack </p>';
+        HTML+='  <p><a class="btn btn-default" href="maps/mapJK2MultiplayerMaps.pk3" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='</div>';
         $("#main-content").html(HTML);

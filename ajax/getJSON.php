@@ -7,14 +7,14 @@ $option = $_POST["option"];
 switch ($option) {
 	case "ladder_duel_rank":
 		$newArray = null;
-	    $query ="SELECT * FROM DuelRanks WHERE type = 0 ORDER BY rank DESC";
+	    $query ="SELECT * FROM DuelRanks ORDER BY rank DESC";
 
 	    $arr = sql2arr($query);
 	    $count = 1;
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"rank"=>number_format($value["rank"], 0, ',', ''),"TSSUM"=>$value["TSSUM"]); 
+		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"type"=>$value["type"],"rank"=>number_format($value["rank"], 0, ',', ''),"TSSUM"=>$value["TSSUM"]); 
 		    	$count++;
 		    }
 	    }

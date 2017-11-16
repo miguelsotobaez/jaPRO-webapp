@@ -1,12 +1,11 @@
 <?php
 require_once('../inc/db_connection.inc.php');
 //require_once('../inc/session.inc.php');
-include '../inc/functions.php'; 
 
 $option = $_POST["option"];
 
 switch ($option) {
-	case "ladder_saber_top_rank":
+	case "ladder_duel_rank":
 		$newArray = null;
 	    $query ="SELECT * FROM DuelRanks WHERE type = 0 ORDER BY rank DESC";
 
@@ -15,7 +14,7 @@ switch ($option) {
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("id"=>$value["id"],"position"=>$count,"username"=>$value["username"],"rank"=>number_format($value["rank"], 0, ',', ''),"TSSUM"=>number_format($value["TSSUM"], 0, ',', ''));
+		    	$newArray[]=array("id"=>$value["id"],"position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"rank"=>number_format($value["rank"], 0, ',', ''),"TSSUM"=>$value["TSSUM"]); 
 		    	$count++;
 		    }
 	    }
@@ -23,9 +22,9 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-	case "ladder_saber_duel_count":
+	case "ladder_duel_count":
 		$newArray = null;
-	    $query ="SELECT * FROM DuelCounts WHERE type = 0 ORDER BY count DESC";
+	    $query ="SELECT username, SUM(count) AS count FROM DuelRanks GROUP BY username ORDER BY count DESC";
 
 	    $arr = sql2arr($query);
 
@@ -38,9 +37,9 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-	case "ladder_saber_last_duels":
+	case "ladder_duel_list":
 		$newArray = null;
-	    $query ="SELECT * FROM LocalDuel WHERE type = 0";
+	    $query ="SELECT * FROM LocalDuel";
 
 	    $arr = sql2arr($query);
 
@@ -48,25 +47,23 @@ switch ($option) {
 		    foreach ($arr as $key => $value) {
 		    	$duration = date("i:s", $value["duration"] / 1000);
 		    	$end_time = date('Y-m-d H:i:s', $value["end_time"]);
-		    	$newArray[]=array("id"=>$value["id"],"winner"=>$value["winner"],"loser"=>$value["loser"],"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
+		    	$newArray[]=array("id"=>$value["id"],"winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$value["type"],"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
 		    }
 	    }
 
 	    $json = json_encode($newArray);
 	break;
 
-	//FULLFORCE
-
-	case "ladder_fullforce_top_rank":
+	case "ladder_race_rank":
 		$newArray = null;
-	    $query ="SELECT * FROM DuelRanks WHERE type = 1 ORDER BY rank DESC";
+	    $query ="SELECT * FROM RaceRanks WHERE style = 1 ORDER BY rank DESC";
 
 	    $arr = sql2arr($query);
 	    $count = 1;
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("id"=>$value["id"],"position"=>$count,"username"=>$value["username"],"rank"=>number_format($value["rank"], 0, ',', ''),"TSSUM"=>number_format($value["TSSUM"], 0, ',', ''));
+		    	$newArray[]=array("id"=>$value["id"],"position"=>$count,"username"=>$value["username"],"style"=>$value["style"],"score"=>$value["score"],"percentilesum"=>$value["percentilesum"],"percentilesum"=>$value["percentilesum"],"ranksum"=>$value["ranksum"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
 		    	$count++;
 		    }
 	    }
@@ -74,9 +71,9 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-	case "ladder_fullforce_duel_count":
+	case "ladder_race_count":
 		$newArray = null;
-	    $query ="SELECT * FROM DuelCounts WHERE type = 1 ORDER BY count DESC";
+	    $query ="SELECT username, SUM(count) AS count FROM RaceRanks GROUP BY username ORDER BY count DESC";
 
 	    $arr = sql2arr($query);
 
@@ -89,84 +86,14 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-	case "ladder_fullforce_last_duels":
+	case "ladder_race_list":
 		$newArray = null;
-	    $query ="SELECT * FROM LocalDuel WHERE type = 1";
+	    $query ="SELECT id, username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY duration_ms ASC LIMIT 500";
 
 	    $arr = sql2arr($query);
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$duration = date("i:s", $value["duration"] / 1000);
-		    	$end_time = date('Y-m-d H:i:s', $value["end_time"]);
-		    	$newArray[]=array("id"=>$value["id"],"winner"=>$value["winner"],"loser"=>$value["loser"],"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
-		    }
-	    }
-
-	    $json = json_encode($newArray);
-	break;
-
-
-	//GUNS
-
-	case "ladder_guns_top_rank":
-		$newArray = null;
-	    $query ="SELECT  id, username, type, MAX(rank) AS rank, TSSUM  FROM DuelRanks WHERE type > 1 GROUP BY username, type ORDER BY rank DESC";
-
-	    $arr = sql2arr($query);
-	    $count = 1;
-
-	    if($arr){
-		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("id"=>$value["id"],"position"=>$count,"username"=>$value["username"],"type"=>$value["type"],"rank"=>$value["rank"],"TSSUM"=>$value["TSSUM"]);
-		    	$count++;
-		    }
-	    }
-
-	    $json = json_encode($newArray);
-	break;
-
-	case "ladder_guns_duel_count":
-		$newArray = null;
-	    $query ="SELECT * FROM DuelCounts WHERE type > 1 GROUP BY username";
-
-	    $arr = sql2arr($query);
-
-	    if($arr){
-		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array(0=>$value["username"],1=>$value["count"]);
-		    }
-	    }
-
-	    $json = json_encode($newArray);
-	break;
-
-	case "ladder_guns_last_duels":
-		$newArray = null;
-	    $query ="SELECT * FROM LocalDuel WHERE type > 1";
-
-	    $arr = sql2arr($query);
-
-	    if($arr){
-		    foreach ($arr as $key => $value) {
-		    	$duration = date("i:s", $value["duration"] / 1000);
-		    	$end_time = date('Y-m-d H:i:s', $value["end_time"]);
-		    	$newArray[]=array("id"=>$value["id"],"winner"=>$value["winner"],"loser"=>$value["loser"],"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
-		    }
-	    }
-
-	    $json = json_encode($newArray);
-	break;
-
-	case "ladder_race_top_rank":
-		$newArray = null;
-	    $query ="SELECT  id, username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, end_time FROM LocalRun GROUP BY username, style, coursename  ORDER BY duration_ms ASC";
-
-	    $arr = sql2arr($query);
-
-	    if($arr){
-		    foreach ($arr as $key => $value) {
-		    	//$duration = date("i:s", $value["duration_ms"] / 1000);
 		    	$duration = TimeToString($value["duration_ms"]);
 		    	$end_time = date('Y-m-d H:i:s', $value["end_time"]);
 		    	$style = getStyle($value["style"]);
@@ -176,7 +103,7 @@ switch ($option) {
 
 	    $json = json_encode($newArray);
 	break;
-	
+
 }
 
 echo $json;
@@ -225,6 +152,34 @@ function getStyle($val){
 	}
 
 	return $style;
+}
+
+function TimeToSTring($duration_ms) { //loda fixme... has to be a standard way to do this
+  if ($duration_ms >= (60*60*1000)) {
+    $hours = (int)(($duration_ms / (1000*60*60)) % 24);
+    $minutes = (int)(($duration_ms / (1000*60)) % 60);
+    $seconds = (int)($duration_ms / 1000) % 60;
+    $milliseconds = $duration_ms % 1000; 
+
+    $minutes = sprintf("%02d", $minutes);
+    $seconds = sprintf("%02d", $seconds );
+    $milliseconds = sprintf("%03d", $milliseconds );
+
+    $timeStr = "$hours:$minutes:$seconds.$milliseconds";
+  }
+  else if ($duration_ms >= (60*1000)) {
+    $minutes = (int)(($duration_ms / (1000*60)) % 60);
+    $seconds = (int)($duration_ms / 1000) % 60;
+    $milliseconds = $duration_ms % 1000; 
+
+    $seconds = sprintf("%02d", $seconds );
+    $milliseconds = sprintf("%03d", $milliseconds );
+
+    $timeStr = "$minutes:$seconds.$milliseconds";
+  }
+  else 
+    $timeStr = number_format($duration_ms * 0.001, 3);
+  return $timeStr;
 }
 
 ?>

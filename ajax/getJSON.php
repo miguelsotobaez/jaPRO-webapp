@@ -88,7 +88,7 @@ switch ($option) {
 
 	case "ladder_race_list":
 		$newArray = null;
-	    $query ="SELECT id, username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY duration_ms ASC LIMIT 500";
+	    $query ="SELECT id, username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY duration_ms ASC LIMIT 1000";
 
 	    $arr = sql2arr($query);
 

@@ -7,7 +7,8 @@ function connect(){
    {
       function __construct()
       {
-         $this->open(DATABASE_ROUTE);
+        //Sqlite database never have to be writen by the webapp. This can help to do not block database from server writes.
+        $this->open(DATABASE_ROUTE, SQLITE3_OPEN_READONLY);
       }
    }
    $db = new MyDB();

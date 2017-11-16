@@ -268,6 +268,7 @@ function ladder_duel_list(){
     panel += '          <div class="panel-body">';
     panel += '              <p>Here you can see the registri of all saber duels in japro server.</p>';
     panel += '              <div class="table-responsive">';
+    panel += '                  <div class="col-sm-6" id="selectDuelPlayer"><label>Player:</label></div>';
     panel += '                  <table id="datatable_ladder_duel_list" class="table table-striped table-hover"></table>';
     panel += '              </div>';
     panel += '          </div>';
@@ -322,15 +323,25 @@ function ladder_duel_list(){
 
         initComplete: function () {
             var columnStyle = this.api().column(2);
+            var columnPlayer = this.api().column(1); //Should be joined between winner and loser (0,1) ?
 
             var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectDuelStyle').on('change', function () {
                 var valStyle = $(this).val();
                 columnStyle.search(valStyle, false, false).draw();
             });
 
+            var selectPlayer = $('<select class="filter form-control"></select>').appendTo('#selectDuelPlayer').on('change', function () {
+                var valPlayer = $(this).val();
+                columnPlayer.search(valPlayer, false, false).draw();
+            });
+
             columnStyle.data().unique().sort().each(function (d, j) {
                 var duelName = DuelToString(d);
                 selectStyle.append('<option value="' + d + '">' + duelName + '</option>');
+            });
+
+            columnPlayer.data().unique().sort().each(function (d, j) {
+                selectStyle.append('<option value="' + d + '">' + d + '</option>');
             });
         }
 
@@ -643,9 +654,9 @@ function ladder_race_list(){
                     columnMap.search(valMap, false, false).draw();
                 });
 
-                var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectTriggerPlayer').on('change', function () {
-                    var valStyle = $(this).val();
-                    columnPlayer.search(valStyle, false, false).draw();
+                var selectPlayer = $('<select class="filter form-control"></select>').appendTo('#selectTriggerPlayer').on('change', function () {
+                    var valPlayer = $(this).val();
+                    columnPlayer.search(valPlayer, false, false).draw();
                 });
 
                 columnMap.data().unique().sort().each(function (d, j) {
@@ -653,7 +664,7 @@ function ladder_race_list(){
                 });
 
                 columnPlayer.data().unique().sort().each(function (d, j) {
-                    selectStyle.append('<option value="' + d + '">' + d + '</option>');
+                    selectPlayer.append('<option value="' + d + '">' + d + '</option>');
                 });
             }
 

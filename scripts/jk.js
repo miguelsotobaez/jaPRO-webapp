@@ -444,12 +444,12 @@ function ladder_race_rank(){
                         content += "<td>"+value.username+"</td>";
                         
                         content += "<td>"+StyleToString(value.style)+"</td>";
-                        content += "<td>"+Math.round(value.score, 1)+"</td>";
+                        content += "<td>"+value.score+"</td>";
                         
-                        content += "<td>"+(value.score / value.count).toFixed(2)+"</td>";
-                        content += "<td>"+(value.percentilesum / value.count).toFixed(2)+"</td>";
+                        content += "<td>"+value.avg_score+"</td>";
+                        content += "<td>"+value.avg_percentilesum+"</td>";
                         
-                        content += "<td>"+(value.ranksum / value.count).toFixed(2)+"</td>";
+                        content += "<td>"+value.avg_ranksum+"</td>";
                         content += "<td>"+value.golds+"</td>";
                         
                         content += "<td>"+value.silvers+"</td>";

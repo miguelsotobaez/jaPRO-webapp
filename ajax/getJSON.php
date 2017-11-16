@@ -7,14 +7,14 @@ $option = $_POST["option"];
 switch ($option) {
 	case "ladder_duel_rank":
 		$newArray = null;
-	    $query ="SELECT * FROM DuelRanks WHERE type = 0 ORDER BY rank DESC";
+	    $query ="SELECT username, ROUND(rank,0) as rank, TSSUM, count FROM DuelRanks WHERE type = 0 ORDER BY rank DESC";
 
 	    $arr = sql2arr($query);
 	    $count = 1;
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"rank"=>number_format($value["rank"], 0, ',', ''),"TSSUM"=>$value["TSSUM"]); 
+		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"rank"=>$value["rank"],"TSSUM"=>$value["TSSUM"]); 
 		    	$count++;
 		    }
 	    }
@@ -60,14 +60,26 @@ switch ($option) {
 
 	case "ladder_race_rank":
 		$newArray = null;
-	    $query ="SELECT * FROM RaceRanks ORDER BY score DESC";
+	    $query ="SELECT 
+		    		username, 
+		    		style, 
+		    		ROUND(score,0) as score, 
+		    		ROUND((score / count),2) AS avg_score,
+		    		ROUND((percentilesum / count),2) AS avg_percentilesum,
+		    		ROUND((ranksum / count),2) AS avg_ranksum, 
+		    		golds, 
+		    		silvers, 
+		    		bronzes, 
+		    		count 
+		    	FROM RaceRanks 
+		    	ORDER BY score DESC";
 
 	    $arr = sql2arr($query);
 	    $count = 1;
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("username"=>$value["username"],"position"=>$count,"style"=>$value["style"],"score"=>$value["score"],"percentilesum"=>$value["percentilesum"],"ranksum"=>$value["ranksum"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
+		    	$newArray[]=array("username"=>$value["username"],"position"=>$count,"style"=>$value["style"],"score"=>$value["score"],"avg_score"=>$value["avg_score"],"avg_percentilesum"=>$value["avg_percentilesum"],"avg_ranksum"=>$value["avg_ranksum"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
 		    	$count++;
 		    }
 	    }

@@ -164,6 +164,7 @@ function ladder_duel_rank(){
             header += "<tr>";
                 header += "<th>Position</th>";
                 header += "<th>Player</th>";
+                header += "<th>Type</th>";
                 header += "<th>Elo</th>";
                 header += "<th data-hide='phone,tablet'>TS</th>";
                 header += "<th>Count</th>";
@@ -177,6 +178,7 @@ function ladder_duel_rank(){
                     content += "<tr class='table'>";
                         content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
+                        content += "<td>"+DuelToString(value.type)+"</td>";
                         content += "<td>"+value.rank+"</td>";
                         content += "<td>"+TS.toPrecision(2)+"</td>";
                         content += "<td>"+value.count+"</td>";
@@ -191,7 +193,32 @@ function ladder_duel_rank(){
     $('#datatable_ladder_duel_rank').DataTable({
         "dom": "<'row'<'col-sm-6'l><'col-sm-6'f>>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
         "responsive": true,
-        "order": [[ 0, "asc" ]]
+        "order": [[ 0, "asc" ]],
+
+        initComplete: function () {
+            var columnStyle = this.api().column(2);
+            var columnPlayer = this.api().column(1); //Should be joined between winner and loser (0,1) ?
+
+            var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectDuelStyle').on('change', function () {
+                var valStyle = $(this).val();
+                columnStyle.search(valStyle, false, false).draw();
+            });
+
+            var selectPlayer = $('<select class="filter form-control"></select>').appendTo('#selectDuelPlayer').on('change', function () {
+                var valPlayer = $(this).val();
+                columnPlayer.search(valPlayer, false, false).draw();
+            });
+
+            columnStyle.data().unique().sort().each(function (d, j) {
+                selectStyle.append('<option value="' + d + '">' + d + '</option>');
+            });
+
+            columnPlayer.data().unique().sort().each(function (d, j) {
+                selectPlayer.append('<option value="' + d + '">' + d + '</option>');
+            });
+        }
+
+
     });
 }
 
@@ -348,7 +375,7 @@ function ladder_duel_list(){
                 selectStyle.append('<option value="' + d + '">' + d + '</option>');
             });
         }
-
+      
     });
 }
 

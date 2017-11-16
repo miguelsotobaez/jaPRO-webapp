@@ -13,24 +13,19 @@ $(document).ready(function () {
 
     if(option=="home"){
         home();
-    }else if(option=="ladder_saber"){
-        ladder_saber_title();
-        ladder_saber_top_rank();
-        ladder_saber_duel_count();
-        ladder_saber_duel_list();
-    }else if(option=="ladder_fullforce"){
-        ladder_fullforce_title();
-        ladder_fullforce_top_rank();
-        ladder_fullforce_duel_count();
-        ladder_fullforce_duel_list();
-    }else if(option=="ladder_guns"){
-        ladder_guns_title();
-        ladder_guns_top_rank();
-        ladder_guns_duel_count();
-        ladder_guns_duel_list();
-    }else if(option=="ladder_run"){
+    }else if(option=="ladder_player"){
+        
+    }
+    else if(option=="ladder_duel"){
+        ladder_duel_title();
+        ladder_duel_rank();
+        ladder_duel_count();
+        ladder_duel_list();
+    }else if(option=="ladder_race"){
         ladder_race_title();
-        ladder_race_top_rank();
+        ladder_race_rank();
+        ladder_race_count();
+        ladder_race_list();
     }else if(option=="maps"){
        maps();
     }else{
@@ -93,28 +88,37 @@ function home(){
 }
 
 //////////////////////////////////////////////////////////////////////////
-/////////////////////////////////SABER////////////////////////////////////
-/////////////////////////////////SABER////////////////////////////////////
-/////////////////////////////////SABER////////////////////////////////////
+/////////////////////////////////DUELS////////////////////////////////////
+/////////////////////////////////DUELS////////////////////////////////////
+/////////////////////////////////DUELS////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-function ladder_saber_title(){
+function ladder_duel_title(){
     var HTML;
     HTML='<div class="row">';
     HTML+='            <div class="col-lg-12">';
     HTML+='                <div class="view-header">';
     HTML+='                    <div class="pull-right text-right" style="line-height: 14px">';
-    HTML+='                        <small>Stats<br><span class="c-white">Saber</span></small>';
+    HTML+='                        <small>Stats<br><span class="c-white">Duels</span></small>';
     HTML+='                    </div>';
     HTML+='                    <div class="header-icon">';
     HTML+='                        <i class="pe page-header-icon pe-7s-shield"></i>';
     HTML+='                    </div>';
     HTML+='                    <div class="header-title">';
-    HTML+='                        <h3>Saber</h3>';
+    HTML+='                        <h3>Duels</h3>';
     HTML+='                        <small>';
-    HTML+='                            Now you can see your saber duel stats.';
+    HTML+='                            Select the types of duels you want to see.';
     HTML+='                        </small>';
+
+
     HTML+='                    </div>';
+
+    HTML += '          <div class="panel-body">';
+    HTML += '              <div class="table-responsive">';
+    HTML += '                  <div class="col-sm-6" id="selectDuelStyle"><label>Type:</label></div>';
+    HTML += '              </div>';
+    HTML += '          </div>';
+
     HTML+='                </div>';
     HTML+='                <hr>';
     HTML+='            </div>';
@@ -122,7 +126,7 @@ function ladder_saber_title(){
     $("#main-content").append(HTML);
 }
 
-function ladder_saber_top_rank(){
+function ladder_duel_rank(){
 
     var panel;
     panel = '<div id="second_row" class="row">';
@@ -134,7 +138,7 @@ function ladder_saber_top_rank(){
     panel += '          <div class="panel-body">';
     panel += '              <p>This is the saber rank list, ordered by ELO.</p>';
     panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_saber_top_rank" class="table table-striped table-hover"></table>';
+    panel += '                  <table id="datatable_ladder_duel_rank" class="table table-striped table-hover"></table>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -143,7 +147,7 @@ function ladder_saber_top_rank(){
 
     $("#main-content").append(panel);
 
-    var item = "ladder_saber_top_rank";
+    var item = "ladder_duel_rank";
     var content = "";
     var header = "";
     var url = "ajax/getJSON.php";
@@ -160,32 +164,36 @@ function ladder_saber_top_rank(){
                 header += "<th>Player</th>";
                 header += "<th>Elo</th>";
                 header += "<th data-hide='phone,tablet'>TS</th>";
+                header += "<th>Count</th>";
             header += "</tr>";
             header += "</thead>";
             content = "<tbody>";
             if(res){
                 $.each( res, function( key, value ) {
+                    var TS = value.TSSUM / value.count;
+
                     content += "<tr class='table' id='"+value.id+"'>";
                         content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
                         content += "<td>"+value.rank+"</td>";
-                        content += "<td>"+value.TSSUM+"</td>";
+                        content += "<td>"+TS.toPrecision(2)+"</td>";
+                        content += "<td>"+value.count+"</td>";
                     content += "</tr>";
                 });
             }
             content += "</tbody>";
-            $("#datatable_ladder_saber_top_rank").html(header+content);
+            $("#datatable_ladder_duel_rank").html(header+content);
         }
     });
 
-    $('#datatable_ladder_saber_top_rank').DataTable({
+    $('#datatable_ladder_duel_rank').DataTable({
         "dom": "<'row'<'col-sm-6'l><'col-sm-6'f>>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
         "responsive": true,
         "order": [[ 0, "asc" ]]
     });
 }
 
-function ladder_saber_duel_count(){
+function ladder_duel_count(){
     var panel = "";
     panel += '  <div class="col-md-4">';
     panel += '                    <div class="panel panel-filled">';
@@ -193,8 +201,8 @@ function ladder_saber_duel_count(){
     panel += '                          Saber Duel Count';
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
-    panel += '                            <p>This is the saber rank list, ordered by ELO.</p>';
-    panel += '                            <div id="chart_saber_duel_count">';
+    panel += '                            <p>Most active duelers.</p>';
+    panel += '                            <div id="chart_duel_count">';
     panel += '                            </div>';
     panel += '                        </div>';
     panel += '                    </div>';
@@ -202,7 +210,7 @@ function ladder_saber_duel_count(){
     $("#main-content #second_row").append(panel);
 
     var data = null;
-    var item = "ladder_saber_duel_count";
+    var item = "ladder_duel_count";
     var url = "ajax/getJSON.php";
     $.ajax({
         type: "POST",
@@ -215,11 +223,12 @@ function ladder_saber_duel_count(){
         }
     });
 
+    //Loda fixme, this can use the json from datatable_ladder_duel_rank maybe and avoid a query?
 
     var chart;
         chart = new Highcharts.Chart({
             chart: {
-                renderTo: 'chart_saber_duel_count',
+                renderTo: 'chart_duel_count',
                 plotBackgroundColor: null,
                 plotBorderWidth: null,
                 plotShadow: false
@@ -247,7 +256,7 @@ function ladder_saber_duel_count(){
     $('#menu_saber').addClass("active");
 }
 
-function ladder_saber_duel_list(){
+function ladder_duel_list(){
     
     var panel;
     panel = '<div id="second_row" class="row">';
@@ -259,7 +268,7 @@ function ladder_saber_duel_list(){
     panel += '          <div class="panel-body">';
     panel += '              <p>Here you can see the registri of all saber duels in japro server.</p>';
     panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_saber_last_duels" class="table table-striped table-hover"></table>';
+    panel += '                  <table id="datatable_ladder_duel_list" class="table table-striped table-hover"></table>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -268,7 +277,7 @@ function ladder_saber_duel_list(){
 
     $("#main-content").append(panel);
 
-    var item = "ladder_saber_last_duels";
+    var item = "ladder_duel_list";
     var content = "";
     var header = "";
     var url = "ajax/getJSON.php";
@@ -283,490 +292,7 @@ function ladder_saber_duel_list(){
             header += "<tr>";
                 header += "<th>Winner</th>";
                 header += "<th>Loser</th>";
-                header += "<th data-hide='phone,tablet'>Winner HP</th>";
-                header += "<th data-hide='phone,tablet'>Winner Shield</th>";
-                header += "<th data-hide='phone,tablet'>Duration</th>";
-                header += "<th data-hide='phone,tablet'>End Time</th>";
-            header += "</tr>";
-            header += "</thead>";
-            content = "<tbody>";
-            $.each( res, function( key, value ) {
-                content += "<tr class='table' id='"+value.id+"'>";
-                    content += "<td>"+value.winner+"</td>";
-                    content += "<td>"+value.loser+"</td>";
-                    content += "<td>"+value.winner_hp+"</td>";
-                    content += "<td>"+value.winner_shield+"</td>";
-                    content += "<td>"+value.duration+"</td>";
-                    content += "<td>"+value.end_time+"</td>";
-                content += "</tr>";
-            });
-            content += "</tbody>";
-            $("#datatable_ladder_saber_last_duels").html(header+content);
-        }
-    });
-
-    $('#datatable_ladder_saber_last_duels').DataTable({
-        "responsive": true,
-        "order": [[ 5, "desc" ]]
-    });
-}
-
-//////////////////////////////////////////////////////////////////////////
-///////////////////////////////FULLFORCE//////////////////////////////////
-///////////////////////////////FULLFORCE//////////////////////////////////
-///////////////////////////////FULLFORCE//////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-
-function ladder_fullforce_title(){
-    var HTML;
-    HTML='<div class="row">';
-    HTML+='            <div class="col-lg-12">';
-    HTML+='                <div class="view-header">';
-    HTML+='                    <div class="pull-right text-right" style="line-height: 14px">';
-    HTML+='                        <small>Stats<br><span class="c-white">Full Force</span></small>';
-    HTML+='                    </div>';
-    HTML+='                    <div class="header-icon">';
-    HTML+='                        <i class="pe page-header-icon pe-7s-shield"></i>';
-    HTML+='                    </div>';
-    HTML+='                    <div class="header-title">';
-    HTML+='                        <h3>Full Force</h3>';
-    HTML+='                        <small>';
-    HTML+='                            Now you can see your fullforce duel stats.';
-    HTML+='                        </small>';
-    HTML+='                    </div>';
-    HTML+='                </div>';
-    HTML+='                <hr>';
-    HTML+='            </div>';
-    HTML+='        </div>';
-    $("#main-content").append(HTML);
-}
-
-function ladder_fullforce_top_rank(){
-
-    var panel;
-    panel = '<div id="second_row" class="row">';
-    panel += '  <div class="col-md-8">';
-    panel += '      <div class="panel panel-filled">';
-    panel += '          <div class="panel-heading">';
-    panel += '              Full Force Rank List';
-    panel += '          </div>';
-    panel += '          <div class="panel-body">';
-    panel += '              <p>This is the full force rank list, ordered by ELO.</p>';
-    panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_fullforce_top_rank" class="table table-striped table-hover"></table>';
-    panel += '              </div>';
-    panel += '          </div>';
-    panel += '      </div>';
-    panel += '  </div>';
-    panel += '</div>';
-
-    $("#main-content").append(panel);
-
-    var item = "ladder_fullforce_top_rank";
-    var content = "";
-    var header = "";
-    var url = "ajax/getJSON.php";
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item},
-        success: function(res) {
-            header = "<thead>";
-            header += "<tr>";
-                header += "<th>Position</th>";
-                header += "<th>Player</th>";
-                header += "<th>Elo</th>";
-                header += "<th data-hide='phone,tablet'>TS</th>";
-            header += "</tr>";
-            header += "</thead>";
-            content = "<tbody>";
-            if(res){
-                $.each( res, function( key, value ) {
-                    content += "<tr class='table' id='"+value.id+"'>";
-                        content += "<td>"+value.position+"</td>";
-                        content += "<td>"+value.username+"</td>";
-                        content += "<td>"+value.rank+"</td>";
-                        content += "<td>"+value.TSSUM+"</td>";
-                    content += "</tr>";
-                });
-            }
-            content += "</tbody>";
-            $("#datatable_ladder_fullforce_top_rank").html(header+content);
-        }
-    });
-
-    $('#datatable_ladder_fullforce_top_rank').DataTable({
-        "dom": "<'row'<'col-sm-6'l><'col-sm-6'f>>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
-        "responsive": true,
-        "order": [[ 0, "asc" ]]
-    });
-}
-
-function ladder_fullforce_duel_count(){
-
-    var panel = "";
-    panel += '  <div class="col-md-4">';
-    panel += '                    <div class="panel panel-filled">';
-    panel += '                      <div class="panel-heading">';
-    panel += '                          Full Force Duel Count';
-    panel += '                      </div>';
-    panel += '                        <div class="panel-body">';
-    panel += '                            <p>This is the full force rank list, ordered by ELO.</p>';
-    panel += '                            <div id="chart_fullforce_duel_count">';
-    panel += '                            </div>';
-    panel += '                        </div>';
-    panel += '                    </div>';
-    panel += '                </div>';
-    $("#main-content #second_row").append(panel);
-
-    var data = null;
-    var item = "ladder_fullforce_duel_count";
-    var url = "ajax/getJSON.php";
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item},
-        success: function(res) {
-            data = res;
-        }
-    });
-
-    var chart;
-        chart = new Highcharts.Chart({
-            chart: {
-                renderTo: 'chart_fullforce_duel_count',
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
-            },
-            title: null,
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        color: '#000000',
-                        connectorColor: '#000000'
-                    }
-                }
-            },
-            series: [{
-                type: 'pie',
-                name: 'Duel count',
-                data: data
-            }]
-        });
-
-    $('.jk-nav li').removeClass("active");
-    $('#menu_fullforce').addClass("active");
-}
-
-function ladder_fullforce_duel_list(){
-    
-    var panel;
-    panel = '<div id="second_row" class="row">';
-    panel += '  <div class="col-md-12">';
-    panel += '      <div class="panel panel-filled">';
-    panel += '          <div class="panel-heading">';
-    panel += '              Full Force Last Duel List';
-    panel += '          </div>';
-    panel += '          <div class="panel-body">';
-    panel += '              <p>Here you can see the registri of all saber duels in japro server.</p>';
-    panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_fullforce_last_duels" class="table table-striped table-hover"></table>';
-    panel += '              </div>';
-    panel += '          </div>';
-    panel += '      </div>';
-    panel += '  </div>';
-    panel += '</div>';
-
-    $("#main-content").append(panel);
-
-    var item = "ladder_fullforce_last_duels";
-    var content = "";
-    var header = "";
-    var url = "ajax/getJSON.php";
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item},
-        success: function(res) {
-            header = "<thead>";
-            header += "<tr>";
-                header += "<th>Winner</th>";
-                header += "<th>Loser</th>";
-                header += "<th data-hide='phone,tablet'>Winner HP</th>";
-                header += "<th data-hide='phone,tablet'>Winner Shield</th>";
-                header += "<th data-hide='phone,tablet'>Duration</th>";
-                header += "<th data-hide='phone,tablet'>End Time</th>";
-            header += "</tr>";
-            header += "</thead>";
-            content = "<tbody>";
-            $.each( res, function( key, value ) {
-                content += "<tr class='table' id='"+value.id+"'>";
-                    content += "<td>"+value.winner+"</td>";
-                    content += "<td>"+value.loser+"</td>";
-                    content += "<td>"+value.winner_hp+"</td>";
-                    content += "<td>"+value.winner_shield+"</td>";
-                    content += "<td>"+value.duration+"</td>";
-                    content += "<td>"+value.end_time+"</td>";
-                content += "</tr>";
-            });
-            content += "</tbody>";
-            $("#datatable_ladder_fullforce_last_duels").html(header+content);
-        }
-    });
-
-    $('#datatable_ladder_fullforce_last_duels').DataTable({
-        "responsive": true,
-        "order": [[ 5, "desc" ]]
-    });
-}
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////GUNS////////////////////////////////////
-//////////////////////////////////GUNS////////////////////////////////////
-//////////////////////////////////GUNS////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-
-function ladder_guns_title(){
-
-    var HTML;
-    HTML='<div class="row">';
-    HTML+='            <div class="col-lg-12">';
-    HTML+='                <div class="view-header">';
-    HTML+='                    <div class="pull-right text-right" style="line-height: 14px">';
-    HTML+='                        <small>Stats<br><span class="c-white">Guns</span></small>';
-    HTML+='                    </div>';
-    HTML+='                    <div class="header-icon">';
-    HTML+='                        <i class="pe page-header-icon pe-7s-shield"></i>';
-    HTML+='                    </div>';
-    HTML+='                    <div class="header-title">';
-    HTML+='                        <h3>Guns</h3>';
-    HTML+='                        <small>';
-    HTML+='                            Now you can see your guns duel stats.';
-    HTML+='                        </small>';
-    HTML+='                    </div>';
-    HTML+='                </div>';
-    HTML+='                <hr>';
-    HTML+='            </div>';
-    HTML+='        </div>';
-    $("#main-content").append(HTML);
-}
-
-function ladder_guns_top_rank(){
-
-    var panel;
-    panel = '<div id="second_row" class="row">';
-    panel += '  <div class="col-md-8">';
-    panel += '      <div class="panel panel-filled">';
-    panel += '          <div class="panel-heading">';
-    panel += '              Guns Rank List';
-    panel += '          </div>';
-    panel += '          <div class="panel-body">';
-    panel += '              <p>This is the guns rank list, ordered by ELO.</p>';
-    panel += '              <div class="table-responsive">';
-    panel += '                  <div class="col-sm-6 dataTables_filter" id="selectTriggerType"><label>Type:</label></div>';
-    panel += '                  <table id="datatable_ladder_guns_top_rank" class="table table-striped table-hover"></table>';
-    panel += '              </div>';
-    panel += '          </div>';
-    panel += '      </div>';
-    panel += '  </div>';
-    panel += '</div>';
-    $("#main-content").append(panel);
-
-    var item = "ladder_guns_top_rank";
-    var content = "";
-    var header = "";
-    var url = "ajax/getJSON.php";
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item},
-        success: function(res) {
-            header = "<thead>";
-            header += "<tr>";
-                header += "<th>Position</th>";
-                header += "<th>Player</th>";
                 header += "<th>Type</th>";
-                header += "<th>Rank</th>";
-                header += "<th data-hide='phone,tablet'>TS</th>";
-            header += "</tr>";
-            header += "</thead>";
-            content = "<tbody>";
-            if(res){
-                $.each( res, function( key, value ) {
-                    content += "<tr class='table' id='"+value.id+"'>";
-                        content += "<td></td>";
-                        content += "<td>"+value.username+"</td>";
-                        content += "<td>"+value.type+"</td>";
-                        content += "<td>"+value.rank+"</td>";
-                        content += "<td>"+value.TSSUM+"</td>";
-                    content += "</tr>";
-                });
-            }
-            content += "</tbody>";
-            $("#datatable_ladder_guns_top_rank").html(header+content);
-        }
-    });
-
-    $('#datatable_ladder_guns_top_rank').DataTable({
-            "responsive": true,
-            "bInfo" : false,
-            "bPaginate": false,
-            "bLengthChange": false,
-            "bFilter": true,
-            "order": [[ 3, "desc" ]],
-            "columnDefs": [
-                {
-                    "targets": [ 2 ],
-                    "visible": false,
-                    "searchable": true
-                }
-            ],
-            "fnDrawCallback": function ( oSettings ) {
-            /* Need to redo the counters if filtered or sorted */
-                if ( oSettings.bSorted || oSettings.bFiltered )
-                {
-                    for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
-                    {
-                        $('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
-                    }
-                }
-            },
-            "aoColumnDefs": [
-                { "bSortable": false, "aTargets": [ 0 ] }
-            ],
-            "aaSorting": [[ 3, 'desc' ]],
-            initComplete: function () {
-                var columnType = this.api().column(2);
-
-                var selectType = $('<select class="filter form-control"></select>').appendTo('#selectTriggerType').on('change', function () {
-                    var valType = $(this).val();
-                    columnType.search(valType, false, false).draw();
-                });
-
-                columnType.data().unique().sort().each(function (d, j) {
-                    selectType.append('<option value="' + d + '">' + d + '</option>');
-                });
-
-            }
-    });
-
-    $('#selectTriggerType').find('select').trigger('change');
-}
-
-function ladder_guns_duel_count(){
-
-    var panel = "";
-    panel += '  <div class="col-md-4">';
-    panel += '                    <div class="panel panel-filled">';
-    panel += '                      <div class="panel-heading">';
-    panel += '                          Guns Duel Count';
-    panel += '                      </div>';
-    panel += '                        <div class="panel-body">';
-    panel += '                            <p>This is the guns rank list, ordered by ELO.</p>';
-    panel += '                            <div id="chart_guns_duel_count">';
-    panel += '                            </div>';
-    panel += '                        </div>';
-    panel += '                    </div>';
-    panel += '                </div>';
-    $("#main-content #second_row").append(panel);
-
-    var data = null;
-    var item = "ladder_guns_duel_count";
-    var url = "ajax/getJSON.php";
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item},
-        success: function(res) {
-            data = res;
-        }
-    });
-
-    if(data){
-        var chart;
-        chart = new Highcharts.Chart({
-            chart: {
-                renderTo: 'chart_guns_duel_count',
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
-            },
-            title: null,
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        color: '#000000',
-                        connectorColor: '#000000'
-                    }
-                }
-            },
-            series: [{
-                type: 'pie',
-                name: 'Duel count',
-                data: data
-            }]
-        });
-    }
-    $('.jk-nav li').removeClass("active");
-    $('#menu_guns').addClass("active");
-    
-}
-
-function ladder_guns_duel_list(){
-    
-    var panel;
-    panel = '<div id="second_row" class="row">';
-    panel += '  <div class="col-md-12">';
-    panel += '      <div class="panel panel-filled">';
-    panel += '          <div class="panel-heading">';
-    panel += '              Guns Last Duel List';
-    panel += '          </div>';
-    panel += '          <div class="panel-body">';
-    panel += '              <p>Here you can see the registri of all guns duels in japro server.</p>';
-    panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_guns_last_duels" class="table table-striped table-hover"></table>';
-    panel += '              </div>';
-    panel += '          </div>';
-    panel += '      </div>';
-    panel += '  </div>';
-    panel += '</div>';
-
-    $("#main-content").append(panel);
-
-    var item = "ladder_guns_last_duels";
-    var content = "";
-    var header = "";
-    var url = "ajax/getJSON.php";
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item},
-        success: function(res) {
-            header = "<thead>";
-            header += "<tr>";
-                header += "<th>Winner</th>";
-                header += "<th>Loser</th>";
                 header += "<th data-hide='phone,tablet'>Winner HP</th>";
                 header += "<th data-hide='phone,tablet'>Winner Shield</th>";
                 header += "<th data-hide='phone,tablet'>Duration</th>";
@@ -778,6 +304,7 @@ function ladder_guns_duel_list(){
                 content += "<tr class='table' id='"+value.id+"'>";
                     content += "<td>"+value.winner+"</td>";
                     content += "<td>"+value.loser+"</td>";
+                    content += "<td>"+value.type+"</td>";
                     content += "<td>"+value.winner_hp+"</td>";
                     content += "<td>"+value.winner_shield+"</td>";
                     content += "<td>"+value.duration+"</td>";
@@ -785,15 +312,37 @@ function ladder_guns_duel_list(){
                 content += "</tr>";
             });
             content += "</tbody>";
-            $("#datatable_ladder_guns_last_duels").html(header+content);
+            $("#datatable_ladder_duel_list").html(header+content);
         }
     });
 
-    $('#datatable_ladder_guns_last_duels').DataTable({
+    $('#datatable_ladder_duel_list').DataTable({
         "responsive": true,
-        "order": [[ 5, "desc" ]]
+        "order": [[ 5, "desc" ]],
+
+        initComplete: function () {
+            var columnStyle = this.api().column(2);
+
+            var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectDuelStyle').on('change', function () {
+                var valStyle = $(this).val();
+                columnStyle.search(valStyle, false, false).draw();
+            });
+
+            columnStyle.data().unique().sort().each(function (d, j) {
+                var duelName = DuelToString(d);
+                selectStyle.append('<option value="' + d + '">' + duelName + '</option>');
+            });
+        }
+
     });
 }
+
+/////////////////////////////////////////////////////////////////////
+///////////////////////////////RACE//////////////////////////////////
+///////////////////////////////RACE//////////////////////////////////
+///////////////////////////////RACE//////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+
 
 function ladder_race_title(){
     var HTML;
@@ -819,21 +368,188 @@ function ladder_race_title(){
     $("#main-content").append(HTML);
 }
 
-function ladder_race_top_rank(){
+function ladder_race_rank(){
+
+    var panel;
+    panel = '<div id="second_row" class="row">';
+    panel += '  <div class="col-md-8">';
+    panel += '      <div class="panel panel-filled">';
+    panel += '          <div class="panel-heading">';
+    panel += '              Race Rank List';
+    panel += '          </div>';
+    panel += '          <div class="panel-body">';
+    panel += '              <p>This is the race rank list, ordered by score.</p>';
+    panel += '              <div class="table-responsive">';
+    panel += '                  <div class="col-sm-6" id="selectRaceRankStyle"><label>Style:</label></div>';
+    panel += '                  <table id="datatable_ladder_race_rank" class="table table-striped table-hover"></table>';
+    panel += '              </div>';
+    panel += '          </div>';
+    panel += '      </div>';
+    panel += '  </div>';
+    panel += '</div>';
+
+    $("#main-content").append(panel);
+
+    var item = "ladder_race_rank";
+    var content = "";
+    var header = "";
+    var url = "ajax/getJSON.php";
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "JSON",
+        async: false,
+        data: { option: item},
+        success: function(res) {
+            header = "<thead>";
+            header += "<tr>";
+                header += "<th>Position</th>";
+                header += "<th>Player</th>";
+                
+                header += "<th>Style</th>";
+                header += "<th>Score</th>";
+                header += "<th>Average Score</th>";
+                
+                header += "<th>Average Percentile</th>";
+                
+                header += "<th>Average Rank</th>";
+                header += "<th>Golds</th>";
+
+                header += "<th>Silvers</th>";
+                header += "<th>Bronzes</th>";
+                header += "<th>Count</th>";
+                
+            header += "</tr>";
+            header += "</thead>";
+            content = "<tbody>";
+            if(res){
+                $.each( res, function( key, value ) {
+                    content += "<tr class='table' id='"+value.id+"'>";
+                        content += "<td>"+value.position+"</td>";
+                        content += "<td>"+value.username+"</td>";
+                        
+                        content += "<td>"+value.style+"</td>";
+                        content += "<td>"+Math.round(value.score, 1)+"</td>";
+                        
+                        content += "<td>"+(value.score / value.count).toFixed(2)+"</td>";
+                        content += "<td>"+(value.percentilesum / value.count).toFixed(2)+"</td>";
+                        
+                        content += "<td>"+(value.ranksum / value.count).toFixed(2)+"</td>";
+                        content += "<td>"+value.golds+"</td>";
+                        
+                        content += "<td>"+value.silvers+"</td>";
+                        content += "<td>"+value.bronzes+"</td>";
+                        content += "<td>"+value.count+"</td>";
+                        
+                    content += "</tr>";
+                });
+            }
+            content += "</tbody>";
+            $("#datatable_ladder_race_rank").html(header+content);
+        }
+    });
+
+    $('#datatable_ladder_race_rank').DataTable({
+        "dom": "<'row'<'col-sm-6'l><'col-sm-6'f>>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
+        "responsive": true,
+        "order": [[ 0, "asc" ]],
+
+            initComplete: function () {
+                var columnStyle = this.api().column(2);
+
+                var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectRaceRankStyle').on('change', function () {
+                    var valStyle = $(this).val();
+                    columnStyle.search(valStyle, false, false).draw();
+                });
+
+                columnStyle.data().unique().sort().each(function (d, j) {
+                    var styleName = StyleToString(d);
+                    selectStyle.append('<option value="' + d + '">' + styleName + '</option>');
+                });
+            }
+
+
+    });
+}
+
+function ladder_race_count(){
+    var panel = "";
+    panel += '  <div class="col-md-4">';
+    panel += '                    <div class="panel panel-filled">';
+    panel += '                      <div class="panel-heading">';
+    panel += '                          Race Count';
+    panel += '                      </div>';
+    panel += '                        <div class="panel-body">';
+    panel += '                            <p>Most active racers.</p>';
+    panel += '                            <div id="chart_race_count">';
+    panel += '                            </div>';
+    panel += '                        </div>';
+    panel += '                    </div>';
+    panel += '                </div>';
+    $("#main-content #second_row").append(panel);
+
+    var data = null;
+    var item = "ladder_race_count";
+    var url = "ajax/getJSON.php";
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "JSON",
+        async: false,
+        data: { option: item},
+        success: function(res) {
+            data = res;
+        }
+    });
+
+    //Loda fixme, this can use the json from datatable_ladder_duel_rank maybe and avoid a query?
+
+    var chart;
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'chart_race_count',
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: null,
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Race count',
+                data: data
+            }]
+        });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_race').addClass("active");
+}
+
+function ladder_race_list(){
 
     var panel;
     panel = '<div id="second_row" class="row">';
     panel += '  <div class="col-md-12">';
     panel += '      <div class="panel panel-filled">';
     panel += '          <div class="panel-heading">';
-    panel += '              Guns Rank List';
+    panel += '              Race List';
     panel += '          </div>';
     panel += '          <div class="panel-body">';
-    panel += '              <p>This is the guns rank list, ordered by ELO.</p>';
+    panel += '              <p>This is the race list, ordered by date.</p>'; //Loda fixme - on first load it should be ordered by date to show recent times? But once we start to filter we want to sort by duration
     panel += '              <div class="table-responsive">';
     panel += '                  <div class="col-sm-6" id="selectTriggerMap"><label>Map:</label></div>';
     panel += '                  <div class="col-sm-6" id="selectTriggerStyle"><label>Style:</label></div>';
-    panel += '                  <table id="datatable_ladder_race_top_rank" class="table table-striped table-hover"></table>';
+    panel += '                  <table id="datatable_ladder_race_list" class="table table-striped table-hover"></table>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -841,7 +557,7 @@ function ladder_race_top_rank(){
     panel += '</div>';
     $("#main-content").append(panel);
 
-    var item = "ladder_race_top_rank";
+    var item = "ladder_race_list";
     var content = "";
     var header = "";
     var url = "ajax/getJSON.php";
@@ -880,13 +596,13 @@ function ladder_race_top_rank(){
                 });
             }
             content += "</tbody>";
-            $("#datatable_ladder_race_top_rank").html(header+content);
+            $("#datatable_ladder_race_list").html(header+content);
         }
     });
 
    
 
-    $('#datatable_ladder_race_top_rank').DataTable({
+    $('#datatable_ladder_race_list').DataTable({
             "responsive": true,
             "bInfo" : false,
             "bPaginate": false,
@@ -952,10 +668,7 @@ function ladder_race_top_rank(){
    
 }
 
-
 function maps(){
-    
-
         HTML='<div class="row">';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>The Academy v2</h2>';
@@ -1003,7 +716,75 @@ function maps(){
         $('.jk-nav li').removeClass("active");
         $('#menu_maps').addClass("active");
 }
-        
 
+function DuelToString(type) {
+  typeStr = "Unknown";
+  if (type == 0)
+    typeStr = "Saber";
+  else if (type == 1)
+    typeStr =  "Force";
+  else if (type == 4)
+    typeStr =  "Melee";
+  else if (type == 6)
+    typeStr =  "Pistol";
+  else if (type == 7)
+    typeStr =  "Blaster";
+  else if (type == 8)
+    typeStr =  "Sniper";
+  else if (type == 9)
+    typeStr =  "Bowcaster";
+  else if (type == 10)
+    typeStr =  "Repeater";
+  else if (type == 11)
+    typeStr =  "Demp2";
+  else if (type == 12)
+    typeStr =  "Flechette";
+  else if (type == 13)
+    typeStr =  "Rocket";
+  else if (type == 14)
+    typeStr =  "Thermal";
+  else if (type == 15)
+    typeStr =  "Trip mine";
+  else if (type == 16)
+    typeStr =  "Det pack";
+  else if (type == 17)
+    typeStr =  "Concussion";
+  else if (type == 18)
+    typeStr =  "Bryar pistol";
+  else if (type == 19)
+    typeStr =  "Stun baton";
+  else if (type == 20)
+    typeStr =  "All weapons";
+  return typeStr;
+}
 
-
+function StyleToString(val){
+    style="Unknown";
+    if (val==0)
+        style="0-SIEGE";
+    else if(val==1)
+        style="1-JKA";
+    else if(val==2)
+        style="2-QW";
+    else if(val==3)
+        style="3-CPM";
+    else if(val==4)
+        style="4-Q3";
+    else if(val==5)
+        style="5-PJK";
+    else if(val==6)
+        style="6-WSW";
+    else if(val==7)
+        style="7-RJQ3";
+    else if(val==8)
+        style="8-RJCPM";
+    else if(val==9)
+        style="9-SWOOP";
+    else if(val==10)
+        style="10-JETPACK";
+    else if(val==11)
+        style="11-SPEED";
+    else if(val==12)
+        style="12-SP";
+    return style;
+}

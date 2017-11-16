@@ -30,18 +30,15 @@ require_once('inc/option.inc.php');
                 <li class="nav-category">
                     Stats
                 </li>
-                
-                <li id="menu_saber">
-                    <a href="?option=ladder_saber"> Saber</a>
-                </li>
-                <li id="menu_fullforce">
-                    <a href="?option=ladder_fullforce"> Full Force</a>
-                </li>
-                <li id="menu_guns">
-                    <a href="?option=ladder_guns"> Guns</a>
+
+                <li id="menu_player">
+                    <a href="?option=ladder_player"> Player</a>
+                </li>        
+                <li id="menu_duel">
+                    <a href="?option=ladder_duel"> Duel</a>
                 </li>
                 <li id="menu_race">
-                    <a href="?option=ladder_run"> Race</a>
+                    <a href="?option=ladder_race"> Race</a>
                 </li>
                 
 

@@ -180,41 +180,46 @@ switch ($option) {
 echo $json;
 
 function getStyle($val){
-	//0=SIEGE 1=JKA 2=QW 3=CPM 4=Q3 5=PJK 6=WSW
 	$style="UNKNOWN";
 
 	if($val==0){
 		$style="0-SIEGE";
 	}
-	if($val==1){
+	else if($val==1){
 		$style="1-JKA";
 	}
-	if($val==2){
+	else if($val==2){
 		$style="2-QW";
 	}
-	if($val==3){
+	else if($val==3){
 		$style="3-CPM";
 	}
-	if($val==4){
+	else if($val==4){
 		$style="4-Q3";
 	}
-	if($val==5){
+	else if($val==5){
 		$style="5-PJK";
 	}
-	if($val==6){
+	else if($val==6){
 		$style="6-WSW";
 	}
-	if($val==7){
+	else if($val==7){
 		$style="7-RJQ3";
 	}
-	if($val==8){
+	else if($val==8){
 		$style="8-RJCPM";
 	}
-	if($val==9){
+	else if($val==9){
 		$style="9-SWOOP";
 	}
-	if($val==10){
+	else if($val==10){
 		$style="10-JETPACK";
+	}
+	else if($val==11){
+		$style="11-SPEED";
+	}
+	else if($val==12){
+		$style="12-SP";
 	}
 
 	return $style;

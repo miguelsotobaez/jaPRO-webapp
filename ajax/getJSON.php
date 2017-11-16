@@ -1,6 +1,7 @@
 <?php
 require_once('../inc/db_connection.inc.php');
 //require_once('../inc/session.inc.php');
+include '../inc/functions.php'; 
 
 $option = $_POST["option"];
 
@@ -165,7 +166,8 @@ switch ($option) {
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$duration = date("i:s", $value["duration_ms"] / 1000);
+		    	//$duration = date("i:s", $value["duration_ms"] / 1000);
+		    	$duration = TimeToString($value["duration_ms"]);
 		    	$end_time = date('Y-m-d H:i:s', $value["end_time"]);
 		    	$style = getStyle($value["style"]);
 		    	$newArray[]=array("id"=>$value["id"],"username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"end_time"=>$end_time);

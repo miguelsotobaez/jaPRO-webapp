@@ -318,8 +318,10 @@ function ladder_duel_list(){
 
     $('#datatable_ladder_duel_list').DataTable({
         "responsive": true,
-        "order": [[ 5, "desc" ]],
-
+        "columnDefs": [
+            { "visible": false, "targets": 2 }
+        ],
+        "order": [[ 6, "desc" ]],
         initComplete: function () {
             var columnStyle = this.api().column(2);
 
@@ -603,62 +605,63 @@ function ladder_race_list(){
    
 
     $('#datatable_ladder_race_list').DataTable({
-            "responsive": true,
-            "bInfo" : false,
-            "bPaginate": false,
-            "bLengthChange": false,
-            "bFilter": true,
-            "order": [[ 4, "asc" ]],
-            "columnDefs": [
-                {
-                    "targets": [ 1 ],
-                    "visible": false,
-                    "searchable": true
-                },
-                {
-                    "targets": [ 2 ],
-                    "visible": false,
-                    "searchable": true
-                }
-            ],
-            "fnDrawCallback": function ( oSettings ) {
-            /* Need to redo the counters if filtered or sorted */
-                if ( oSettings.bSorted || oSettings.bFiltered )
-                {
-                    for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
-                    {
-                        $('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
-                    }
-                }
+        //"serverSide": true,
+        "responsive": true,
+        "bInfo" : false,
+        "bPaginate": false,
+        "bLengthChange": false,
+        "bFilter": true,
+        "order": [[ 4, "asc" ]],
+        "columnDefs": [
+            {
+                "targets": [ 1 ],
+                "visible": false,
+                "searchable": true
             },
-            "aoColumnDefs": [
-                { "bSortable": false, "aTargets": [ 0 ] }
-            ],
-            "aaSorting": [[ 1, 'asc' ]],
-            initComplete: function () {
-                var columnMap = this.api().column(2);
-                var columnStyle = this.api().column(3);
-
-                var selectMap = $('<select class="filter form-control"></select>').appendTo('#selectTriggerMap').on('change', function () {
-                    var valMap = $(this).val();
-                    columnMap.search(valMap, false, false).draw();
-                });
-
-                var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectTriggerStyle').on('change', function () {
-                    var valStyle = $(this).val();
-                    columnStyle.search(valStyle, false, false).draw();
-                });
-
-                columnMap.data().unique().sort().each(function (d, j) {
-                    selectMap.append('<option value="' + d + '">' + d + '</option>');
-                });
-
-                columnStyle.data().unique().sort().each(function (d, j) {
-                    selectStyle.append('<option value="' + d + '">' + d + '</option>');
-                });
+            {
+                "targets": [ 2 ],
+                "visible": false,
+                "searchable": true
             }
+        ],
+        "fnDrawCallback": function ( oSettings ) {
+        /* Need to redo the counters if filtered or sorted */
+            if ( oSettings.bSorted || oSettings.bFiltered )
+            {
+                for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
+                {
+                    $('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
+                }
+            }
+        },
+        "aoColumnDefs": [
+            { "bSortable": false, "aTargets": [ 0 ] }
+        ],
+        "aaSorting": [[ 1, 'asc' ]],
+        initComplete: function () {
+            var columnMap = this.api().column(2);
+            var columnStyle = this.api().column(3);
 
-        });
+            var selectMap = $('<select class="filter form-control"></select>').appendTo('#selectTriggerMap').on('change', function () {
+                var valMap = $(this).val();
+                columnMap.search(valMap, false, false).draw();
+            });
+
+            var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectTriggerStyle').on('change', function () {
+                var valStyle = $(this).val();
+                columnStyle.search(valStyle, false, false).draw();
+            });
+
+            columnMap.data().unique().sort().each(function (d, j) {
+                selectMap.append('<option value="' + d + '">' + d + '</option>');
+            });
+
+            columnStyle.data().unique().sort().each(function (d, j) {
+                selectStyle.append('<option value="' + d + '">' + d + '</option>');
+            });
+        }
+
+    });
 
     $('#selectTriggerMap').find('select').trigger('change');
     $('#selectTriggerStyle').find('select').trigger('change');

@@ -115,11 +115,13 @@ function ladder_duel_title(){
 
     HTML+='                    </div>';
 
+/*
     HTML += '          <div class="panel-body">';
     HTML += '              <div class="table-responsive">';
     HTML += '                  <div class="col-sm-6" id="selectDuelStyle"><label>Type:</label></div>';
     HTML += '              </div>';
     HTML += '          </div>';
+*/
 
     HTML+='                </div>';
     HTML+='                <hr>';
@@ -140,6 +142,7 @@ function ladder_duel_rank(){
     panel += '          <div class="panel-body">';
     panel += '              <p>This is the saber rank list, ordered by ELO.</p>';
     panel += '              <div class="table-responsive">';
+    panel += '                  <div class="col-sm-6" id="selectDuelRankType"><label>Type:</label></div>';
     panel += '                  <table id="datatable_ladder_duel_rank" class="table table-striped table-hover"></table>';
     panel += '              </div>';
     panel += '          </div>';
@@ -195,25 +198,16 @@ function ladder_duel_rank(){
 
         initComplete: function () {
             var columnStyle = this.api().column(2);
-            var columnPlayer = this.api().column(1); //Should be joined between winner and loser (0,1) ?
 
-            var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectDuelStyle').on('change', function () {
+            var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectDuelRankType').on('change', function () {
                 var valStyle = $(this).val();
                 columnStyle.search(valStyle, false, false).draw();
-            });
-
-            var selectPlayer = $('<select class="filter form-control"></select>').appendTo('#selectDuelPlayer').on('change', function () {
-                var valPlayer = $(this).val();
-                columnPlayer.search(valPlayer, false, false).draw();
             });
 
             columnStyle.data().unique().sort().each(function (d, j) {
                 selectStyle.append('<option value="' + d + '">' + d + '</option>');
             });
 
-            columnPlayer.data().unique().sort().each(function (d, j) {
-                selectPlayer.append('<option value="' + d + '">' + d + '</option>');
-            });
         }
 
 
@@ -290,11 +284,12 @@ function ladder_duel_list(){
     panel += '  <div class="col-md-12">';
     panel += '      <div class="panel panel-filled">';
     panel += '          <div class="panel-heading">';
-    panel += '              Saber Last Duel List';
+    panel += '              Recent duels';
     panel += '          </div>';
     panel += '          <div class="panel-body">';
     panel += '              <p>Here you can see the registri of all saber duels in japro server.</p>';
     panel += '              <div class="table-responsive">';
+    panel += '                  <div class="col-sm-6" id="selectDuelListType"><label>Type:</label></div>';
     panel += '                  <div class="col-sm-6" id="selectDuelPlayer"><label>Player:</label></div>';
     panel += '                  <table id="datatable_ladder_duel_list" class="table table-striped table-hover"></table>';
     panel += '              </div>';
@@ -349,8 +344,36 @@ function ladder_duel_list(){
         "columnDefs": [
             { "visible": false, "targets": 2 }
         ],
-        "order": [[ 6, "desc" ]]      
+        "order": [[ 6, "desc" ]],
+
+ //This functionality should be on the player page i guess
+        initComplete: function () {
+            var columnPlayer = this.api().column(0); //Should be joined between winner and loser (0,1) ?
+
+            var selectPlayer = $('<select class="filter form-control"></select>').appendTo('#selectDuelPlayer').on('change', function () {
+                var valPlayer = $(this).val();
+                columnPlayer.search(valPlayer, false, false).draw();
+            });
+
+            columnPlayer.data().unique().sort().each(function (d, j) {
+                selectPlayer.append('<option value="' + d + '">' + d + '</option>');
+            });
+
+            var columnType = this.api().column(2); //Should be joined between winner and loser (0,1) ?
+
+            var selectType = $('<select class="filter form-control"></select>').appendTo('#selectDuelListType').on('change', function () {
+                var valType = $(this).val();
+                columnType.search(valType, false, false).draw();
+            });
+
+            columnType.data().unique().sort().each(function (d, j) {
+                selectType.append('<option value="' + d + '">' + d + '</option>');
+            });
+        }
+
+
     });
+
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -378,11 +401,13 @@ function ladder_race_title(){
     HTML+='                        </small>';
     HTML+='                    </div>';
 
+/*
     HTML += '          <div class="panel-body">';
     HTML += '              <div class="table-responsive">';
     HTML += '                  <div class="col-sm-6" id="selectRaceStyle"><label>Style:</label></div>';
     HTML += '              </div>';
     HTML += '          </div>';
+*/
 
     HTML+='                </div>';
     HTML+='                <hr>';
@@ -403,6 +428,7 @@ function ladder_race_rank(){
     panel += '          <div class="panel-body">';
     panel += '              <p>This is the race rank list, ordered by score.</p>';
     panel += '              <div class="table-responsive">';
+    panel += '                  <div class="col-sm-6" id="selectRaceRankStyle"><label>Style:</label></div>';
     panel += '                  <table id="datatable_ladder_race_rank" class="table table-striped table-hover"></table>';
     panel += '              </div>';
     panel += '          </div>';
@@ -434,6 +460,38 @@ function ladder_race_rank(){
         //Sum Avg_score == SumScore / SumCount
         //Sum avg_percentilesum = (ap1 * count1) + (ap2 * count2) ... / SumCount
         //Sum avg_ranksum = (ar1 * count1) + (ar2 * count2) ... / SumCount
+
+        //For each item in array
+        //If username is already in new array, add it to that element..
+        //If not, add it as a new element
+
+        //If we have the array sorted by username, we can usee less costly method
+
+        /*
+        success: function(res) {
+            var j = 0;
+            var newData;
+
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].style == "style") {
+                    if (data[i].username === newData[spot].username) { //Add into element
+                        newData[j].score += data[i].score;
+                        newData[j].percentilesum += data[i].percentilesum;
+                        newData[j].ranksum += data[i].ranksum;
+                        newData[j].golds += data[i].golds;
+                        newData[j].silvers += data[i].silvers;
+                        newData[j].bronzes += data[i].bronzes;
+                        newData[j].count += data[i].count;
+                    }
+                    else { //Add new element
+                        newData[j] = data[i];
+                        j++;
+                    }
+                }
+            }
+        }
+        */
+
 
 
         success: function(res) {
@@ -493,7 +551,7 @@ function ladder_race_rank(){
             initComplete: function () {
                 var columnStyle = this.api().column(2);
 
-                var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectRaceStyle').on('change', function () {
+                var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectRaceRankStyle').on('change', function () {
                     var valStyle = $(this).val();
                     columnStyle.search(valStyle, false, false).draw();
                 });
@@ -582,8 +640,9 @@ function ladder_race_list(){
     panel += '          <div class="panel-body">';
     panel += '              <p>This is the race list, ordered by date.</p>'; //Loda fixme - on first load it should be ordered by date to show recent times? But once we start to filter we want to sort by duration
     panel += '              <div class="table-responsive">';
-    panel += '                  <div class="col-sm-6" id="selectTriggerMap"><label>Map:</label></div>';
-    panel += '                  <div class="col-sm-6" id="selectTriggerPlayer"><label>Player:</label></div>';
+    panel += '                  <div class="col-sm-6" id="selectRaceMap"><label>Map:</label></div>';
+    panel += '                  <div class="col-sm-6" id="selectRacePlayer"><label>Player:</label></div>';
+    panel += '                  <div class="col-sm-6" id="selectRaceListStyle"><label>Style:</label></div>';
     panel += '                  <table id="datatable_ladder_race_list" class="table table-striped table-hover"></table>';
     panel += '              </div>';
     panel += '          </div>';
@@ -606,9 +665,10 @@ function ladder_race_list(){
             header = "<thead>";
             header += "<tr>";
                 header += "<th>position</th>";
+                header += "<th>rank</th>";
                 header += "<th>username</th>";
                 header += "<th>coursename</th>";
-                //header += "<th>style</th>";
+                header += "<th>style</th>";
                 header += "<th>duration</th>";
                 header += "<th data-hide='phone,tablet'>topspeed</th>";
                 header += "<th data-hide='phone,tablet'>average</th>";
@@ -619,10 +679,11 @@ function ladder_race_list(){
             if(res){
                 $.each( res, function( key, value ) {
                     content += "<tr class='table'>";
-                        content += "<td></td>";
+                        content += "<td></td>"; //Whats this?
+                        content += "<td>"+value.rank+"</td>";
                         content += "<td>"+value.username+"</td>";
                         content += "<td>"+value.coursename+"</td>";
-                        //content += "<td>"+value.style+"</td>";
+                        content += "<td>"+value.style+"</td>";
                         content += "<td>"+value.duration_ms+"</td>";
                         content += "<td>"+value.topspeed+"</td>";
                         content += "<td>"+value.average+"</td>";
@@ -641,7 +702,7 @@ function ladder_race_list(){
         //"serverSide": true,
         "responsive": true,
         "bInfo" : false,
-        "bPaginate": false,
+        "bPaginate": true,
         "bLengthChange": false,
         "bFilter": true,
         "order": [[ 4, "asc" ]],
@@ -672,26 +733,33 @@ function ladder_race_list(){
         ],
         "aaSorting": [[ 1, 'asc' ]],
         initComplete: function () {
-            var columnMap = this.api().column(2);
-            var columnStyle = this.api().column(3);
-
-            var selectMap = $('<select class="filter form-control"></select>').appendTo('#selectTriggerMap').on('change', function () {
+            var columnMap = this.api().column(3);
+            var selectMap = $('<select class="filter form-control"></select>').appendTo('#selectRaceMap').on('change', function () {
                 var valMap = $(this).val();
                 columnMap.search(valMap, false, false).draw();
             });
-
-            var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectTriggerStyle').on('change', function () {
-                var valStyle = $(this).val();
-                columnStyle.search(valStyle, false, false).draw();
-            });
-
             columnMap.data().unique().sort().each(function (d, j) {
                 selectMap.append('<option value="' + d + '">' + d + '</option>');
             });
 
+            var columnStyle = this.api().column(4);
+            var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectRaceListStyle').on('change', function () {
+                var valStyle = $(this).val();
+                columnStyle.search(valStyle, false, false).draw();
+            });
             columnStyle.data().unique().sort().each(function (d, j) {
                 selectStyle.append('<option value="' + d + '">' + d + '</option>');
             });
+
+            var columnPlayer = this.api().column(2);
+            var selectPlayer = $('<select class="filter form-control"></select>').appendTo('#selectRacePlayer').on('change', function () {
+                var valPlayer = $(this).val();
+                columnPlayer.search(valPlayer, false, false).draw();
+            });
+            columnPlayer.data().unique().sort().each(function (d, j) {
+                selectPlayer.append('<option value="' + d + '">' + d + '</option>');
+            });
+
         }
 
     });

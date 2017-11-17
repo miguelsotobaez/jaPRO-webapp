@@ -106,7 +106,7 @@ switch ($option) {
 	case "ladder_race_list":
 		$newArray = null;
 
-	    $query ="SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY duration_ms ASC LIMIT 1000";
+	    $query ="SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY duration_ms ASC LIMIT 1000";
 
 	    $arr = sql2arr($query);
 
@@ -115,7 +115,7 @@ switch ($option) {
 		    	$duration = TimeToString($value["duration_ms"]);
 		    	$end_time = date('Y-m-d H:i:s', $value["end_time"]);
 		    	$style = getStyle($value["style"]);
-		    	$newArray[]=array("username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"end_time"=>$end_time);
+		    	$newArray[]=array("username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"rank"=>$value["rank"],"end_time"=>$end_time);
 		    }
 	    }
 

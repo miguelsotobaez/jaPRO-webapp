@@ -380,7 +380,7 @@ function ladder_race_title(){
 
     HTML += '          <div class="panel-body">';
     HTML += '              <div class="table-responsive">';
-    HTML += '                  <div class="col-sm-6" id="selectRaceStyle"><label>Type:</label></div>';
+    HTML += '                  <div class="col-sm-6" id="selectRaceStyle"><label>Style:</label></div>';
     HTML += '              </div>';
     HTML += '          </div>';
 
@@ -422,6 +422,20 @@ function ladder_race_rank(){
         dataType: "JSON",
         async: false,
         data: { option: item},
+
+
+        //I think we have to do math here..
+        //Dont have to show style since its implied from the checkboxes/dropdown
+        //Get list of which styles we want to show, from the dropdown/checkbox filter
+        //Change data based on that..
+
+        //SumScore = Score1 + Score2 + Score3...
+        //SumCount = count1 + count2 + count3...
+        //Sum Avg_score == SumScore / SumCount
+        //Sum avg_percentilesum = (ap1 * count1) + (ap2 * count2) ... / SumCount
+        //Sum avg_ranksum = (ar1 * count1) + (ar2 * count2) ... / SumCount
+
+
         success: function(res) {
             header = "<thead>";
             header += "<tr>";
@@ -450,7 +464,7 @@ function ladder_race_rank(){
                         content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
                         
-                        content += "<td>"+RaceToString(value.style)+"</td>";
+                        content += "<td>"+RaceToString(value.style)+"</td>"; //We dont want this to show up in the table but we need to access it for the dropdown filter..
                         content += "<td>"+value.score+"</td>";
                         
                         content += "<td>"+value.avg_score+"</td>";
@@ -594,7 +608,7 @@ function ladder_race_list(){
                 header += "<th>position</th>";
                 header += "<th>username</th>";
                 header += "<th>coursename</th>";
-                header += "<th>style</th>";
+                //header += "<th>style</th>";
                 header += "<th>duration</th>";
                 header += "<th data-hide='phone,tablet'>topspeed</th>";
                 header += "<th data-hide='phone,tablet'>average</th>";
@@ -608,7 +622,7 @@ function ladder_race_list(){
                         content += "<td></td>";
                         content += "<td>"+value.username+"</td>";
                         content += "<td>"+value.coursename+"</td>";
-                        content += "<td>"+value.style+"</td>";
+                        //content += "<td>"+value.style+"</td>";
                         content += "<td>"+value.duration_ms+"</td>";
                         content += "<td>"+value.topspeed+"</td>";
                         content += "<td>"+value.average+"</td>";

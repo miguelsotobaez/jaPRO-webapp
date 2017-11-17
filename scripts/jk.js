@@ -173,14 +173,12 @@ function ladder_duel_rank(){
             content = "<tbody>";
             if(res){
                 $.each( res, function( key, value ) {
-                    var TS = value.TSSUM / value.count;
-
                     content += "<tr class='table'>";
                         content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
                         content += "<td>"+DuelToString(value.type)+"</td>";
                         content += "<td>"+value.rank+"</td>";
-                        content += "<td>"+TS.toPrecision(2)+"</td>";
+                        content += "<td>"+(value.TSSUM / value.count).toPrecision(2)+"</td>";
                         content += "<td>"+value.count+"</td>";
                     content += "</tr>";
                 });
@@ -351,31 +349,7 @@ function ladder_duel_list(){
         "columnDefs": [
             { "visible": false, "targets": 2 }
         ],
-        "order": [[ 6, "desc" ]],
-        initComplete: function () {
-            var columnStyle = this.api().column(2);
-            var columnPlayer = this.api().column(1); //Should be joined between winner and loser (0,1) ?
-
-            var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectDuelStyle').on('change', function () {
-                var valStyle = $(this).val();
-                columnStyle.search(valStyle, false, false).draw();
-            });
-
-            var selectPlayer = $('<select class="filter form-control"></select>').appendTo('#selectDuelPlayer').on('change', function () {
-                var valPlayer = $(this).val();
-                columnPlayer.search(valPlayer, false, false).draw();
-            });
-
-            columnStyle.data().unique().sort().each(function (d, j) {
-                var duelName = DuelToString(d);
-                selectStyle.append('<option value="' + d + '">' + duelName + '</option>');
-            });
-
-            columnPlayer.data().unique().sort().each(function (d, j) {
-                selectStyle.append('<option value="' + d + '">' + d + '</option>');
-            });
-        }
-      
+        "order": [[ 6, "desc" ]]      
     });
 }
 
@@ -470,7 +444,7 @@ function ladder_race_rank(){
                         content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
                         
-                        content += "<td>"+StyleToString(value.style)+"</td>";
+                        content += "<td>"+RaceToString(value.style)+"</td>";
                         content += "<td>"+value.score+"</td>";
                         
                         content += "<td>"+value.avg_score+"</td>";
@@ -800,7 +774,7 @@ function DuelToString(type) {
   return typeStr;
 }
 
-function StyleToString(val){
+function RaceToString(val){
     style="Unknown";
     if (val==0)
         style="0-SIEGE";

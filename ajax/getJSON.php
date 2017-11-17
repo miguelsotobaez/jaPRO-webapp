@@ -8,14 +8,14 @@ switch ($option) {
 	case "ladder_duel_rank":
 		$newArray = null;
 
-	    $query ="SELECT username, ROUND(rank,0) as rank, TSSUM, count FROM DuelRanks WHERE type = 0 ORDER BY rank DESC";
+	    $query ="SELECT username, type, ROUND(rank,0) as rank, TSSUM, count FROM DuelRanks ORDER BY rank DESC";
 	    $arr = sql2arr($query);
 	    $count = 1;
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 
-		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"rank"=>$value["rank"],"TSSUM"=>$value["TSSUM"]); 
+		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"type"=>$value["type"],"rank"=>$value["rank"],"TSSUM"=>$value["TSSUM"]); 
 		    	$count++;
 		    }
 	    }

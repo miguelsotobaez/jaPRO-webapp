@@ -169,7 +169,7 @@ function ladder_duel_rank(){
                 header += "<th>Player</th>";
                 header += "<th>Type</th>";
                 header += "<th>Elo</th>";
-                header += "<th data-hide='phone,tablet'>TS</th>";
+                header += "<th data-hide='phone,tablet' title='Relative strength of opponent.  A lower value means this person is dueling relatively weak opponents'>TS</th>";
                 header += "<th>Count</th>";
             header += "</tr>";
             header += "</thead>";
@@ -179,9 +179,9 @@ function ladder_duel_rank(){
                     content += "<tr class='table'>";
                         content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
-                        content += "<td>"+DuelToString(value.type)+"</td>";
+                        content += "<td>"+DuelToString(value.type)+"</td>"; //loda fixme - td id=value.type   ? Then sort on that in the dropdown?
                         content += "<td>"+value.rank+"</td>";
-                        content += "<td>"+(value.TSSUM / value.count).toPrecision(2)+"</td>";
+                        content += "<td>"+Math.round((1 - (value.TSSUM / value.count)) * 100)+"</td>";
                         content += "<td>"+value.count+"</td>";
                     content += "</tr>";
                 });
@@ -192,9 +192,47 @@ function ladder_duel_rank(){
     });
 
     $('#datatable_ladder_duel_rank').DataTable({
+        /*
         "dom": "<'row'<'col-sm-6'l><'col-sm-6'f>>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
         "responsive": true,
         "order": [[ 0, "asc" ]],
+        */
+
+        "responsive": true,
+        "bInfo" : false,
+        "bPaginate": true,
+        "bLengthChange": false,
+        "bFilter": true, //This breaks the dropdown if we change it to remove searchbox? or use "searching"
+        "order": [[ 3, "desc" ]],
+        "columnDefs": [
+            {
+                "targets": [ 1 ],
+                "visible": false,
+                "searchable": true
+            },
+            {
+                "targets": [ 2 ],
+                "visible": false,
+                "searchable": true
+            }
+        ],
+        "fnDrawCallback": function ( oSettings ) {
+        /* Need to redo the counters if filtered or sorted */
+            if ( oSettings.bSorted || oSettings.bFiltered )
+            {
+                for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
+                {
+                    $('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
+                }
+            }
+        },
+        "aoColumnDefs": [
+            { "bSortable": false, "aTargets": [ 0 ] }
+        ],
+        "aaSorting": [[ 1, 'asc' ]],
+
+
+
 
         initComplete: function () {
             var columnStyle = this.api().column(2);
@@ -319,7 +357,7 @@ function ladder_duel_list(){
                 header += "<th data-hide='phone,tablet'>Winner HP</th>";
                 header += "<th data-hide='phone,tablet'>Winner Shield</th>";
                 header += "<th data-hide='phone,tablet'>Duration</th>";
-                header += "<th data-hide='phone,tablet'>End Time</th>";
+                header += "<th>End Time</th>";
             header += "</tr>";
             header += "</thead>";
             content = "<tbody>";
@@ -327,7 +365,7 @@ function ladder_duel_list(){
                 content += "<tr class='table'>";
                     content += "<td>"+value.winner+"</td>";
                     content += "<td>"+value.loser+"</td>";
-                    content += "<td>"+value.type+"</td>";
+                    content += "<td>"+DuelToString(value.type)+"</td>";
                     content += "<td>"+value.winner_hp+"</td>";
                     content += "<td>"+value.winner_shield+"</td>";
                     content += "<td>"+value.duration+"</td>";
@@ -341,9 +379,11 @@ function ladder_duel_list(){
 
     $('#datatable_ladder_duel_list').DataTable({
         "responsive": true,
+        /*
         "columnDefs": [
-            { "visible": false, "targets": 2 }
+            { "visible": false, "targets": 2 } //Well this fucks up the formatting, it formats as if its visible but then just hides it..
         ],
+        */
         "order": [[ 6, "desc" ]],
 
  //This functionality should be on the player page i guess
@@ -519,16 +559,16 @@ function ladder_race_rank(){
             if(res){
                 $.each( res, function( key, value ) {
                     content += "<tr class='table'>";
-                        content += "<td>"+value.position+"</td>";
+                        content += "<td></td>"; //Whats this?
                         content += "<td>"+value.username+"</td>";
                         
                         content += "<td>"+RaceToString(value.style)+"</td>"; //We dont want this to show up in the table but we need to access it for the dropdown filter..
                         content += "<td>"+value.score+"</td>";
                         
                         content += "<td>"+value.avg_score+"</td>";
-                        content += "<td>"+value.avg_percentilesum+"</td>";
+                        content += "<td>"+value.avg_percentile+"</td>";
                         
-                        content += "<td>"+value.avg_ranksum+"</td>";
+                        content += "<td>"+value.avg_rank+"</td>";
                         content += "<td>"+value.golds+"</td>";
                         
                         content += "<td>"+value.silvers+"</td>";
@@ -544,9 +584,48 @@ function ladder_race_rank(){
     });
 
     $('#datatable_ladder_race_rank').DataTable({
+
+        /*
         "dom": "<'row'<'col-sm-6'l><'col-sm-6'f>>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
         "responsive": true,
         "order": [[ 0, "asc" ]],
+        */
+
+
+
+        //"serverSide": true,
+        "responsive": true,
+        "bInfo" : false,
+        "bPaginate": true,
+        "bLengthChange": false,
+        "bFilter": true, //This breaks the dropdown if we change it to remove searchbox? or use "searching"
+        "order": [[ 3, "desc" ]],
+        "columnDefs": [
+            {
+                "targets": [ 1 ],
+                "visible": false,
+                "searchable": true
+            },
+            {
+                "targets": [ 2 ],
+                "visible": false,
+                "searchable": true
+            }
+        ],
+        "fnDrawCallback": function ( oSettings ) {
+        /* Need to redo the counters if filtered or sorted */
+            if ( oSettings.bSorted || oSettings.bFiltered )
+            {
+                for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
+                {
+                    $('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
+                }
+            }
+        },
+        "aoColumnDefs": [
+            { "bSortable": false, "aTargets": [ 0 ] }
+        ],
+        "aaSorting": [[ 1, 'asc' ]],
 
             initComplete: function () {
                 var columnStyle = this.api().column(2);
@@ -638,7 +717,7 @@ function ladder_race_list(){
     panel += '              Race List';
     panel += '          </div>';
     panel += '          <div class="panel-body">';
-    panel += '              <p>This is the race list, ordered by date.</p>'; //Loda fixme - on first load it should be ordered by date to show recent times? But once we start to filter we want to sort by duration
+    panel += '              <p>This is the race list, ordered by date.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <div class="col-sm-6" id="selectRaceMap"><label>Map:</label></div>';
     panel += '                  <div class="col-sm-6" id="selectRacePlayer"><label>Player:</label></div>';
@@ -661,26 +740,25 @@ function ladder_race_list(){
         dataType: "JSON",
         async: false,
         data: { option: item},
-        success: function(res) {
+
+    success: function(res) {
             header = "<thead>";
             header += "<tr>";
-                header += "<th>position</th>";
-                header += "<th>rank</th>";
-                header += "<th>username</th>";
-                header += "<th>coursename</th>";
-                header += "<th>style</th>";
-                header += "<th>duration</th>";
+                header += "<th>Rank</th>";
+                header += "<th>Username</th>";
+                header += "<th>Coursename</th>";
+                header += "<th>Style</th>";
+                header += "<th>Duration</th>";
                 header += "<th data-hide='phone,tablet'>topspeed</th>";
                 header += "<th data-hide='phone,tablet'>average</th>";
-                header += "<th data-hide='phone,tablet'>end time</th>";
+                header += "<th>end time</th>";
             header += "</tr>";
             header += "</thead>";
             content = "<tbody>";
             if(res){
                 $.each( res, function( key, value ) {
                     content += "<tr class='table'>";
-                        content += "<td></td>"; //Whats this?
-                        content += "<td>"+value.rank+"</td>";
+                        content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
                         content += "<td>"+value.coursename+"</td>";
                         content += "<td>"+value.style+"</td>";
@@ -694,10 +772,49 @@ function ladder_race_list(){
             content += "</tbody>";
             $("#datatable_ladder_race_list").html(header+content);
         }
+
     });
 
-   
+    $('#datatable_ladder_race_list').DataTable({
+        "dom": "<'row'<'col-sm-6'l><'col-sm-6'f>>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
+        "responsive": true,
+        "order": [[ 7, "desc" ]], //Order by end_time on first load to show recent times
+        //"searching": false, //Or bfilter=false ?, why does this break the dropdown functionality
 
+        initComplete: function () {
+            var columnMap = this.api().column(2);
+            var selectMap = $('<select class="filter form-control"></select>').appendTo('#selectRaceMap').on('change', function () {
+                var valMap = $(this).val();
+                columnMap.search(valMap, false, false).draw();
+            });
+            columnMap.data().unique().sort().each(function (d, j) {
+                selectMap.append('<option value="' + d + '">' + d + '</option>');
+            });
+
+            var columnStyle = this.api().column(3);
+            var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectRaceListStyle').on('change', function () {
+                var valStyle = $(this).val();
+                columnStyle.search(valStyle, false, false).draw();
+            });
+            columnStyle.data().unique().sort().each(function (d, j) {
+                selectStyle.append('<option value="' + d + '">' + d + '</option>');
+            });
+
+            var columnPlayer = this.api().column(1);
+            var selectPlayer = $('<select class="filter form-control"></select>').appendTo('#selectRacePlayer').on('change', function () {
+                var valPlayer = $(this).val();
+                columnPlayer.search(valPlayer, false, false).draw();
+            });
+            columnPlayer.data().unique().sort().each(function (d, j) {
+                selectPlayer.append('<option value="' + d + '">' + d + '</option>');
+            });
+
+        }
+
+
+    });
+
+/*
     $('#datatable_ladder_race_list').DataTable({
         //"serverSide": true,
         "responsive": true,
@@ -719,7 +836,7 @@ function ladder_race_list(){
             }
         ],
         "fnDrawCallback": function ( oSettings ) {
-        /* Need to redo the counters if filtered or sorted */
+        // Need to redo the counters if filtered or sorted 
             if ( oSettings.bSorted || oSettings.bFiltered )
             {
                 for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
@@ -763,6 +880,7 @@ function ladder_race_list(){
         }
 
     });
+    */
 
     $('#selectTriggerMap').find('select').trigger('change');
     $('#selectTriggerStyle').find('select').trigger('change');

@@ -23,7 +23,7 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-	case "ladder_duel_count":
+	case "ladder_duel_count": //Loda fixme, we could just do one query maybe and have duel_rank also return the counts and use that?
 		$newArray = null;
 	    $query ="SELECT username, SUM(count) AS count FROM DuelRanks GROUP BY username ORDER BY count DESC";
 
@@ -66,8 +66,8 @@ switch ($option) {
 		    		style, 
 		    		ROUND(score,0) as score, 
 		    		ROUND((score / count),2) AS avg_score,
-		    		ROUND((percentilesum / count),2) AS avg_percentilesum,
-		    		ROUND((ranksum / count),2) AS avg_ranksum, 
+		    		ROUND((percentilesum / count),2) AS avg_percentile,
+		    		ROUND((CAST(ranksum AS float) / count),2) AS avg_rank, 
 		    		golds, 
 		    		silvers, 
 		    		bronzes, 
@@ -80,7 +80,7 @@ switch ($option) {
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("username"=>$value["username"],"position"=>$count,"style"=>$value["style"],"score"=>$value["score"],"avg_score"=>$value["avg_score"],"avg_percentilesum"=>$value["avg_percentilesum"],"avg_ranksum"=>$value["avg_ranksum"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
+		    	$newArray[]=array("username"=>$value["username"],"position"=>$count,"style"=>$value["style"],"score"=>$value["score"],"avg_score"=>$value["avg_score"],"avg_percentile"=>$value["avg_percentile"],"avg_rank"=>$value["avg_rank"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
 		    	$count++;
 		    }
 	    }
@@ -115,7 +115,7 @@ switch ($option) {
 		    	$duration = TimeToString($value["duration_ms"]);
 		    	$end_time = date('Y-m-d H:i:s', $value["end_time"]);
 		    	$style = getStyle($value["style"]);
-		    	$newArray[]=array("username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"rank"=>$value["rank"],"end_time"=>$end_time);
+		    	$newArray[]=array("position"=>$value["rank"],"username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"end_time"=>$end_time);
 		    }
 	    }
 

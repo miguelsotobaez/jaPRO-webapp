@@ -51,7 +51,7 @@ switch ($option) {
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 		    	$duration = date("i:s", $value["duration"] / 1000);
-		    	$end_time = date('Y-m-d H:i:s', $value["end_time"]);
+		    	$end_time = date('y-M-d H:i', $value["end_time"]);
 		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$value["type"],"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
 		    }
 	    }
@@ -113,7 +113,7 @@ switch ($option) {
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 		    	$duration = TimeToString($value["duration_ms"]);
-		    	$end_time = date('Y-m-d H:i:s', $value["end_time"]);
+		    	$end_time = date('y-M-d H:i', $value["end_time"]);
 		    	$style = getStyle($value["style"]);
 		    	$newArray[]=array("position"=>$value["rank"],"username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"end_time"=>$end_time);
 		    }

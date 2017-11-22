@@ -232,11 +232,10 @@ function ladder_duel_rank(){
         "aaSorting": [[ 1, 'asc' ]],
 
         initComplete: function () {
-            var columnStyle = this.api().column(2);
 
             this.api().columns([1, 2]).every( function () {
                 var column = this;
-                var select = $('<select class="filter form-control input-sm"><option value=""></option></select>')
+                var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
                     .appendTo( $(column.footer()).empty() )
                     .on( 'change', function () {
                         var val = $.fn.dataTable.util.escapeRegex(
@@ -252,9 +251,6 @@ function ladder_duel_rank(){
                     select.append( '<option value="'+d+'">'+d+'</option>' )
                 } );
             } );
-
-
-
         }
     });
 }
@@ -334,8 +330,6 @@ function ladder_duel_list(){
     panel += '          <div class="panel-body">';
     panel += '              <p>Here you can see the registri of all saber duels in japro server.</p>';
     panel += '              <div class="table-responsive">';
-    panel += '                  <div class="col-sm-6" id="selectDuelListType"><label>Type:</label></div>';
-    panel += '                  <div class="col-sm-6" id="selectDuelPlayer"><label>Player:</label></div>';
     panel += '                  <table id="datatable_ladder_duel_list" class="table table-striped table-hover"></table>';
     panel += '              </div>';
     panel += '          </div>';
@@ -367,6 +361,17 @@ function ladder_duel_list(){
                 header += "<th>Date</th>";
             header += "</tr>";
             header += "</thead>";
+            header += "<tfoot>";
+            header += "<tr>";
+                header += "<th>Winner</th>";
+                header += "<th>Loser</th>";
+                header += "<th>Type</th>";
+                header += "<th data-hide='phone,tablet'>Winner HP</th>";
+                header += "<th data-hide='phone,tablet'>Winner Shield</th>";
+                header += "<th data-hide='phone,tablet'>Duration</th>";
+                header += "<th>Date</th>";
+            header += "</tr>";
+            header += "</tfoot>";
             content = "<tbody>";
             $.each( res, function( key, value ) {
                 content += "<tr class='table'>";
@@ -395,27 +400,28 @@ function ladder_duel_list(){
 
  //This functionality should be on the player page i guess
         initComplete: function () {
-            var columnPlayer = this.api().column(0); //Should be joined between winner and loser (0,1) ?
 
-            var selectPlayer = $('<select class="filter form-control"></select>').appendTo('#selectDuelPlayer').on('change', function () {
-                var valPlayer = $(this).val();
-                columnPlayer.search(valPlayer, false, false).draw();
-            });
+            this.api().columns([0, 1, 2]).every( function () {
+                var column = this;
+                var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                    .appendTo( $(column.footer()).empty() )
+                    .on( 'change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+ 
+                        column
+                            .search( val ? '^'+val+'$' : '', true, false )
+                            .draw();
+                    } );
+ 
+                column.data().unique().sort().each( function ( d, j ) {
+                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                } );
+            } );
 
-            columnPlayer.data().unique().sort().each(function (d, j) {
-                selectPlayer.append('<option value="' + d + '">' + d + '</option>');
-            });
 
-            var columnType = this.api().column(2); //Should be joined between winner and loser (0,1) ?
 
-            var selectType = $('<select class="filter form-control"></select>').appendTo('#selectDuelListType').on('change', function () {
-                var valType = $(this).val();
-                columnType.search(valType, false, false).draw();
-            });
-
-            columnType.data().unique().sort().each(function (d, j) {
-                selectType.append('<option value="' + d + '">' + d + '</option>');
-            });
         }
 
 

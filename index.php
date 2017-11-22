@@ -72,7 +72,6 @@ require_once('inc/option.inc.php');
 </script>
 
 <!-- Vendor scripts -->
-<script src="vendor/pacejs/pace.min.js"></script>
 <script src="vendor/jquery/dist/jquery.min.js"></script>
 <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
 <script src="vendor/datatables/datatables.min.js"></script>

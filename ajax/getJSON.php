@@ -8,14 +8,14 @@ switch ($option) {
 	case "ladder_duel_rank":
 		$newArray = null;
 
-	    $query ="SELECT username, type, ROUND(rank,0) as rank, TSSUM, count FROM DuelRanks ORDER BY rank DESC";
+	    $query ="SELECT username, type, ROUND(rank,0) AS rank, ROUND(100*TSSUM/count, 0) AS TS, count FROM DuelRanks ORDER BY rank DESC";
 	    $arr = sql2arr($query);
 	    $count = 1;
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 
-		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"type"=>$value["type"],"rank"=>$value["rank"],"TSSUM"=>$value["TSSUM"]); 
+		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"type"=>$value["type"],"rank"=>$value["rank"],"TS"=>$value["TS"]); 
 		    	$count++;
 		    }
 	    }
@@ -42,17 +42,15 @@ switch ($option) {
 		$newArray = null;
 	    $query ="SELECT winner, loser, type, winner_hp, winner_shield, duration, end_time 
 	    		FROM LocalDuel 
-	    		ORDER BY end_time DESC
-	    		LIMIT 500
-	    ";
+	    		ORDER BY end_time DESC";
 
 	    $arr = sql2arr($query);
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 		    	$duration = date("i:s", $value["duration"] / 1000);
-		    	$end_time = date('y-M-d H:i', $value["end_time"]);
-		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$value["type"],"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
+		    	$end_time = date('y-m-d H:i', $value["end_time"]);
+		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$type,"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
 		    }
 	    }
 
@@ -106,15 +104,24 @@ switch ($option) {
 	case "ladder_race_list":
 		$newArray = null;
 
-	    $query ="SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY duration_ms ASC LIMIT 1000";
+	    $query ="SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY duration_ms ASC";
 
 	    $arr = sql2arr($query);
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 		    	$duration = TimeToString($value["duration_ms"]);
-		    	$end_time = date('y-M-d H:i', $value["end_time"]);
+		    	//$end_time = date('y-m-d H:i', $value["end_time"]);
+
+		    	//Format is: http://162.248.89.208/races/eternal/eternal-racepack2(rainbow)-swoop.dm_26
 		    	$style = getStyle($value["style"]);
+		    	$coursenameCleaned = $value["coursename"]; //Remove the spaces
+		    	$username = $value["username"];
+		    	$date = date('y-m-d H:i', $value["end_time"]);
+
+		    	$end_time = "<a href='../races/{$username}/{$username}-{$coursenameCleaned}-{$style}.dm_26'>{$date}</a>";
+
+
 		    	$newArray[]=array("position"=>$value["rank"],"username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"end_time"=>$end_time);
 		    }
 	    }

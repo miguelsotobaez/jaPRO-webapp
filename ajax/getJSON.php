@@ -111,9 +111,7 @@ switch ($option) {
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 		    	$duration = TimeToString($value["duration_ms"]);
-		    	//$end_time = date('y-m-d H:i', $value["end_time"]);
 
-		    	//Format is: http://162.248.89.208/races/eternal/eternal-racepack2(rainbow)-swoop.dm_26
 		    	$style = getStyle($value["style"]);
 		    	$demoStyle = getDemoStyle($value["style"]);
 		    	$coursenameCleaned = str_replace(" ","",$value["coursename"]); //Remove the spaces

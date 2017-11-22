@@ -83,8 +83,8 @@ function home(){
     var p1 = '<h1>Welcome to jaPRO Mod!</h1><p>It is a mod started by loda from modbase put together by raz0r and other jacoders with the security fixes. There are alot of features and new ideas taken from popular mods.</p>';
     var p2 = '<h4>What does jaPRO do for me?</h4><p>A better sabering environment from base, ranking system, lag compensation either using guns or force, tweaking current weapons for different effects, non abusive admin commands from JA+, voting system, 2 admin levels fullAdmin or junior. From FFA, TFFA and CTF gamemodes there are lots of things to toggle to get the server with no force or with force how you want to run it. Better client smoothing when you have the client installed in the japro directory.</p>';
     var p3 = '<h4>Why should I even bother using jaPRO?</h4><p>Those who maybe looking for another option other than running JA+ or any other mod which is old and can be crashed, DoS attacked or exploited.</p>';
-    var p4 = '<p><a class="btn btn-default btn-lg" href="mod/japro3.pk3" role="button">Download jaPRO Client</a></p>';
-    $("#main-content").html('<div class="container">'+p1+' <br> '+p2+' '+p3+' '+p3+'</div>');
+    var p4 = '<p><a class="btn btn-default btn-lg" href="https://github.com/videoP/jaPRO/raw/master/japro3.pk3" role="button">Download jaPRO Client</a></p>';
+    $("#main-content").html('<div class="container">'+p1+' <br> '+p2+' '+p3+' '+p4+'</div>');
     $('.jk-nav li').removeClass("active");
     $('#menu_home').addClass("active");
 }
@@ -357,7 +357,7 @@ function ladder_duel_list(){
                 header += "<th data-hide='phone,tablet'>Winner HP</th>";
                 header += "<th data-hide='phone,tablet'>Winner Shield</th>";
                 header += "<th data-hide='phone,tablet'>Duration</th>";
-                header += "<th>End Time</th>";
+                header += "<th>Date</th>";
             header += "</tr>";
             header += "</thead>";
             content = "<tbody>";
@@ -748,10 +748,10 @@ function ladder_race_list(){
                 header += "<th>Username</th>";
                 header += "<th>Coursename</th>";
                 header += "<th>Style</th>";
-                header += "<th>Duration</th>";
+                header += "<th>Time</th>";
                 header += "<th data-hide='phone,tablet'>topspeed</th>";
                 header += "<th data-hide='phone,tablet'>average</th>";
-                header += "<th>end time</th>";
+                header += "<th>Date</th>";
             header += "</tr>";
             header += "</thead>";
             content = "<tbody>";

@@ -66,7 +66,7 @@ switch ($option) {
 		    		style, 
 		    		ROUND(score,0) as score, 
 		    		ROUND((score / count),2) AS avg_score,
-		    		ROUND((percentilesum / count),2) AS avg_percentile,
+		    		CAST((percentilesum / count)*100 AS INT) AS avg_percentile,
 		    		ROUND((CAST(ranksum AS float) / count),2) AS avg_rank, 
 		    		golds, 
 		    		silvers, 

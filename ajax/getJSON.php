@@ -50,7 +50,8 @@ switch ($option) {
 		    foreach ($arr as $key => $value) {
 		    	$duration = date("i:s", $value["duration"] / 1000);
 		    	$end_time = date('y-m-d H:i', $value["end_time"]);
-		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$value["type"],"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
+		    	$type = DuelToString($value["type"]);
+		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$type,"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
 		    }
 	    }
 
@@ -194,6 +195,47 @@ function getDemoStyle($val){
 	else if($val==12)
 		$style="sp";
 	return $style;
+}
+
+function DuelToString($type) {
+  $typeStr = "Unknown";
+  if ($type == 0)
+    $typeStr = "Saber";
+  else if ($type == 1)
+    $typeStr =  "Force";
+  else if ($type == 4)
+    $typeStr =  "Melee";
+  else if ($type == 6)
+    $typeStr =  "Pistol";
+  else if ($type == 7)
+    $typeStr =  "Blaster";
+  else if ($type == 8)
+    $typeStr =  "Sniper";
+  else if ($type == 9)
+    $typeStr =  "Bowcaster";
+  else if ($type == 10)
+    $typeStr =  "Repeater";
+  else if ($type == 11)
+    $typeStr =  "Demp2";
+  else if ($type == 12)
+    $typeStr =  "Flechette";
+  else if ($type == 13)
+    $typeStr =  "Rocket";
+  else if ($type == 14)
+    $typeStr =  "Thermal";
+  else if ($type == 15)
+    $typeStr =  "Trip mine";
+  else if ($type == 16)
+    $typeStr =  "Det pack";
+  else if ($type == 17)
+    $typeStr =  "Concussion";
+  else if ($type == 18)
+    $typeStr =  "Bryar pistol";
+  else if ($type == 19)
+    $typeStr =  "Stun baton";
+  else if ($type == 20)
+    $typeStr =  "All weapons";
+  return $typeStr;
 }
 
 function TimeToSTring($duration_ms) { //loda fixme... has to be a standard way to do this

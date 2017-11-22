@@ -181,7 +181,7 @@ function ladder_duel_rank(){
                         content += "<td>"+value.username+"</td>";
                         content += "<td>"+DuelToString(value.type)+"</td>"; //loda fixme - td id=value.type   ? Then sort on that in the dropdown?
                         content += "<td>"+value.rank+"</td>";
-                        content += "<td>"+Math.round((1 - (value.TSSUM / value.count)) * 100)+"</td>";
+                        content += "<td>"+value.TS+"</td>";
                         content += "<td>"+value.count+"</td>";
                     content += "</tr>";
                 });
@@ -377,7 +377,7 @@ function ladder_duel_list(){
                 content += "<tr class='table'>";
                     content += "<td>"+value.winner+"</td>";
                     content += "<td>"+value.loser+"</td>";
-                    content += "<td>"+DuelToString(value.type)+"</td>";
+                    content += "<td>"+value.type+"</td>";
                     content += "<td>"+value.winner_hp+"</td>";
                     content += "<td>"+value.winner_shield+"</td>";
                     content += "<td>"+value.duration+"</td>";
@@ -761,25 +761,29 @@ function ladder_race_list(){
                 header += "<th>Username</th>";
                 header += "<th>Coursename</th>";
                 header += "<th>Style</th>";
-                header += "<th>Time</th>";
-                header += "<th data-hide='phone,tablet'>topspeed</th>";
-                header += "<th data-hide='phone,tablet'>average</th>";
+                header += "<th data-hide='phone,tablet'>Topspeed</th>";
+                header += "<th data-hide='phone,tablet'>Average</th>";
                 header += "<th>Date</th>";
+                header += "<th>Time</th>";
             header += "</tr>";
             header += "</thead>";
             content = "<tbody>";
             if(res){
-                $.each( res, function( key, value ) {
+                $.each( res, function( key, value ) { //This is what takes forever
+
+
                     content += "<tr class='table'>";
                         content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
                         content += "<td>"+value.coursename+"</td>";
                         content += "<td>"+value.style+"</td>";
-                        content += "<td>"+value.duration_ms+"</td>";
                         content += "<td>"+value.topspeed+"</td>";
                         content += "<td>"+value.average+"</td>";
                         content += "<td>"+value.end_time+"</td>";
+                        content += "<td align='right'>"+value.duration_ms+"</td>"; //Align right
                     content += "</tr>";
+
+
                 });
             }
             content += "</tbody>";
@@ -791,7 +795,7 @@ function ladder_race_list(){
     $('#datatable_ladder_race_list').DataTable({
         "dom": "<'row'<'col-sm-6'l><'col-sm-6'f>>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
         "responsive": true,
-        "order": [[ 7, "desc" ]], //Order by end_time on first load to show recent times
+        "order": [[ 6, "desc" ]], //Order by end_time on first load to show recent times
         //"searching": false, //Or bfilter=false ?, why does this break the dropdown functionality
 
         initComplete: function () {

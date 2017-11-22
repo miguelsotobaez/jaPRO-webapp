@@ -115,11 +115,14 @@ switch ($option) {
 
 		    	//Format is: http://162.248.89.208/races/eternal/eternal-racepack2(rainbow)-swoop.dm_26
 		    	$style = getStyle($value["style"]);
-		    	$coursenameCleaned = $value["coursename"]; //Remove the spaces
+		    	$demoStyle = getDemoStyle($value["style"]);
+		    	$coursenameCleaned = str_replace(" ","",$value["coursename"]); //Remove the spaces
 		    	$username = $value["username"];
 		    	$date = date('y-m-d H:i', $value["end_time"]);
 
-		    	$end_time = "<a href='../races/{$username}/{$username}-{$coursenameCleaned}-{$style}.dm_26'>{$date}</a>";
+		    	$end_time = "<a href='../races/{$username}/{$username}-{$coursenameCleaned}-{$demoStyle}.dm_26'>{$date}</a>";
+
+
 
 
 		    	$newArray[]=array("position"=>$value["rank"],"username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"end_time"=>$end_time);
@@ -135,47 +138,63 @@ echo $json;
 
 function getStyle($val){
 	$style="UNKNOWN";
-
-	if($val==0){
+	if($val==0)
 		$style="0-SIEGE";
-	}
-	else if($val==1){
+	else if($val==1)
 		$style="1-JKA";
-	}
-	else if($val==2){
+	else if($val==2)
 		$style="2-QW";
-	}
-	else if($val==3){
+	else if($val==3)
 		$style="3-CPM";
-	}
-	else if($val==4){
+	else if($val==4)
 		$style="4-Q3";
-	}
-	else if($val==5){
+	else if($val==5)
 		$style="5-PJK";
-	}
-	else if($val==6){
+	else if($val==6)
 		$style="6-WSW";
-	}
-	else if($val==7){
+	else if($val==7)
 		$style="7-RJQ3";
-	}
-	else if($val==8){
+	else if($val==8)
 		$style="8-RJCPM";
-	}
-	else if($val==9){
+	else if($val==9)
 		$style="9-SWOOP";
-	}
-	else if($val==10){
+	else if($val==10)
 		$style="10-JETPACK";
-	}
-	else if($val==11){
+	else if($val==11)
 		$style="11-SPEED";
-	}
-	else if($val==12){
+	else if($val==12)
 		$style="12-SP";
-	}
+	return $style;
+}
 
+function getDemoStyle($val){
+	$style="UNKNOWN";
+	if($val==0)
+		$style="siege";
+	else if($val==1)
+		$style="jka";
+	else if($val==2)
+		$style="qw";
+	else if($val==3)
+		$style="cpm";
+	else if($val==4)
+		$style="q3";
+	else if($val==5)
+		$style="pjk";
+	else if($val==6)
+		$style="wsw";
+	else if($val==7)
+		$style="rjq3";
+	else if($val==8)
+		$style="rjcpm";
+	else if($val==9)
+		$style="swoop";
+	else if($val==10)
+		$style="jetpack";
+	else if($val==11)
+		$style="speed";
+	else if($val==12)
+		$style="sp";
 	return $style;
 }
 

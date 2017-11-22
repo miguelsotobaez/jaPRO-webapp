@@ -111,18 +111,7 @@ function ladder_duel_title(){
     HTML+='                        <small>';
     HTML+='                            Select the types of duels you want to see.';
     HTML+='                        </small>';
-
-
     HTML+='                    </div>';
-
-/*
-    HTML += '          <div class="panel-body">';
-    HTML += '              <div class="table-responsive">';
-    HTML += '                  <div class="col-sm-6" id="selectDuelStyle"><label>Type:</label></div>';
-    HTML += '              </div>';
-    HTML += '          </div>';
-*/
-
     HTML+='                </div>';
     HTML+='                <hr>';
     HTML+='            </div>';
@@ -142,7 +131,6 @@ function ladder_duel_rank(){
     panel += '          <div class="panel-body">';
     panel += '              <p>This is the saber rank list, ordered by ELO.</p>';
     panel += '              <div class="table-responsive">';
-    panel += '                  <div class="col-sm-6" id="selectDuelRankType"><label>Type:</label></div>';
     panel += '                  <table id="datatable_ladder_duel_rank" class="table table-striped table-hover"></table>';
     panel += '              </div>';
     panel += '          </div>';
@@ -173,6 +161,18 @@ function ladder_duel_rank(){
                 header += "<th>Count</th>";
             header += "</tr>";
             header += "</thead>";
+
+            header += "<tfoot>";
+            header += "<tr>";
+                header += "<th>Position</th>";
+                header += "<th>Player</th>";
+                header += "<th>Type</th>";
+                header += "<th>Elo</th>";
+                header += "<th data-hide='phone,tablet' title='Relative strength of opponent.  A lower value means this person is dueling relatively weak opponents'>TS</th>";
+                header += "<th>Count</th>";
+            header += "</tr>";
+            header += "</tfoot>";
+
             content = "<tbody>";
             if(res){
                 $.each( res, function( key, value ) {
@@ -231,24 +231,31 @@ function ladder_duel_rank(){
         ],
         "aaSorting": [[ 1, 'asc' ]],
 
-
-
-
         initComplete: function () {
             var columnStyle = this.api().column(2);
 
-            var selectStyle = $('<select class="filter form-control"></select>').appendTo('#selectDuelRankType').on('change', function () {
-                var valStyle = $(this).val();
-                columnStyle.search(valStyle, false, false).draw();
-            });
+            this.api().columns([1, 2]).every( function () {
+                var column = this;
+                var select = $('<select class="filter form-control input-sm"><option value=""></option></select>')
+                    .appendTo( $(column.footer()).empty() )
+                    .on( 'change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+ 
+                        column
+                            .search( val ? '^'+val+'$' : '', true, false )
+                            .draw();
+                    } );
+ 
+                column.data().unique().sort().each( function ( d, j ) {
+                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                } );
+            } );
 
-            columnStyle.data().unique().sort().each(function (d, j) {
-                selectStyle.append('<option value="' + d + '">' + d + '</option>');
-            });
+
 
         }
-
-
     });
 }
 

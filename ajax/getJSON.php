@@ -15,7 +15,8 @@ switch ($option) {
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 
-		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"type"=>$value["type"],"rank"=>$value["rank"],"TS"=>$value["TS"]); 
+		    	$type = DuelToString($value["type"]);
+		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"type"=>$type,"rank"=>$value["rank"],"TS"=>$value["TS"]); 
 		    	$count++;
 		    }
 	    }
@@ -50,7 +51,8 @@ switch ($option) {
 		    foreach ($arr as $key => $value) {
 		    	$duration = date("i:s", $value["duration"] / 1000);
 		    	$end_time = date('y-m-d H:i', $value["end_time"]);
-		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$value["type"],"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
+		    	$type = DuelToString($value["type"]);
+		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$type,"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
 		    }
 	    }
 
@@ -78,7 +80,8 @@ switch ($option) {
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("username"=>$value["username"],"position"=>$count,"style"=>$value["style"],"score"=>$value["score"],"avg_score"=>$value["avg_score"],"avg_percentile"=>$value["avg_percentile"],"avg_rank"=>$value["avg_rank"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
+		    	$style = StyleToString($value["style"]);
+		    	$newArray[]=array("username"=>$value["username"],"position"=>$count,"style"=>$style,"score"=>$value["score"],"avg_score"=>$value["avg_score"],"avg_percentile"=>$value["avg_percentile"],"avg_rank"=>$value["avg_rank"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
 		    	$count++;
 		    }
 	    }
@@ -111,11 +114,9 @@ switch ($option) {
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 		    	$duration = TimeToString($value["duration_ms"]);
-		    	//$end_time = date('y-m-d H:i', $value["end_time"]);
 
-		    	//Format is: http://162.248.89.208/races/eternal/eternal-racepack2(rainbow)-swoop.dm_26
-		    	$style = getStyle($value["style"]);
-		    	$demoStyle = getDemoStyle($value["style"]);
+		    	$style = StyleToString($value["style"]);
+		    	$demoStyle = StyleToDemoString($value["style"]);
 		    	$coursenameCleaned = str_replace(" ","",$value["coursename"]); //Remove the spaces
 		    	$username = $value["username"];
 		    	$date = date('y-m-d H:i', $value["end_time"]);
@@ -136,7 +137,7 @@ switch ($option) {
 
 echo $json;
 
-function getStyle($val){
+function StyleToString($val){
 	$style="UNKNOWN";
 	if($val==0)
 		$style="0-SIEGE";
@@ -167,7 +168,7 @@ function getStyle($val){
 	return $style;
 }
 
-function getDemoStyle($val){
+function StyleToDemoString($val){
 	$style="UNKNOWN";
 	if($val==0)
 		$style="siege";
@@ -196,6 +197,47 @@ function getDemoStyle($val){
 	else if($val==12)
 		$style="sp";
 	return $style;
+}
+
+function DuelToString($type) {
+  $typeStr = "Unknown";
+  if ($type == 0)
+    $typeStr = "Saber";
+  else if ($type == 1)
+    $typeStr =  "Force";
+  else if ($type == 4)
+    $typeStr =  "Melee";
+  else if ($type == 6)
+    $typeStr =  "Pistol";
+  else if ($type == 7)
+    $typeStr =  "Blaster";
+  else if ($type == 8)
+    $typeStr =  "Sniper";
+  else if ($type == 9)
+    $typeStr =  "Bowcaster";
+  else if ($type == 10)
+    $typeStr =  "Repeater";
+  else if ($type == 11)
+    $typeStr =  "Demp2";
+  else if ($type == 12)
+    $typeStr =  "Flechette";
+  else if ($type == 13)
+    $typeStr =  "Rocket";
+  else if ($type == 14)
+    $typeStr =  "Thermal";
+  else if ($type == 15)
+    $typeStr =  "Trip mine";
+  else if ($type == 16)
+    $typeStr =  "Det pack";
+  else if ($type == 17)
+    $typeStr =  "Concussion";
+  else if ($type == 18)
+    $typeStr =  "Bryar pistol";
+  else if ($type == 19)
+    $typeStr =  "Stun baton";
+  else if ($type == 20)
+    $typeStr =  "All weapons";
+  return $typeStr;
 }
 
 function TimeToSTring($duration_ms) { //loda fixme... has to be a standard way to do this

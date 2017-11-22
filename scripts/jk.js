@@ -179,7 +179,7 @@ function ladder_duel_rank(){
                     content += "<tr class='table'>";
                         content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
-                        content += "<td>"+DuelToString(value.type)+"</td>"; //loda fixme - td id=value.type   ? Then sort on that in the dropdown?
+                        content += "<td>"+value.type+"</td>"; //loda fixme - td id=value.type   ? Then sort on that in the dropdown?
                         content += "<td>"+value.rank+"</td>";
                         content += "<td>"+value.TS+"</td>";
                         content += "<td>"+value.count+"</td>";
@@ -575,7 +575,7 @@ function ladder_race_rank(){
                         content += "<td></td>"; //Whats this?
                         content += "<td>"+value.username+"</td>";
                         
-                        content += "<td>"+RaceToString(value.style)+"</td>"; //We dont want this to show up in the table but we need to access it for the dropdown filter..
+                        content += "<td>"+value.style+"</td>"; //We dont want this to show up in the table but we need to access it for the dropdown filter..
                         content += "<td>"+value.score+"</td>";
                         
                         content += "<td>"+value.avg_score+"</td>";

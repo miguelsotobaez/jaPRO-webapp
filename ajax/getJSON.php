@@ -15,7 +15,8 @@ switch ($option) {
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 
-		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"type"=>$value["type"],"rank"=>$value["rank"],"TS"=>$value["TS"]); 
+		    	$type = DuelToString($value["type"]);
+		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"type"=>$type,"rank"=>$value["rank"],"TS"=>$value["TS"]); 
 		    	$count++;
 		    }
 	    }
@@ -79,7 +80,8 @@ switch ($option) {
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("username"=>$value["username"],"position"=>$count,"style"=>$value["style"],"score"=>$value["score"],"avg_score"=>$value["avg_score"],"avg_percentile"=>$value["avg_percentile"],"avg_rank"=>$value["avg_rank"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
+		    	$style = StyleToString($value["style"]);
+		    	$newArray[]=array("username"=>$value["username"],"position"=>$count,"style"=>$style,"score"=>$value["score"],"avg_score"=>$value["avg_score"],"avg_percentile"=>$value["avg_percentile"],"avg_rank"=>$value["avg_rank"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
 		    	$count++;
 		    }
 	    }
@@ -113,8 +115,8 @@ switch ($option) {
 		    foreach ($arr as $key => $value) {
 		    	$duration = TimeToString($value["duration_ms"]);
 
-		    	$style = getStyle($value["style"]);
-		    	$demoStyle = getDemoStyle($value["style"]);
+		    	$style = StyleToString($value["style"]);
+		    	$demoStyle = StyleToDemoString($value["style"]);
 		    	$coursenameCleaned = str_replace(" ","",$value["coursename"]); //Remove the spaces
 		    	$username = $value["username"];
 		    	$date = date('y-m-d H:i', $value["end_time"]);
@@ -135,7 +137,7 @@ switch ($option) {
 
 echo $json;
 
-function getStyle($val){
+function StyleToString($val){
 	$style="UNKNOWN";
 	if($val==0)
 		$style="0-SIEGE";
@@ -166,7 +168,7 @@ function getStyle($val){
 	return $style;
 }
 
-function getDemoStyle($val){
+function StyleToDemoString($val){
 	$style="UNKNOWN";
 	if($val==0)
 		$style="siege";

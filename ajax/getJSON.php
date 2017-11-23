@@ -8,7 +8,7 @@ switch ($option) {
 	case "ladder_duel_rank":
 		$newArray = null;
 
-	    $query ="SELECT username, type, ROUND(rank,0) AS rank, ROUND(100*TSSUM/count, 0) AS TS, count FROM DuelRanks ORDER BY rank DESC";
+	    $query ="SELECT username, type, ROUND(rank,0) AS rank, 100-ROUND(100*TSSUM/count, 0) AS TS, count FROM DuelRanks ORDER BY rank DESC";
 	    $arr = sql2arr($query);
 	    $count = 1;
 

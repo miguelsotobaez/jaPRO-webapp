@@ -524,7 +524,7 @@ function ladder_race_rank(){
             if(res){
                 $.each( res, function( key, value ) {
                     content += "<tr class='table'>";
-                        content += "<td></td>"; //Whats this?
+                        content += "<td></td>";
                         content += "<td>"+value.username+"</td>";
                         
                         content += "<td>"+value.style+"</td>"; //We dont want this to show up in the table but we need to access it for the dropdown filter..

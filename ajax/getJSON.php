@@ -61,6 +61,7 @@ switch ($option) {
 
 	case "ladder_race_rank":
 		$newArray = null;
+		/*
 	    $query ="SELECT 
 		    		username, 
 		    		style, 
@@ -74,6 +75,36 @@ switch ($option) {
 		    		count 
 		    	FROM RaceRanks 
 		    	ORDER BY score DESC";
+		    	*/
+
+		$query = "SELECT DISTINCT
+				    username,
+				    -1 AS style,
+				    ROUND(SUM(score),0) AS score_sum,
+				    ROUND((SUM(score) / SUM(COUNT)),2) AS avg_score,
+				    CAST((SUM(percentilesum) / SUM(COUNT))*100 AS INT) AS avg_percentile,
+				    ROUND((CAST(SUM(ranksum) AS FLOAT) / SUM(COUNT)),2) AS avg_rank,
+				    SUM(golds) AS golds_sum,
+				    SUM(silvers) AS silvers_sum,
+				    SUM(bronzes) AS bronzes_sum,
+				    SUM(count) AS count_sum
+				FROM RaceRanks
+				GROUP BY username
+				UNION
+				SELECT DISTINCT
+				    username,
+				    style,
+				    ROUND(SUM(score),0) AS SumScore,
+				    ROUND((score / COUNT),2) AS avg_score,
+				    CAST((percentilesum / COUNT)*100 AS INT) AS avg_percentile,
+				    ROUND((CAST(ranksum AS FLOAT) / COUNT),2) AS avg_rank,
+				    golds,
+				    silvers,
+				    bronzes,
+				    COUNT
+				FROM RaceRanks
+				GROUP BY style, username
+				ORDER BY SumScore DESC";
 
 	    $arr = sql2arr($query);
 	    $count = 1;
@@ -81,7 +112,7 @@ switch ($option) {
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 		    	$style = StyleToString($value["style"]);
-		    	$newArray[]=array("username"=>$value["username"],"position"=>$count,"style"=>$style,"score"=>$value["score"],"avg_score"=>$value["avg_score"],"avg_percentile"=>$value["avg_percentile"],"avg_rank"=>$value["avg_rank"],"golds"=>$value["golds"],"silvers"=>$value["silvers"],"bronzes"=>$value["bronzes"],"count"=>$value["count"]); 
+		    	$newArray[]=array("username"=>$value["username"],"position"=>$count,"style"=>$style,"score"=>$value["score_sum"],"avg_score"=>$value["avg_score"],"avg_percentile"=>$value["avg_percentile"],"avg_rank"=>$value["avg_rank"],"golds"=>$value["golds_sum"],"silvers"=>$value["silvers_sum"],"bronzes"=>$value["bronzes_sum"],"count"=>$value["count_sum"]); 
 		    	$count++;
 		    }
 	    }
@@ -139,6 +170,8 @@ echo $json;
 
 function StyleToString($val){
 	$style="UNKNOWN";
+	if($val==-1)
+		$style="-1-All Styles";
 	if($val==0)
 		$style="0-SIEGE";
 	else if($val==1)

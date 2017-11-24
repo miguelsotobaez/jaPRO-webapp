@@ -12,6 +12,47 @@ $(document).ready(function () {
     if(option=="home"){
         home();
     }else if(option=="ladder_player"){
+        player_title();
+        player_duel_chart();
+        player_race_chart();
+        
+        //Global info for players, or should this be in a header shown on every page?
+            //Number of accounts
+            //number of total races
+            //number of total duels
+            //number of courses/maps
+
+        //Select player dropdown?
+
+        //Avatar of player
+
+        //Some type of pie or horizontal bar graph (like github language stat graph) that shows a breakdown of their race styles https://jsfiddle.net/fyww2t4n/
+            //SELECT style, count FROM RaceRanks WHERE username = ? ORDER BY count DESC
+        //Same type of graph but for a breakdown of their duel styles
+            //SELECT type, count FROM DuelRanks WHERE username = ? ORDER BY count DESC
+        //Recent duels/races?
+
+        //Show achivements
+
+        //Show stats? 
+            //Show last login, date created
+            //Race score (nth place)?
+            //Golds (nth place)?
+            //Silvers (nth place)?
+            //Bronzes (nth place)?
+            //average rank (nth place)?
+            //sprr ?
+            //spr ?
+            //avg percentile?
+            //avg rank?
+            //races / courses completed?
+
+            //How to decide which duel type? -- Or pick best type .. ? or just show saber or force?
+            //duel winrate?
+            //duel avg HP?
+            //duel avg TS?
+            //duel elo (nth place)?
+
         
     }
     else if(option=="ladder_duel"){
@@ -795,6 +836,169 @@ function ladder_race_count(){
     $('.jk-nav li').removeClass("active");
     $('#menu_race').addClass("active");
 }
+
+/////////////////////////////////////////////////////////////////////
+///////////////////////////////PLAYER////////////////////////////////
+///////////////////////////////PLAYER////////////////////////////////
+///////////////////////////////PLAYER////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+
+function player_title(){
+    var HTML;
+    HTML='<div class="row">';
+    HTML+='            <div class="col-lg-12">';
+    HTML+='                <div class="view-header">';
+    HTML+='                    <div class="pull-right text-right" style="line-height: 14px">';
+    HTML+='                        <small>Stats<br><span class="c-white">Players</span></small>';
+    HTML+='                    </div>';
+    HTML+='                    <div class="header-icon">';
+    HTML+='                        <i class="pe page-header-icon pe-7s-shield"></i>';
+    HTML+='                    </div>';
+    HTML+='                    <div class="header-title">';
+    HTML+='                        <h3>Players</h3>';
+    HTML+='                        <small>';
+    HTML+='                            Select the player you want to see.';
+    HTML+='                        </small>';
+    HTML+='                    </div>';
+    HTML+='                </div>';
+    HTML+='                <hr>';
+    HTML+='            </div>';
+    HTML+='        </div>';
+    $("#main-content").append(HTML);
+}
+
+
+function player_duel_chart(){
+    var panel = "";
+    panel += '<div id="third_row" class="row">';
+    panel += '  <div class="col-md-6">';
+    panel += '                    <div class="panel panel-filled">';
+    panel += '                      <div class="panel-heading">';
+    panel += '                          Duel Types';
+    panel += '                      </div>';
+    panel += '                        <div class="panel-body">';
+    panel += '                            <p>Most popular types.</p>';
+    panel += '                            <div id="player_duel_count_chart">';
+    panel += '                            </div>';
+    panel += '                        </div>';
+    panel += '                    </div>';
+    panel += '                </div>';
+    panel += '            </div>';
+    $("#main-content").append(panel);
+
+    var data = null;
+    var item = "player_duel_chart";
+    var url = "ajax/getJSON.php";
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "JSON",
+        async: false,
+        data: { option: item},
+        success: function(res) {
+            data = res;
+        }
+    });
+
+    var chart;
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'player_duel_count_chart',
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: null,
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Duel count',
+                data: data
+            }]
+        });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_player').addClass("active");
+}
+
+function player_race_chart(){
+    var panel = "";
+    panel += '<div id="third_row" class="row">';
+    panel += '  <div class="col-md-6">';
+    panel += '                    <div class="panel panel-filled">';
+    panel += '                      <div class="panel-heading">';
+    panel += '                          Race Types';
+    panel += '                      </div>';
+    panel += '                        <div class="panel-body">';
+    panel += '                            <p>Most popular styles.</p>';
+    panel += '                            <div id="player_race_count_chart">';
+    panel += '                            </div>';
+    panel += '                        </div>';
+    panel += '                    </div>';
+    panel += '                </div>';
+    panel += '            </div>';
+    $("#main-content").append(panel);
+
+    var data = null;
+    var item = "player_race_chart";
+    var url = "ajax/getJSON.php";
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "JSON",
+        async: false,
+        data: { option: item},
+        success: function(res) {
+            data = res;
+        }
+    });
+
+    var chart;
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'player_race_count_chart',
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: null,
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Race count',
+                data: data
+            }]
+        });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_player').addClass("active");
+}
+
+/////////////////////////////////////////////////////////////////////
+///////////////////////////////RACE//////////////////////////////////
+///////////////////////////////RACE//////////////////////////////////
+///////////////////////////////RACE//////////////////////////////////
+/////////////////////////////////////////////////////////////////////
 
 function maps(){
         HTML='<div class="row">';

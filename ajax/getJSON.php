@@ -3,6 +3,11 @@ require_once('../inc/db_connection.inc.php');
 //require_once('../inc/session.inc.php');
 
 $option = $_POST["option"];
+//$player = $_POST["player"];
+//Sanitize player?
+              //if (strlen($player) > 32)
+                  //$player = substr($player, 0, 32);
+			//Also htmlentities? or check special characters?
 
 switch ($option) {
 	case "ladder_duel_rank":
@@ -158,6 +163,39 @@ switch ($option) {
 
 
 		    	$newArray[]=array("position"=>$value["rank"],"username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"end_time"=>$end_time);
+		    }
+	    }
+
+	    $json = json_encode($newArray);
+	break;
+
+
+	case "player_duel_chart": //Loda fixme, we could just do one query maybe and have duel_rank also return the counts and use that?
+		$newArray = null;
+	    $query ="SELECT type, count FROM DuelRanks WHERE username = 'source' ORDER BY count DESC";
+
+	    $arr = sql2arr($query);
+
+	    if($arr){
+		    foreach ($arr as $key => $value) {
+		    	$type = DuelToString($value["type"]);
+		    	$newArray[]=array(0=>$type,1=>$value["count"]);
+		    }
+	    }
+
+	    $json = json_encode($newArray);
+	break;
+
+	case "player_race_chart": //Loda fixme, we could just do one query maybe and have duel_rank also return the counts and use that?
+		$newArray = null;
+	    $query ="SELECT style, count FROM RaceRanks WHERE username = 'source' ORDER BY count DESC";
+
+	    $arr = sql2arr($query);
+
+	    if($arr){
+		    foreach ($arr as $key => $value) {
+		    	$type = StyleToString($value["style"]);
+		    	$newArray[]=array(0=>$type,1=>$value["count"]);
 		    }
 	    }
 

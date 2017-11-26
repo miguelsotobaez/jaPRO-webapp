@@ -221,7 +221,7 @@ function ladder_duel_rank(){
                         content += "<td>"+value.position+"</td>";
                         content += "<td>"+value.username+"</td>";
                         content += "<td>"+value.type+"</td>"; //loda fixme - td id=value.type   ? Then sort on that in the dropdown?
-                        content += "<td>"+value.rank+"</td>";
+                        content += "<td>"+value.elo+"</td>";
                         content += "<td>"+value.TS+"</td>";
                         content += "<td>"+value.count+"</td>";
                     content += "</tr>";
@@ -765,8 +765,8 @@ function ladder_race_list(){
     });
 
 
-    $('#selectTriggerMap').find('select').trigger('change');
-    $('#selectTriggerStyle').find('select').trigger('change');
+    //$('#selectTriggerMap').find('select').trigger('change');
+    //$('#selectTriggerStyle').find('select').trigger('change');
 
     $('.jk-nav li').removeClass("active");
     $('#menu_race').addClass("active");

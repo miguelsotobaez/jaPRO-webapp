@@ -13,7 +13,10 @@ switch ($option) {
 	case "ladder_duel_rank":
 		$newArray = null;
 
-	    $query ="SELECT username, type, ROUND(rank,0) AS rank, 100-ROUND(100*TSSUM/count, 0) AS TS, count FROM DuelRanks ORDER BY rank DESC";
+	    //$query ="SELECT username, type, ROUND(rank,0) AS rank, 100-ROUND(100*TSSUM/count, 0) AS TS, count FROM DuelRanks ORDER BY rank DESC";
+	    $query = "SELECT winner, type, elo FROM (SELECT winner, type, ROUND(winner_elo,0) AS elo, end_time FROM LocalDuel where type = 0 UNION SELECT loser, type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel ORDER BY end_time ASC) 
+			GROUP BY winner, type ORDER BY elo DESC";
+
 	    $arr = sql2arr($query);
 	    $count = 1;
 
@@ -21,7 +24,7 @@ switch ($option) {
 		    foreach ($arr as $key => $value) {
 
 		    	$type = DuelToString($value["type"]);
-		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"type"=>$type,"rank"=>$value["rank"],"TS"=>$value["TS"]); 
+		    	$newArray[]=array("position"=>$count,"count"=>1,"username"=>$value["winner"],"type"=>$type,"elo"=>$value["elo"],"TS"=>1); 
 		    	$count++;
 		    }
 	    }
@@ -170,7 +173,7 @@ switch ($option) {
 	break;
 
 
-	case "player_duel_chart": //Loda fixme, we could just do one query maybe and have duel_rank also return the counts and use that?
+	case "player_duel_chart":
 		$newArray = null;
 	    $query ="SELECT type, count FROM DuelRanks WHERE username = 'source' ORDER BY count DESC";
 
@@ -186,7 +189,7 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-	case "player_race_chart": //Loda fixme, we could just do one query maybe and have duel_rank also return the counts and use that?
+	case "player_race_chart":
 		$newArray = null;
 	    $query ="SELECT style, count FROM RaceRanks WHERE username = 'source' ORDER BY count DESC";
 

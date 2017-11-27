@@ -15,6 +15,7 @@ $(document).ready(function () {
         player_title();
         player_duel_chart();
         player_race_chart();
+        player_duel_graph();
         
         //Global info for players, or should this be in a header shown on every page?
             //Number of accounts
@@ -735,7 +736,11 @@ function ladder_race_list(){
     $('#datatable_ladder_race_list').DataTable({
         "dom": "<'row'<'col-sm-6'l><'col-sm-6'f>>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
         "responsive": true,
-        "order": [[ 6, "desc" ]], //Order by end_time on first load to show recent times
+        "order": [[ 6, "desc" ]], 
+
+        //"aoColumnDefs": [{ "sType": "numeric", "aTargets": [ 7 ] }], //'string', 'numeric', 'date' or 'html' -- Need option for h:m:s time 
+
+    //Order by end_time on first load to show recent times
         //"searching": false, //Or bfilter=false ?, why does this break the dropdown functionality
 
         initComplete: function () {
@@ -993,6 +998,64 @@ function player_race_chart(){
     $('.jk-nav li').removeClass("active");
     $('#menu_player').addClass("active");
 }
+
+function player_duel_graph(){
+    var panel = "";
+    panel += '<div id="third_row" class="row">';
+    panel += '  <div class="col-md-6">';
+    panel += '                    <div class="panel panel-filled">';
+    panel += '                      <div class="panel-heading">';
+    panel += '                          Duel Elo Trend';
+    panel += '                      </div>';
+    panel += '                        <div class="panel-body">';
+    panel += '                            <p>Elo graph.</p>';
+    panel += '                            <div id="player_duel_graph">';
+    panel += '                            </div>';
+    panel += '                        </div>';
+    panel += '                    </div>';
+    panel += '                </div>';
+    panel += '            </div>';
+    $("#main-content").append(panel);
+
+    var data = null;
+    var item = "player_duel_graph";
+    var url = "ajax/getJSON.php";
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "JSON",
+        async: false,
+        data: { option: item},
+        success: function(res) {
+            data = res;
+        }
+    });
+
+    var chart;
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'player_duel_graph',
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: null,
+            plotOptions: {
+            },
+            series: [{
+                type: 'line',
+                name: 'Player Elo',
+                data: data //type, elo, end_time  - each 'type' should be specific to its own line
+            }]
+        });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_player').addClass("active");
+}
+
+
+
+
 
 /////////////////////////////////////////////////////////////////////
 ///////////////////////////////RACE//////////////////////////////////

@@ -189,6 +189,28 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
+	case "player_duel_graph":
+		$newArray = null;
+	    //$query ="SELECT end_time, CAST(winner_elo AS INT) AS winner_elo FROM LocalDuel WHERE winner = 'source' ORDER BY end_time ASC"; // This needs to also search for them as loser
+
+		//Should select type, and let client filter that.. should apply smoothing? 
+	    $query = "SELECT end_time, CAST(winner_elo AS INT) AS elo FROM LocalDuel WHERE winner = 'source' AND type = 0 
+			UNION
+			select end_time, CAST(loser_elo AS INT) AS elo FROM LocalDuel WHERE loser = 'source' AND type = 0
+			ORDER BY end_time ASC";
+
+	    $arr = sql2arr($query);
+
+	    if($arr){
+		    foreach ($arr as $key => $value) {
+		    	//$type = DuelToString($value["type"]);
+		    	$newArray[]=array(0=>$value["end_time"],1=>$value["elo"]);
+		    }
+	    }
+
+	    $json = json_encode($newArray);
+	break;
+
 	case "player_race_chart":
 		$newArray = null;
 	    $query ="SELECT style, count FROM RaceRanks WHERE username = 'source' ORDER BY count DESC";

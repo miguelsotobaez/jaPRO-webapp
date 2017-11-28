@@ -158,7 +158,7 @@ switch ($option) {
 		    	$username = $value["username"];
 		    	$end_time = date('y-m-d H:i', $value["end_time"]);
 		    	$date = "<a href='../races/{$username}/{$username}-{$coursenameCleaned}-{$demoStyle}.dm_26'>{$end_time}</a>";
-		    	$duration = "<td align='right'>{$duration_ms}</td>";
+		    	$duration = "<td align='right'>{$duration_ms}</td>"; //Why doesn't this work
 		    	$rank = $value["rank"];
 		    	if ($rank == 1)
 		    		$rank =  "<b><font color='gold'>1</font></b>";

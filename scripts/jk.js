@@ -662,8 +662,8 @@ function ladder_race_list(){
     panel += '              <p>This is the race list, ordered by date.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_ladder_race_list" class="table table-striped table-hover">';
-    panel += '                      <thead><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th>Topspeed</th><th>Average</th><th>Date</th><th>Time</th></tr></thead>'
-    panel += '                      <tfoot><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th>Topspeed</th><th>Average</th><th>Date</th><th>Time</th></tr></tfoot></table>'
+    panel += '                      <thead><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th>Topspeed</th><th>Average</th><th>Date</th><th>Time</th></tr></thead>';
+    panel += '                      <tfoot><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th>Topspeed</th><th>Average</th><th>Date</th><th>Time</th></tr></tfoot></table>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -680,7 +680,7 @@ function ladder_race_list(){
             url: url,
             dataType: "JSON",
             async: false,
-            data: { option: item, username: filterPlayer, coursename: filterMap, style: filterStyle },
+            data: { option: item },
             success: function(res) {
                 data = res;
             }

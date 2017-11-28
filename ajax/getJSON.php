@@ -126,25 +126,22 @@ switch ($option) {
 
 	    $json = json_encode($newArray);
 	break;
-
-	case "ladder_race_dropdowns": //Get a json that can populate all our dropdown filters by getting the minimum amount necessary in one query
+	
+	case "ladder_map_dropdown": //Get a json that can populate all our dropdown filters by getting the minimum amount necessary in one query
 		$newArray = null;
-	    $query = "SELECT DISTINCT 1 AS type, username AS value FROM LocalRun
-	    	UNION
-			SELECT Distinct 2 AS type, coursename AS value FROM LocalRun
-			UNION
-			SELECT Distinct 3 AS type, style AS value FROM LocalRun";
+	    $query = "SELECT DISTINCT coursename FROM LocalRun";
 
 	    $arr = sql2arr($query);
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array(0=>$value["type"],1=>$value["value"]);
+		    	$newArray[]=array(0=>$value["coursename"]);
 		    }
 	    }
 
 	    $json = json_encode($newArray);
 	break;
+
 
 	case "ladder_race_list":
 		$filterPlayer = $_POST["username"];
@@ -161,7 +158,7 @@ switch ($option) {
 		if ($filterPlayer == -1) { // Yikes
 			if ($filterStyle == -1) {
 				if ($filterMap == -1) {
-					$stmt = $db->prepare("SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY duration_ms ASC LIMIT 1000");
+					$stmt = $db->prepare("SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY end_time DESC LIMIT 1000");
 				}
 				else {
 					$stmt = $db->prepare("SELECT username, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style WHERE coursename = :coursename ORDER BY duration_ms ASC");

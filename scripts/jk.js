@@ -488,6 +488,8 @@ function ladder_race_title(){
     $("#main-content").append(HTML);
 }
 
+//var RaceRankData;
+
 function ladder_race_rank(){
 
     var panel;
@@ -520,6 +522,9 @@ function ladder_race_rank(){
         async: false,
         data: { option: item},
         success: function(res) {
+
+            //RaceRankData = res;
+
             header = "<thead>";
             header += "<tr>";
                 header += "<th>Position</th>";
@@ -842,7 +847,7 @@ function ladder_race_count(){
             series: [{
                 type: 'pie',
                 name: 'Race count',
-                data: data
+                data: data //RaceRankData?
             }]
         });
 

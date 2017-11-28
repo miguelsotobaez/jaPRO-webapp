@@ -161,7 +161,7 @@ switch ($option) {
 		if ($filterPlayer == -1) { // Yikes
 			if ($filterStyle == -1) {
 				if ($filterMap == -1) {
-					$stmt = $db->prepare("SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY duration_ms ASC");
+					$stmt = $db->prepare("SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY duration_ms ASC LIMIT 1000");
 				}
 				else {
 					$stmt = $db->prepare("SELECT username, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style WHERE coursename = :coursename ORDER BY duration_ms ASC");
@@ -220,8 +220,15 @@ switch ($option) {
 		    	$username = $value["username"];
 		    	$date = date('y-m-d H:i', $value["end_time"]);
 		    	$end_time = "<a href='../races/{$username}/{$username}-{$coursenameCleaned}-{$demoStyle}.dm_26'>{$date}</a>";
+		    	$rank = $value["rank"];
+		    	if ($rank == 1)
+		    		$rank =  "<b><font color='gold'>1</font></b>";
+		    	else if ($rank == 2)
+		    		$rank =  "<b><font color='silver'>2</font></b>";
+		    	else if ($rank == 3)
+		    		$rank =  "<b><font color='bronze'>3</font></b>";
 
-		    	$newArray[]=array("position"=>$value["rank"],"username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"end_time"=>$end_time);
+		    	$newArray[]=array("position"=>$rank,"username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"end_time"=>$end_time);
 		    }
 		}
 		

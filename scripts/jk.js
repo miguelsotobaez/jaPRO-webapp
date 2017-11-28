@@ -162,7 +162,6 @@ function ladder_duel_title(){
 }
 
 function ladder_duel_rank(){
-
     var panel;
     panel = '<div id="first_row" class="row">';
     panel += '  <div class="col-md-12">';
@@ -173,7 +172,9 @@ function ladder_duel_rank(){
     panel += '          <div class="panel-body">';
     panel += '              <p>This is the saber rank list, ordered by ELO.</p>';
     panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_duel_rank" class="table table-striped table-hover"></table>';
+    panel += '                  <table id="datatable_ladder_duel_rank" width="100%" class="table table-striped table-hover">';
+    panel += '                      <thead><tr><th>Position</th><th>Player</th><th>Type</th><th>Elo</th><th data-hide="phone,table">TS</th><th>Count</th></tr></thead>';
+    panel += '                      <tfoot><tr><th>Position</th><th>Player</th><th>Type</th><th>Elo</th><th data-hide="phone,table">TS</th><th>Count</th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -182,118 +183,78 @@ function ladder_duel_rank(){
 
     $("#main-content").append(panel);
 
-    var item = "ladder_duel_rank";
-    var content = "";
-    var header = "";
-    var url = "ajax/getJSON.php";
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item},
-        success: function(res) {
-            header = "<thead>";
-            header += "<tr>";
-                header += "<th>Position</th>";
-                header += "<th>Player</th>";
-                header += "<th>Type</th>";
-                header += "<th>Elo</th>";
-                header += "<th data-hide='phone,tablet' title='Relative strength of opponent.  A lower value means this person is dueling relatively weak opponents'>TS</th>";
-                header += "<th>Count</th>";
-            header += "</tr>";
-            header += "</thead>";
-
-            header += "<tfoot>";
-            header += "<tr>";
-                header += "<th>Position</th>";
-                header += "<th>Player</th>";
-                header += "<th>Type</th>";
-                header += "<th>Elo</th>";
-                header += "<th data-hide='phone,tablet' title='Relative strength of opponent.  A lower value means this person is dueling relatively weak opponents'>TS</th>";
-                header += "<th>Count</th>";
-            header += "</tr>";
-            header += "</tfoot>";
-
-            content = "<tbody>";
-            if(res){
-                $.each( res, function( key, value ) {
-                    content += "<tr class='table'>";
-                        content += "<td>"+value.position+"</td>";
-                        content += "<td>"+value.username+"</td>";
-                        content += "<td>"+value.type+"</td>"; //loda fixme - td id=value.type   ? Then sort on that in the dropdown?
-                        content += "<td>"+value.elo+"</td>";
-                        content += "<td>"+value.TS+"</td>";
-                        content += "<td>"+value.count+"</td>";
-                    content += "</tr>";
-                });
+    $(document).ready(function() {
+        var item = "ladder_duel_rank";
+        var content = "";
+        var header = "";
+        var url = "ajax/getJSON.php";
+        $.ajax({
+            type: "POST",
+            url: url,
+            dataType: "JSON",
+            async: false,
+            data: { option: item},
+            success: function(res) {
+                data = res;
             }
-            content += "</tbody>";
-            $("#datatable_ladder_duel_rank").html(header+content);
-        }
-    });
+        });
 
-    $('#datatable_ladder_duel_rank').DataTable({
-
-        "responsive": true,
-        "bInfo" : false,
-        "bPaginate": true,
-        "bLengthChange": false,
-        "bFilter": true, //This breaks the dropdown if we change it to remove searchbox? or use "searching"
-        "order": [[ 3, "desc" ]],
-        "columnDefs": [
-            {
-                "targets": [ 1 ],
-                "visible": false,
-                "searchable": true
-            },
-            {
-                "targets": [ 2 ],
-                "visible": false,
-                "searchable": true
-            }
-        ],
-        "fnDrawCallback": function ( oSettings ) {
-        /* Need to redo the counters if filtered or sorted */
-            if ( oSettings.bSorted || oSettings.bFiltered )
-            {
-                for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
+        $('#datatable_ladder_duel_rank').DataTable( {
+            "order": [[ 3, "desc" ]],
+            "bLengthChange": false,
+            "deferRender": true,
+            "data": data,
+            "columns": [
+                { "data": null, defaultContent: "N/A" }, //How get position for this
+                { "data": "username" },
+                { "data": "type" },
+                { "data": "elo" },
+                { "data": "TS" },
+                { "data": "count" }
+            ],
+            /*
+            "fnDrawCallback": function ( oSettings ) {
+            //Need to redo the counters if filtered or sorted
+                if ( oSettings.bSorted || oSettings.bFiltered )
                 {
-                    $('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
+                    for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
+                    {
+                        $('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
+                    }
                 }
-            }
-        },
-        "aoColumnDefs": [
-            { "bSortable": false, "aTargets": [ 0 ] }
-        ],
-        "aaSorting": [[ 1, 'asc' ]],
+            },
+            */
+            "aoColumnDefs": [
+                { "bSortable": false, "aTargets": [ 0 ] }
+            ],
+            "aaSorting": [[ 1, 'asc' ]], // ?
 
-        initComplete: function () {
-
-            this.api().columns([1, 2]).every( function () {
-                var column = this;
-                var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-                    .appendTo( $(column.footer()).empty() )
-                    .on( 'change', function () {
-                        var val = $.fn.dataTable.util.escapeRegex(
-                            $(this).val()
-                        );
- 
-                        column
-                            .search( val ? '^'+val+'$' : '', true, false )
-                            .draw();
+            initComplete: function () {
+                this.api().columns([1, 2]).every( function () {
+                    var column = this;
+                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                        .appendTo( $(column.footer()).empty() )
+                        .on( 'change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+                            column
+                                .search( val ? '^'+val+'$' : '', true, false )
+                                .draw();
+                        } );
+                    column.data().unique().sort().each( function ( d, j ) {
+                        select.append( '<option value="'+d+'">'+d+'</option>' )
                     } );
- 
-                column.data().unique().sort().each( function ( d, j ) {
-                    select.append( '<option value="'+d+'">'+d+'</option>' )
                 } );
-            } );
-        }
+            }
+        });
     });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_duel').addClass("active");
 }
 
-function ladder_duel_list(){
-    
+function ladder_duel_list(){  
     var panel;
     panel = '<div id="second_row" class="row">';
     panel += '  <div class="col-md-12">';
@@ -304,7 +265,9 @@ function ladder_duel_list(){
     panel += '          <div class="panel-body">';
     panel += '              <p>Here you can see the registri of all saber duels in japro server.</p>';
     panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_duel_list" class="table table-striped table-hover"></table>';
+    panel += '                  <table id="datatable_ladder_duel_list" width="100%" class="table table-striped table-hover">';
+    panel += '                      <thead><tr><th>Winner</th><th>Loser</th><th>Type</th><th>Winner Health</th><th data-hide="phone,table">Duration</th><th>Time</th></tr></thead>';
+    panel += '                      <tfoot><tr><th>Winner</th><th>Loser</th><th>Type</th><th>Winner Health</th><th data-hide="phone,table">Duration</th><th>Time</th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -313,83 +276,57 @@ function ladder_duel_list(){
 
     $("#main-content").append(panel);
 
-    var item = "ladder_duel_list";
-    var content = "";
-    var header = "";
-    var url = "ajax/getJSON.php";
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item},
-        success: function(res) {
-            header = "<thead>";
-            header += "<tr>";
-                header += "<th>Winner</th>";
-                header += "<th>Loser</th>";
-                header += "<th>Type</th>";
-                header += "<th data-hide='phone,tablet'>Winner HP</th>";
-                header += "<th data-hide='phone,tablet'>Winner Shield</th>";
-                header += "<th data-hide='phone,tablet'>Duration</th>";
-                header += "<th>Date</th>";
-            header += "</tr>";
-            header += "</thead>";
-            header += "<tfoot>";
-            header += "<tr>";
-                header += "<th>Winner</th>";
-                header += "<th>Loser</th>";
-                header += "<th>Type</th>";
-                header += "<th data-hide='phone,tablet'>Winner HP</th>";
-                header += "<th data-hide='phone,tablet'>Winner Shield</th>";
-                header += "<th data-hide='phone,tablet'>Duration</th>";
-                header += "<th>Date</th>";
-            header += "</tr>";
-            header += "</tfoot>";
-            content = "<tbody>";
-            $.each( res, function( key, value ) {
-                content += "<tr class='table'>";
-                    content += "<td>"+value.winner+"</td>";
-                    content += "<td>"+value.loser+"</td>";
-                    content += "<td>"+value.type+"</td>";
-                    content += "<td>"+value.winner_hp+"</td>";
-                    content += "<td>"+value.winner_shield+"</td>";
-                    content += "<td>"+value.duration+"</td>";
-                    content += "<td>"+value.end_time+"</td>";
-                content += "</tr>";
-            });
-            content += "</tbody>";
-            $("#datatable_ladder_duel_list").html(header+content);
-        }
-    });
+    $(document).ready(function() {
+        var data = null;
+        var item = "ladder_duel_list";
+        var url = "ajax/getJSON.php";
+        $.ajax({
+            type: "POST",
+            url: url,
+            dataType: "JSON",
+            async: false,
+            data: { option: item },
+            success: function(res) {
+                data = res;
+            }
+        });
 
-    $('#datatable_ladder_duel_list').DataTable({
-        "responsive": true,
-        "order": [[ 6, "desc" ]],
-
- //This functionality should be on the player page i guess
-        initComplete: function () {
-
-            this.api().columns([0, 1, 2]).every( function () {
-                var column = this;
-                var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-                    .appendTo( $(column.footer()).empty() )
-                    .on( 'change', function () {
-                        var val = $.fn.dataTable.util.escapeRegex(
-                            $(this).val()
-                        );
- 
-                        column
-                            .search( val ? '^'+val+'$' : '', true, false )
-                            .draw();
+        $('#datatable_ladder_duel_list').DataTable( {
+            "order": [[ 5, "desc" ]],
+            "deferRender": true,
+            "data": data,
+            "columns": [
+                { "data": "winner" },
+                { "data": "loser" },
+                { "data": "type" },
+                { "data": "winner_health" }, //This does not sort properly - x/y  format, sort by sum(x+y)
+                { "data": "duration" },
+                { "data": "end_time" }
+            ],
+            initComplete: function () {            
+                this.api().columns([0, 1, 2]).every( function () { //This doesn't activate?
+                    var column = this;
+                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                        .appendTo( $(column.footer()).empty() )
+                        .on( 'change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+                            column
+                                .search( val ? '^'+val+'$' : '', true, false )
+                                .draw();
+                        } );
+                    column.data().unique().sort().each( function ( d, j ) {
+                        select.append( '<option value="'+d+'">'+d+'</option>' )
                     } );
- 
-                column.data().unique().sort().each( function ( d, j ) {
-                    select.append( '<option value="'+d+'">'+d+'</option>' )
                 } );
-            } );
-        }
+            }
+        });
     });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_duel').addClass("active");
+
 }
 
 function ladder_duel_count(){
@@ -410,23 +347,23 @@ function ladder_duel_count(){
     panel += '            </div>';
     $("#main-content").append(panel);
 
-    var data = null;
-    var item = "ladder_duel_count";
-    var url = "ajax/getJSON.php";
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item},
-        success: function(res) {
-            data = res;
-        }
-    });
+    $(document).ready(function() {
+        var data = null;
+        var item = "ladder_duel_count";
+        var url = "ajax/getJSON.php";
+        $.ajax({
+            type: "POST",
+            url: url,
+            dataType: "JSON",
+            async: false,
+            data: { option: item},
+            success: function(res) {
+                data = res;
+            }
+        });
 
-    //Loda fixme, this can use the json from datatable_ladder_duel_rank maybe and avoid a query?
-
-    var chart;
+        //Loda fixme, this can use the json from datatable_ladder_duel_rank maybe and avoid a query?
+        var chart;
         chart = new Highcharts.Chart({
             chart: {
                 renderTo: 'chart_duel_count',
@@ -448,10 +385,11 @@ function ladder_duel_count(){
             },
             series: [{
                 type: 'pie',
-                name: 'Duel count',
-                data: data
+                name: 'Race count',
+                data: data //DuelRankData?
             }]
         });
+    });
 
     $('.jk-nav li').removeClass("active");
     $('#menu_saber').addClass("active");
@@ -491,146 +429,77 @@ function ladder_race_title(){
 //var RaceRankData;
 
 function ladder_race_rank(){
-
     var panel;
     panel = '<div id="first_row" class="row">';
     panel += '  <div class="col-md-12">';
     panel += '      <div class="panel panel-filled">';
     panel += '          <div class="panel-heading">';
-    panel += '              Race Rank List';
+    panel += '              Race Rank';
     panel += '          </div>';
     panel += '          <div class="panel-body">';
-    panel += '              <p>This is the race rank list, ordered by score.</p>';
+    panel += '              <p>This is the race rank.</p>';
     panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_race_rank" class="table table-striped table-hover"></table>';
+    panel += '                  <table id="datatable_ladder_race_rank" width="100%" class="table table-striped table-hover">';
+    panel += '                      <thead><tr><th>Position</th><th>Username</th><th>Style</th><th>Score</th><th>Avgerage Score</th><th>Average Percentile</th><th>Golds</th><th>Silvers</th><th>Bronzes</th><th>Count</th></tr></thead>';
+    panel += '                      <tfoot><tr><th>Position</th><th>Username</th><th>Style</th><th>Score</th><th>Avgerage Score</th><th>Average Percentile</th><th>Golds</th><th>Silvers</th><th>Bronzes</th><th>Count</th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
     panel += '  </div>';
     panel += '</div>';
-
     $("#main-content").append(panel);
 
-    var item = "ladder_race_rank";
-    var content = "";
-    var header = "";
-    var url = "ajax/getJSON.php";
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item},
-        success: function(res) {
-
-            //RaceRankData = res;
-
-            header = "<thead>";
-            header += "<tr>";
-                header += "<th>Position</th>";
-                header += "<th>Player</th>";
-                
-                header += "<th>Style</th>";
-                header += "<th>Score</th>";
-                header += "<th>Average Score</th>";
-                
-                header += "<th>Average Percentile</th>";
-                
-                header += "<th>Average Rank</th>";
-                header += "<th>Golds</th>";
-
-                header += "<th>Silvers</th>";
-                header += "<th>Bronzes</th>";
-                header += "<th>Count</th>";
-                
-            header += "</tr>";
-            header += "</thead>";
-
-            header += "<tfoot>";
-            header += "<tr>";
-                header += "<th>Position</th>";
-                header += "<th>Player</th>";
-                
-                header += "<th>Style</th>";
-                header += "<th>Score</th>";
-                header += "<th>Average Score</th>";
-                
-                header += "<th>Average Percentile</th>";
-                
-                header += "<th>Average Rank</th>";
-                header += "<th>Golds</th>";
-
-                header += "<th>Silvers</th>";
-                header += "<th>Bronzes</th>";
-                header += "<th>Count</th>";
-                
-            header += "</tr>";
-            header += "</tfoot>";
-
-            content = "<tbody>";
-            if(res){
-                $.each( res, function( key, value ) {
-                    content += "<tr class='table'>";
-                        content += "<td></td>";
-                        content += "<td>"+value.username+"</td>";
-                        
-                        content += "<td>"+value.style+"</td>"; //We dont want this to show up in the table but we need to access it for the dropdown filter..
-                        content += "<td>"+value.score+"</td>";
-                        
-                        content += "<td>"+value.avg_score+"</td>";
-                        content += "<td>"+value.avg_percentile+"</td>";
-                        
-                        content += "<td>"+value.avg_rank+"</td>";
-                        content += "<td>"+value.golds+"</td>";
-                        
-                        content += "<td>"+value.silvers+"</td>";
-                        content += "<td>"+value.bronzes+"</td>";
-                        content += "<td>"+value.count+"</td>";
-                        
-                    content += "</tr>";
-                });
+    $(document).ready(function() {
+        var data = null;
+        var item = "ladder_race_rank";
+        var url = "ajax/getJSON.php";
+        $.ajax({
+            type: "POST",
+            url: url,
+            dataType: "JSON",
+            async: false,
+            data: { option: item },
+            success: function(res) {
+                data = res;
+                //RaceRankData = res;
             }
-            content += "</tbody>";
-            $("#datatable_ladder_race_rank").html(header+content);
-        }
-    });
+        });
 
-    $('#datatable_ladder_race_rank').DataTable({
-
-        "responsive": true,
-        "bInfo" : false,
-        "bPaginate": true,
-        "bLengthChange": false,
-        "bFilter": true, //This breaks the dropdown if we change it to remove searchbox? or use "searching"
-        "order": [[ 3, "desc" ]],
-        "columnDefs": [
-            {
-                "targets": [ 1 ],
-                "visible": false,
-                "searchable": true
-            },
-            {
-                "targets": [ 2 ],
-                "visible": false,
-                "searchable": true
-            }
-        ],
-        "fnDrawCallback": function ( oSettings ) {
-        /* Need to redo the counters if filtered or sorted */
-            if ( oSettings.bSorted || oSettings.bFiltered )
-            {
-                for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
+        $('#datatable_ladder_race_rank').DataTable( {
+            "order": [[ 3, "desc" ]],
+            "bLengthChange": false,
+            "deferRender": true,
+            "data": data,
+            "columns": [
+                { "data": null, defaultContent: "N/A" }, //How get position for this
+                { "data": "username" },
+                { "data": "style" },
+                { "data": "score" },
+                { "data": "avg_score" },
+                { "data": "avg_percentile" },
+                { "data": "golds" },
+                { "data": "silvers" },
+                { "data": "bronzes" },
+                { "data": "count" }
+            ],
+            /*
+             "fnDrawCallback": function ( oSettings ) {
+            // Need to redo the counters if filtered or sorted
+                if ( oSettings.bSorted || oSettings.bFiltered )
                 {
-                    $('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
+                    for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
+                    {
+                        $('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
+                    }
                 }
-            }
-        },
-        "aoColumnDefs": [
-            { "bSortable": false, "aTargets": [ 0 ] }
-        ],
-        "aaSorting": [[ 1, 'asc' ]],
-            initComplete: function () {
-                this.api().columns([1, 2]).every( function () {
+            },
+            */
+            "aoColumnDefs": [
+                { "bSortable": false, "aTargets": [ 0 ] }
+            ],
+            "aaSorting": [[ 1, 'asc' ]],
+            initComplete: function () {            
+                this.api().columns([1, 2, 3]).every( function () {
                     var column = this;
                     var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
                         .appendTo( $(column.footer()).empty() )
@@ -647,7 +516,12 @@ function ladder_race_rank(){
                     } );
                 } );
             }
+        });
     });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_race').addClass("active");
+   
 }
 
 function ladder_race_list(){
@@ -661,7 +535,7 @@ function ladder_race_list(){
     panel += '          <div class="panel-body">';
     panel += '              <p>This is the race list, ordered by date.</p>';
     panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_race_list" class="table table-striped table-hover">';
+    panel += '                  <table id="datatable_ladder_race_list" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th>Topspeed</th><th>Average</th><th>Date</th><th>Time</th></tr></thead>';
     panel += '                      <tfoot><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th>Topspeed</th><th>Average</th><th>Date</th><th>Time</th></tr></tfoot></table>';
     panel += '              </div>';
@@ -699,6 +573,10 @@ function ladder_race_list(){
                 { "data": "average" },
                 { "data": "date" },
                 { "data": "duration" }
+            ],
+            "columnDefs": [
+              { "sType": "num-html", "aTargets": [ 0 ] } //numbers-html plugin
+              //{ "sType": "numeric", "aTargets": [ 7 ] } //time-uni sort plugin
             ],
             initComplete: function () {            
                 this.api().columns([1, 2, 3]).every( function () {
@@ -744,22 +622,23 @@ function ladder_race_count(){
     panel += '            </div>';
     $("#main-content #second_row").append(panel);
 
-    var data = null;
-    var item = "ladder_race_count";
-    var url = "ajax/getJSON.php";
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item},
-        success: function(res) {
-            data = res;
-        }
-    });
+    $(document).ready(function() {
+        var data = null;
+        var item = "ladder_race_count";
+        var url = "ajax/getJSON.php";
+        $.ajax({
+            type: "POST",
+            url: url,
+            dataType: "JSON",
+            async: false,
+            data: { option: item},
+            success: function(res) {
+                data = res;
+            }
+        });
 
-    //Loda fixme, this can use the json from datatable_ladder_duel_rank maybe and avoid a query?
-    var chart;
+        //Loda fixme, this can use the json from datatable_ladder_duel_rank maybe and avoid a query?
+        var chart;
         chart = new Highcharts.Chart({
             chart: {
                 renderTo: 'chart_race_count',
@@ -839,6 +718,7 @@ function player_duel_chart(){
     panel += '            </div>';
     $("#main-content").append(panel);
 
+    var username = "source";
     var data = null;
     var item = "player_duel_chart";
     var url = "ajax/getJSON.php";
@@ -847,7 +727,7 @@ function player_duel_chart(){
         url: url,
         dataType: "JSON",
         async: false,
-        data: { option: item},
+        data: { option: item, player: username},
         success: function(res) {
             data = res;
         }
@@ -884,7 +764,7 @@ function player_duel_chart(){
     $('#menu_player').addClass("active");
 }
 
-function player_race_chart(){
+function player_race_chart(){ //This should be a stacked horizontal bar graph like githubs code breakdwon
     var panel = "";
     panel += '<div id="third_row" class="row">';
     panel += '  <div class="col-md-6">';
@@ -893,7 +773,7 @@ function player_race_chart(){
     panel += '                          Race Types';
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
-    panel += '                            <p>Most popular styles.</p>';
+    panel += '                            <p>Favorite race styles.</p>';
     panel += '                            <div id="player_race_count_chart">';
     panel += '                            </div>';
     panel += '                        </div>';
@@ -902,6 +782,7 @@ function player_race_chart(){
     panel += '            </div>';
     $("#main-content").append(panel);
 
+    var username = "source";
     var data = null;
     var item = "player_race_chart";
     var url = "ajax/getJSON.php";
@@ -910,7 +791,7 @@ function player_race_chart(){
         url: url,
         dataType: "JSON",
         async: false,
-        data: { option: item},
+        data: { option: item, player: username},
         success: function(res) {
             data = res;
         }
@@ -938,7 +819,7 @@ function player_race_chart(){
             },
             series: [{
                 type: 'pie',
-                name: 'Race count',
+                name: 'Strength',
                 data: data
             }]
         });
@@ -965,6 +846,7 @@ function player_duel_graph(){
     panel += '            </div>';
     $("#main-content").append(panel);
 
+    var username = "source";
     var data = null;
     var item = "player_duel_graph";
     var url = "ajax/getJSON.php";
@@ -973,7 +855,7 @@ function player_duel_graph(){
         url: url,
         dataType: "JSON",
         async: false,
-        data: { option: item},
+        data: { option: item, player: username},
         success: function(res) {
             data = res;
         }
@@ -991,7 +873,7 @@ function player_duel_graph(){
             plotOptions: {
             },
             series: [{
-                type: 'line',
+                type: 'spline',
                 name: 'Player Elo',
                 data: data //type, elo, end_time  - each 'type' should be specific to its own line
             }]

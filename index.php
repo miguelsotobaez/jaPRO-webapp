@@ -75,6 +75,7 @@ require_once('inc/option.inc.php');
 <script src="vendor/jquery/dist/jquery.min.js"></script>
 <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
 <script src="vendor/datatables/datatables.min.js"></script>
+<script src="vendor/datatables/plugins.js"></script>
 <script src="vendor/highcharts/js/highcharts.js"></script>
 <script src="scripts/highcharts.jk.theme.js"></script>
 

@@ -60,7 +60,8 @@ switch ($option) {
 		    	$duration = date("i:s", $value["duration"] / 1000);
 		    	$end_time = date('y-m-d H:i', $value["end_time"]);
 		    	$type = DuelToString($value["type"]);
-		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$type,"winner_hp"=>$value["winner_hp"],"winner_shield"=>$value["winner_shield"],"duration"=>$duration,"end_time"=>$end_time);
+		    	$winner_health = $value["winner_hp"] . " / " . $value["winner_shield"];
+		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$type,"winner_health"=>$winner_health,"duration"=>$duration,"end_time"=>$end_time);
 		    }
 	    }
 
@@ -163,7 +164,7 @@ switch ($option) {
 		    	if ($rank == 1)
 		    		$rank =  "<b><font color='gold'>1</font></b>";
 
-		    	$newArray[]=array("rank"=>$rank,"username"=>$value["username"],"coursename"=>$value["coursename"],"duration"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"date"=>$date);
+		    	$newArray[]=array("rank"=>$rank,"username"=>$username,"coursename"=>$value["coursename"],"duration"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"date"=>$date);
 		    }
 		}
 		
@@ -171,13 +172,18 @@ switch ($option) {
 	break;
 
 	case "player_duel_chart":
+		$username = $_POST["player"];
 		$newArray = null;
-	    $query ="SELECT type, count FROM DuelRanks WHERE username = 'source' ORDER BY count DESC";
 
-	    $arr = sql2arr($query);
+		$stmt = $db->prepare("SELECT type, count(*) AS count FROM LocalDuel WHERE (winner = :username OR loser = :username) GROUP BY type ORDER BY count DESC"); //Count, we should get elo instead i think
+		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
 
-	    if($arr){
-		    foreach ($arr as $key => $value) {
+		$result = $stmt->execute();
+		$exists = sql2arr2($result);
+		$result->finalize();
+
+	    if($exists){
+		    foreach ($exists as $key => $value) {
 		    	$type = DuelToString($value["type"]);
 		    	$newArray[]=array(0=>$type,1=>$value["count"]);
 		    }
@@ -187,19 +193,23 @@ switch ($option) {
 	break;
 
 	case "player_duel_graph":
+		$username = $_POST["player"];
 		$newArray = null;
 	    //$query ="SELECT end_time, CAST(winner_elo AS INT) AS winner_elo FROM LocalDuel WHERE winner = 'source' ORDER BY end_time ASC"; // This needs to also search for them as loser
 
 		//Should select type, and let client filter that.. should apply smoothing? 
-	    $query = "SELECT end_time, CAST(winner_elo AS INT) AS elo FROM LocalDuel WHERE winner = 'source' AND type = 0 
+		$stmt = $db->prepare("SELECT end_time, CAST(winner_elo AS INT) AS elo FROM LocalDuel WHERE winner = :username AND type = 0 
 			UNION
-			select end_time, CAST(loser_elo AS INT) AS elo FROM LocalDuel WHERE loser = 'source' AND type = 0
-			ORDER BY end_time ASC";
+			select end_time, CAST(loser_elo AS INT) AS elo FROM LocalDuel WHERE loser = :username AND type = 0
+			ORDER BY end_time ASC");
+		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
 
-	    $arr = sql2arr($query);
+		$result = $stmt->execute();
+		$exists = sql2arr2($result);
+		$result->finalize();
 
-	    if($arr){
-		    foreach ($arr as $key => $value) {
+	    if($exists){
+		    foreach ($exists as $key => $value) {
 		    	$newArray[]=array(0=>$value["end_time"],1=>$value["elo"]);
 		    }
 	    }
@@ -207,16 +217,22 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-	case "player_race_chart":
+	case "player_race_chart": //Get relative strength of each race style for this player
+		$username = $_POST["player"];
 		$newArray = null;
-	    $query ="SELECT style, count FROM RaceRanks WHERE username = 'source' ORDER BY count DESC";
 
-	    $arr = sql2arr($query);
+	   	$stmt = $db->prepare("SELECT x.style AS style, ROUND(x.score/y.avg_score, 0) AS diff FROM (SELECT style, score from RaceRanks WHERE username=:username) as x, 
+	    	(SELECT style, AVG(score) AS avg_score FROM RaceRanks GROUP BY style) as y WHERE x.style = y.style ORDER BY diff DESC");
+		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
 
-	    if($arr){
-		    foreach ($arr as $key => $value) {
+		$result = $stmt->execute();
+		$exists = sql2arr2($result);
+		$result->finalize();
+
+	    if($exists){
+		    foreach ($exists as $key => $value) {
 		    	$type = StyleToString($value["style"]);
-		    	$newArray[]=array(0=>$type,1=>$value["count"]);
+		    	$newArray[]=array(0=>$type,1=>$value["diff"]);
 		    }
 	    }
 

@@ -688,9 +688,12 @@ function ladder_race_list(){
             header = "<thead>";
             header += "<tr>";
                 header += "<th>Rank</th>";
-                header += "<th>Username</th>";
-                header += "<th>Coursename</th>";
-                header += "<th>Style</th>";
+                if (filterPlayer == -1)
+                    header += "<th>Username</th>";
+                if (filterMap == -1)
+                    header += "<th>Coursename</th>";
+                if (filterStyle == -1)
+                    header += "<th>Style</th>";
                 header += "<th data-hide='phone,tablet'>Topspeed</th>";
                 header += "<th data-hide='phone,tablet'>Average</th>";
                 header += "<th>Date</th>";
@@ -701,9 +704,12 @@ function ladder_race_list(){
             header += "<tfoot>";
             header += "<tr>";
                 header += "<th>Rank</th>";
-                header += "<th>Username</th>";
-                header += "<th>Coursename</th>";
-                header += "<th>Style</th>";
+                if (filterPlayer == -1)
+                    header += "<th>Username</th>";
+                if (filterMap == -1)
+                    header += "<th>Coursename</th>";
+                if (filterStyle == -1)
+                    header += "<th>Style</th>";
                 header += "<th data-hide='phone,tablet'>Topspeed</th>";
                 header += "<th data-hide='phone,tablet'>Average</th>";
                 header += "<th>Date</th>";
@@ -714,20 +720,19 @@ function ladder_race_list(){
             content = "<tbody>";
             if(res){
                 $.each( res, function( key, value ) { //This is what takes forever
-
-
                     content += "<tr class='table'>";
                         content += "<td>"+value.position+"</td>";
-                        content += "<td>"+value.username+"</td>";
-                        content += "<td>"+value.coursename+"</td>";
-                        content += "<td>"+value.style+"</td>";
+                        if (filterPlayer == -1)
+                            content += "<td>"+value.username+"</td>";
+                        if (filterMap == -1)
+                            content += "<td>"+value.coursename+"</td>";
+                        if (filterStyle == -1)
+                            content += "<td>"+value.style+"</td>";
                         content += "<td>"+value.topspeed+"</td>";
                         content += "<td>"+value.average+"</td>";
                         content += "<td>"+value.end_time+"</td>";
                         content += "<td align='right'>"+value.duration_ms+"</td>"; //Align right
                     content += "</tr>";
-
-
                 });
             }
             content += "</tbody>";

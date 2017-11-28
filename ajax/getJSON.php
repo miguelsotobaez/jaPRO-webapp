@@ -165,44 +165,44 @@ switch ($option) {
 				}
 				else {
 					$stmt = $db->prepare("SELECT username, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style WHERE coursename = :coursename ORDER BY duration_ms ASC");
-					$stmt->bindValue(":coursename", 1, SQLITE3_TEXT);
+					$stmt->bindValue(":coursename", $filterMap, SQLITE3_TEXT);
 				}
 			}
 			else {
 				if ($filterMap == -1) {
-		   			$stmt = $db->prepare("SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, rank, end_time FROM LocalRun GROUP BY username, coursename WHERE style = :style ORDER BY duration_ms ASC");
-		   			$stmt->bindValue(":style", 1, SQLITE3_INTEGER);
+		   			$stmt = $db->prepare("SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, rank, end_time FROM LocalRun WHERE style = :style GROUP BY username, coursename ORDER BY duration_ms ASC");
+		   			$stmt->bindValue(":style", $filterStyle, SQLITE3_INTEGER);
 				}
 		   		else {
 		   			$stmt = $db->prepare("SELECT username, MIN(duration_ms) AS duration_ms, topspeed, average, rank, end_time FROM LocalRun GROUP BY username WHERE style = :style AND coursename = :coursename ORDER BY duration_ms ASC");
-		   			$stmt->bindValue(":style", 1, SQLITE3_INTEGER);
-		   			$stmt->bindValue(":coursename", 2, SQLITE3_TEXT);
+		   			$stmt->bindValue(":style", $filterStyle, SQLITE3_INTEGER);
+		   			$stmt->bindValue(":coursename", $filterMap, SQLITE3_TEXT);
 		   		}
 			}	
 		}
 		else {
 			if ($filterStyle == -1) {
 				if ($filterMap == -1) {
-					$stmt = $db->prepare("SELECT coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename WHERE username = :username ORDER BY duration_ms ASC");
-		   			$stmt->bindValue(":username", 1, SQLITE3_TEXT);
+					$stmt = $db->prepare("SELECT coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun WHERE username = :username GROUP BY username, style, coursename ORDER BY duration_ms ASC");
+		   			$stmt->bindValue(":username", $filterPlayer, SQLITE3_TEXT);
 				}
 				else {
 					$stmt = $db->prepare("SELECT MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style WHERE coursename = :coursename AND username = :username ORDER BY duration_ms ASC");
-					$stmt->bindValue(":coursename", 1, SQLITE3_TEXT);
-					$stmt->bindValue(":username", 2, SQLITE3_TEXT);
+					$stmt->bindValue(":coursename", $filterMap, SQLITE3_TEXT);
+					$stmt->bindValue(":username", $filterPlayer, SQLITE3_TEXT);
 				}
 			}
 			else {
 				if ($filterMap == -1) {
 		   			$stmt = $db->prepare("SELECT coursename, MIN(duration_ms) AS duration_ms, topspeed, average, rank, end_time FROM LocalRun GROUP BY username, coursename WHERE style = :style AND username = :username ORDER BY duration_ms ASC");
-		   			$stmt->bindValue(":style", 1, SQLITE3_INTEGER);
-					$stmt->bindValue(":username", 2, SQLITE3_TEXT);
+		   			$stmt->bindValue(":style", $filterStyle, SQLITE3_INTEGER);
+					$stmt->bindValue(":username", $filterPlayer, SQLITE3_TEXT);
 				}
 		   		else {
 		   			$stmt = $db->prepare("SELECT MIN(duration_ms) AS duration_ms, topspeed, average, rank, end_time FROM LocalRun WHERE style = :style AND coursename = :coursename AND username = :username ORDER BY duration_ms ASC");
-		   			$stmt->bindValue(":style", 1, SQLITE3_INTEGER);
-					$stmt->bindValue(":username", 2, SQLITE3_TEXT);
-					$stmt->bindValue(":coursename", 3, SQLITE3_TEXT);
+		   			$stmt->bindValue(":style", $filterStyle, SQLITE3_INTEGER);
+					$stmt->bindValue(":username", $filterPlayer, SQLITE3_TEXT);
+					$stmt->bindValue(":coursename", $filterMap, SQLITE3_TEXT);
 		   		}
 			}	
 		}

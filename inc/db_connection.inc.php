@@ -14,6 +14,7 @@ if(!$db) {
    //echo "Opened database successfully\n";
 }
    
+/*   
 function sql2arr2($results){ //For prepared statements that needed to be bound
   while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
       $arrayResult[]=$row;
@@ -24,6 +25,7 @@ function sql2arr2($results){ //For prepared statements that needed to be bound
     return false;
   }
 }
+*/
 
 function sql2arr($sql){
    global $db;

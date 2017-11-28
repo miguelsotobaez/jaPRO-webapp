@@ -629,7 +629,6 @@ function ladder_race_rank(){
             { "bSortable": false, "aTargets": [ 0 ] }
         ],
         "aaSorting": [[ 1, 'asc' ]],
-
             initComplete: function () {
                 this.api().columns([1, 2]).every( function () {
                     var column = this;
@@ -639,24 +638,19 @@ function ladder_race_rank(){
                             var val = $.fn.dataTable.util.escapeRegex(
                                 $(this).val()
                             );
-     
                             column
                                 .search( val ? '^'+val+'$' : '', true, false )
                                 .draw();
                         } );
-     
                     column.data().unique().sort().each( function ( d, j ) {
                         select.append( '<option value="'+d+'">'+d+'</option>' )
                     } );
                 } );
             }
-
-
     });
 }
 
 function ladder_race_list(){
-
     var panel;
     panel = '<div id="second_row" class="row">';
     panel += '  <div class="col-md-12">';
@@ -667,7 +661,9 @@ function ladder_race_list(){
     panel += '          <div class="panel-body">';
     panel += '              <p>This is the race list, ordered by date.</p>';
     panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_race_list" class="table table-striped table-hover"></table>';
+    panel += '                  <table id="datatable_ladder_race_list" class="table table-striped table-hover">';
+    panel += '                      <thead><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th>Topspeed</th><th>Average</th><th>Date</th><th>Time</th></tr></thead>'
+    panel += '                      <tfoot><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th>Topspeed</th><th>Average</th><th>Date</th><th>Time</th></tr></tfoot></table>'
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -675,116 +671,55 @@ function ladder_race_list(){
     panel += '</div>';
     $("#main-content").append(panel);
 
-    var item = "ladder_race_list";
-    var content = "";
-    var header = "";
-    var url = "ajax/getJSON.php";
-    var filterPlayer = -1;
-    var filterMap = -1;
-    var filterStyle = -1;
-    $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "JSON",
-        async: false,
-        data: { option: item, username: filterPlayer, coursename: filterMap, style: filterStyle },
-
-    success: function(res) {
-            header = "<thead>";
-            header += "<tr>";
-                header += "<th>Rank</th>";
-                if (filterPlayer == -1)
-                    header += "<th>Username</th>";
-                if (filterMap == -1)
-                    header += "<th>Coursename</th>";
-                if (filterStyle == -1)
-                    header += "<th>Style</th>";
-                header += "<th data-hide='phone,tablet'>Topspeed</th>";
-                header += "<th data-hide='phone,tablet'>Average</th>";
-                header += "<th>Date</th>";
-                header += "<th>Time</th>";
-            header += "</tr>";
-            header += "</thead>";
-
-            header += "<tfoot>";
-            header += "<tr>";
-                header += "<th>Rank</th>";
-                if (filterPlayer == -1)
-                    header += "<th>Username</th>";
-                if (filterMap == -1)
-                    header += "<th>Coursename</th>";
-                if (filterStyle == -1)
-                    header += "<th>Style</th>";
-                header += "<th data-hide='phone,tablet'>Topspeed</th>";
-                header += "<th data-hide='phone,tablet'>Average</th>";
-                header += "<th>Date</th>";
-                header += "<th>Time</th>";
-            header += "</tr>";
-            header += "</tfoot>";
-
-            content = "<tbody>";
-            if(res){
-                $.each( res, function( key, value ) { //This is what takes forever
-                    content += "<tr class='table'>";
-                        content += "<td>"+value.position+"</td>";
-                        if (filterPlayer == -1)
-                            content += "<td>"+value.username+"</td>";
-                        if (filterMap == -1)
-                            content += "<td>"+value.coursename+"</td>";
-                        if (filterStyle == -1)
-                            content += "<td>"+value.style+"</td>";
-                        content += "<td>"+value.topspeed+"</td>";
-                        content += "<td>"+value.average+"</td>";
-                        content += "<td>"+value.end_time+"</td>";
-                        content += "<td align='right'>"+value.duration_ms+"</td>"; //Align right
-                    content += "</tr>";
-                });
+    $(document).ready(function() {
+        var data = null;
+        var item = "ladder_race_list";
+        var url = "ajax/getJSON.php";
+        $.ajax({
+            type: "POST",
+            url: url,
+            dataType: "JSON",
+            async: false,
+            data: { option: item, username: filterPlayer, coursename: filterMap, style: filterStyle },
+            success: function(res) {
+                data = res;
             }
-            content += "</tbody>";
-            $("#datatable_ladder_race_list").html(header+content);
-        }
+        });
 
-    });
-
-    $('#datatable_ladder_race_list').DataTable({
-        "dom": "<'row'<'col-sm-6'l><'col-sm-6'f>>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
-        "responsive": true,
-        "order": [[ 6, "desc" ]], 
-
-        //"aoColumnDefs": [{ "sType": "numeric", "aTargets": [ 7 ] }], //'string', 'numeric', 'date' or 'html' -- Need option for h:m:s time 
-
-    //Order by end_time on first load to show recent times
-        //"searching": false, //Or bfilter=false ?, why does this break the dropdown functionality
-
-        initComplete: function () {
-            
-            this.api().columns([1, 2, 3]).every( function () {
-                var column = this;
-                var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-                    .appendTo( $(column.footer()).empty() )
-                    .on( 'change', function () {
-                        var val = $.fn.dataTable.util.escapeRegex(
-                            $(this).val()
-                        );
- 
-                        column
-                            .search( val ? '^'+val+'$' : '', true, false )
-                            .draw();
+        $('#datatable_ladder_race_list').DataTable( {
+            "order": [[ 6, "desc" ]],
+            "deferRender": true,
+            "data": data,
+            "columns": [
+                { "data": "rank" },
+                { "data": "username" },
+                { "data": "coursename" },
+                { "data": "style" },
+                { "data": "topspeed" },
+                { "data": "average" },
+                { "data": "date" },
+                { "data": "duration" }
+            ],
+            initComplete: function () {            
+                this.api().columns([1, 2, 3]).every( function () {
+                    var column = this;
+                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                        .appendTo( $(column.footer()).empty() )
+                        .on( 'change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+                            column
+                                .search( val ? '^'+val+'$' : '', true, false )
+                                .draw();
+                        } );
+                    column.data().unique().sort().each( function ( d, j ) {
+                        select.append( '<option value="'+d+'">'+d+'</option>' )
                     } );
- 
-                column.data().unique().sort().each( function ( d, j ) {
-                    select.append( '<option value="'+d+'">'+d+'</option>' )
                 } );
-            } );
-
-        }
-
-
+            }
+        });
     });
-
-
-    //$('#selectTriggerMap').find('select').trigger('change');
-    //$('#selectTriggerStyle').find('select').trigger('change');
 
     $('.jk-nav li').removeClass("active");
     $('#menu_race').addClass("active");
@@ -847,7 +782,7 @@ function ladder_race_count(){
             series: [{
                 type: 'pie',
                 name: 'Race count',
-                data: data //RaceRankData?
+                data: data //RaceRankData? //Graph only entries where style is -1.  Graph username vs count.  
             }]
         });
 

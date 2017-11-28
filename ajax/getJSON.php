@@ -97,6 +97,7 @@ switch ($option) {
 				FROM RaceRanks
 				GROUP BY style, username
 				ORDER BY SumScore DESC";
+				//From RaceRanks WHERE score > 10 - to cut out the useless crap, if it really is affecting pageload, but then we cant trust distinct username/style(?) to be complete for other dropdowns
 
 	    $arr = sql2arr($query);
 	    $count = 1;
@@ -142,90 +143,27 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-
-	case "ladder_race_list":
-		$filterPlayer = $_POST["username"];
-		$filterMap = $_POST["coursename"];
-		$filterStyle = $_POST["style"];
-	
+	case "ladder_race_list":	
 		$newArray = null;
+		$query = "SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY end_time DESC";
 
-/* --More trouble than its worth
-		$query = "SELECT " . $filterPlayer ? "username" : "" .  $filterMap ? "coursename" : "" . "MIN(duration_ms) AS duration_ms, topspeed, average " . $filterStyle ? ", style" : "" . ", rank, end_time FROM LocalRun GROUP BY " 
-			. $filterPlayer ? " username" : "" $filterStyle ? ", style" : "" $filterMap ? ", coursename" : "" . "ORDER BY duration_ms ASC";
-*/
+		$arr = sql2arr($query);
 
-		if ($filterPlayer == -1) { // Yikes
-			if ($filterStyle == -1) {
-				if ($filterMap == -1) {
-					$stmt = $db->prepare("SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY end_time DESC LIMIT 1000");
-				}
-				else {
-					$stmt = $db->prepare("SELECT username, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style WHERE coursename = :coursename ORDER BY duration_ms ASC");
-					$stmt->bindValue(":coursename", $filterMap, SQLITE3_TEXT);
-				}
-			}
-			else {
-				if ($filterMap == -1) {
-		   			$stmt = $db->prepare("SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, rank, end_time FROM LocalRun WHERE style = :style GROUP BY username, coursename ORDER BY duration_ms ASC");
-		   			$stmt->bindValue(":style", $filterStyle, SQLITE3_INTEGER);
-				}
-		   		else {
-		   			$stmt = $db->prepare("SELECT username, MIN(duration_ms) AS duration_ms, topspeed, average, rank, end_time FROM LocalRun GROUP BY username WHERE style = :style AND coursename = :coursename ORDER BY duration_ms ASC");
-		   			$stmt->bindValue(":style", $filterStyle, SQLITE3_INTEGER);
-		   			$stmt->bindValue(":coursename", $filterMap, SQLITE3_TEXT);
-		   		}
-			}	
-		}
-		else {
-			if ($filterStyle == -1) {
-				if ($filterMap == -1) {
-					$stmt = $db->prepare("SELECT coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun WHERE username = :username GROUP BY username, style, coursename ORDER BY duration_ms ASC");
-		   			$stmt->bindValue(":username", $filterPlayer, SQLITE3_TEXT);
-				}
-				else {
-					$stmt = $db->prepare("SELECT MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style WHERE coursename = :coursename AND username = :username ORDER BY duration_ms ASC");
-					$stmt->bindValue(":coursename", $filterMap, SQLITE3_TEXT);
-					$stmt->bindValue(":username", $filterPlayer, SQLITE3_TEXT);
-				}
-			}
-			else {
-				if ($filterMap == -1) {
-		   			$stmt = $db->prepare("SELECT coursename, MIN(duration_ms) AS duration_ms, topspeed, average, rank, end_time FROM LocalRun GROUP BY username, coursename WHERE style = :style AND username = :username ORDER BY duration_ms ASC");
-		   			$stmt->bindValue(":style", $filterStyle, SQLITE3_INTEGER);
-					$stmt->bindValue(":username", $filterPlayer, SQLITE3_TEXT);
-				}
-		   		else {
-		   			$stmt = $db->prepare("SELECT MIN(duration_ms) AS duration_ms, topspeed, average, rank, end_time FROM LocalRun WHERE style = :style AND coursename = :coursename AND username = :username ORDER BY duration_ms ASC");
-		   			$stmt->bindValue(":style", $filterStyle, SQLITE3_INTEGER);
-					$stmt->bindValue(":username", $filterPlayer, SQLITE3_TEXT);
-					$stmt->bindValue(":coursename", $filterMap, SQLITE3_TEXT);
-		   		}
-			}	
-		}
-
-		$result = $stmt->execute();
-		$exists = sql2arr2($result);
-		$result->finalize();
-
-		if($exists) {
-		    foreach ($exists as $key => $value) {
-		    	$duration = TimeToString($value["duration_ms"]);
+		if($arr) {
+		    foreach ($arr as $key => $value) {
+		    	$duration_ms = TimeToString($value["duration_ms"]);
 		    	$style = StyleToString($value["style"]);
 		    	$demoStyle = StyleToDemoString($value["style"]);
 		    	$coursenameCleaned = str_replace(" ","",$value["coursename"]); //Remove the spaces
 		    	$username = $value["username"];
-		    	$date = date('y-m-d H:i', $value["end_time"]);
-		    	$end_time = "<a href='../races/{$username}/{$username}-{$coursenameCleaned}-{$demoStyle}.dm_26'>{$date}</a>";
+		    	$end_time = date('y-m-d H:i', $value["end_time"]);
+		    	$date = "<a href='../races/{$username}/{$username}-{$coursenameCleaned}-{$demoStyle}.dm_26'>{$end_time}</a>";
+		    	$duration = "<td align='right'>{$duration_ms}</td>";
 		    	$rank = $value["rank"];
 		    	if ($rank == 1)
 		    		$rank =  "<b><font color='gold'>1</font></b>";
-		    	else if ($rank == 2)
-		    		$rank =  "<b><font color='silver'>2</font></b>";
-		    	else if ($rank == 3)
-		    		$rank =  "<b><font color='bronze'>3</font></b>";
 
-		    	$newArray[]=array("position"=>$rank,"username"=>$value["username"],"coursename"=>$value["coursename"],"duration_ms"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"end_time"=>$end_time);
+		    	$newArray[]=array("rank"=>$rank,"username"=>$value["username"],"coursename"=>$value["coursename"],"duration"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"date"=>$date);
 		    }
 		}
 		

@@ -674,12 +674,15 @@ function ladder_race_list(){
     var content = "";
     var header = "";
     var url = "ajax/getJSON.php";
+    var filterPlayer = -1;
+    var filterMap = -1;
+    var filterStyle = -1;
     $.ajax({
         type: "POST",
         url: url,
         dataType: "JSON",
         async: false,
-        data: { option: item},
+        data: { option: item, username: filterPlayer, coursename: filterMap, style: filterStyle },
 
     success: function(res) {
             header = "<thead>";

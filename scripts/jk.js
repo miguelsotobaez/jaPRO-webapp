@@ -3,6 +3,7 @@
  *
  */
 
+
 $(document).ready(function () {
     //home
     //ladder_duels
@@ -28,12 +29,22 @@ $(document).ready(function () {
         //Avatar of player
 
         //Some type of pie or horizontal bar graph (like github language stat graph) that shows a breakdown of their race styles https://jsfiddle.net/fyww2t4n/
+        //do we want this to be their most dueled types or their highest score types ? And should it be relative to playerbase average? we already have the race/duels page for absolute stats..
+
+        //This is their relative strenght of each style..? Normalize it?  Or... Change MAX to AVG maybe..?
+        //SELECT x.style, x.score/y.max_score FROM (SELECT style, score from RaceRanks WHERE username="source") as x, (SELECT style, MAX(score) AS max_score FROM RaceRanks GROUP BY style) as y WHERE x.style = y.style
+        //Do this, then divide each diff by max(diff) in js.  For duels, it will be a lot simpler since average is always 1k ?
+        //SELECT x.style, x.score/y.avg_score AS diff FROM (SELECT style, score from RaceRanks WHERE username="source") as x, (SELECT style, AVG(score) AS avg_score FROM RaceRanks GROUP BY style) as y WHERE x.style = y.style
+
+        //or SELECT style, percentilesum FROM RaceRanks WHERE username = "source"
+        
             //SELECT style, count FROM RaceRanks WHERE username = ? ORDER BY count DESC
-        //Same type of graph but for a breakdown of their duel styles
+        //Same type of graph but for a breakdown of their duel styles.. 
             //SELECT type, count FROM DuelRanks WHERE username = ? ORDER BY count DESC
         //Recent duels/races?
 
         //Show achivements
+
 
         //Show stats? 
             //Show last login, date created
@@ -54,6 +65,18 @@ $(document).ready(function () {
             //duel avg TS?
             //duel elo (nth place)?
 
+        //If we want to have a graph of their win/losses for each type with time as x axis, https://www.highcharts.com/demo/line-ajax ?
+        /* //if win value++ if loss value-- and graph value
+        select * from ( 
+        SELECT "win", type, end_time FROM LocalDuel WHERE winner = 'source'
+        UNION
+        SELECT "loss", type, end_time FROM LocalDuel WHERE loser = 'source')
+        ORDER BY end_time
+        */
+
+        //Show top/most active "recent" players?
+            //where end time > (now - 1 month) etc
+
         
     }
     else if(option=="ladder_duel"){
@@ -72,15 +95,11 @@ $(document).ready(function () {
 
     }
 
-
     // Handle minimalize left menu
     $('.left-nav-toggle a').on('click', function(event){
         event.preventDefault();
         $("body").toggleClass("nav-toggle");
     });
-
-
-
 
     // Hide all open sub nav menu list
     $('.nav-second').on('show.bs.collapse', function () {
@@ -125,8 +144,10 @@ function home(){
     var p1 = '<h1>Welcome to jaPRO Mod!</h1><p>It is a mod started by loda from modbase put together by raz0r and other jacoders with the security fixes. There are alot of features and new ideas taken from popular mods.</p>';
     var p2 = '<h4>What does jaPRO do for me?</h4><p>A better sabering environment from base, ranking system, lag compensation either using guns or force, tweaking current weapons for different effects, non abusive admin commands from JA+, voting system, 2 admin levels fullAdmin or junior. From FFA, TFFA and CTF gamemodes there are lots of things to toggle to get the server with no force or with force how you want to run it. Better client smoothing when you have the client installed in the japro directory.</p>';
     var p3 = '<h4>Why should I even bother using jaPRO?</h4><p>Those who maybe looking for another option other than running JA+ or any other mod which is old and can be crashed, DoS attacked or exploited.</p>';
-    var p4 = '<p><a class="btn btn-default btn-lg" href="https://github.com/videoP/jaPRO/raw/master/japro3.pk3" role="button">Download jaPRO Client</a></p>';
-    $("#main-content").html('<div class="container">'+p1+' <br> '+p2+' '+p3+' '+p4+'</div>');
+    var p4 = '<p><a class="btn btn-default btn-lg" href="https://github.com/videoP/jaPRO/raw/master/japro3.pk3" role="button">Download jaPRO Client</a> </p>';
+    var webmtest = '<p><video width="800" height="800" loop autoplay><source src="output.webm" type="video/mp4">Your browser does not support the video tag.</video></p>';
+    var webmtest2 = '<p><video width="800" height="800" loop autoplay><source src="output2.webm" type="video/mp4">Your browser does not support the video tag.</video></p>';
+    $("#main-content").html('<div class="container">'+p1+' <br> '+p2+' '+p3+' '+p4+' '+webmtest+' '+webmtest2+'</div>');
     $('.jk-nav li').removeClass("active");
     $('#menu_home').addClass("active");
 }
@@ -664,6 +685,7 @@ function ladder_race_count(){
                 data: data //RaceRankData? //Graph only entries where style is -1.  Graph username vs count.  
             }]
         });
+    });
 
     $('.jk-nav li').removeClass("active");
     $('#menu_race').addClass("active");
@@ -709,7 +731,7 @@ function player_duel_chart(){
     panel += '                          Duel Types';
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
-    panel += '                            <p>Most popular types.</p>';
+    panel += '                            <p>Favorite duel types.</p>';
     panel += '                            <div id="player_duel_count_chart">';
     panel += '                            </div>';
     panel += '                        </div>';
@@ -755,7 +777,7 @@ function player_duel_chart(){
             },
             series: [{
                 type: 'pie',
-                name: 'Duel count',
+                name: 'Strength',
                 data: data
             }]
         });

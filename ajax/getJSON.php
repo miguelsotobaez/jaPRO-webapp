@@ -1,5 +1,6 @@
 <?php
 require_once('../inc/db_connection.inc.php');
+date_default_timezone_set('EST');
 //require_once('../inc/session.inc.php');
 
 $option = $_POST["option"];

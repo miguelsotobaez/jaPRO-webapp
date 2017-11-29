@@ -176,7 +176,8 @@ switch ($option) {
 		$username = $_POST["player"];
 		$newArray = null;
 
-		$stmt = $db->prepare("SELECT type, count(*) AS count FROM LocalDuel WHERE (winner = :username OR loser = :username) GROUP BY type ORDER BY count DESC"); //Count, we should get elo instead i think
+		$stmt = $db->prepare("SELECT type, elo from (SELECT type, ROUND(winner_elo,0) AS elo, end_time FROM LocalDuel WHERE winner = :username GROUP BY type
+				UNION SELECT type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel WHERE loser = :username GROUP BY type) GROUP BY type ORDER BY elo DESC LIMIT 5");
 		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
 
 		$result = $stmt->execute();
@@ -184,9 +185,11 @@ switch ($option) {
 		$result->finalize();
 
 	    if($exists){
+			$min = min(array_column($exists, 'elo'));
 		    foreach ($exists as $key => $value) {
 		    	$type = DuelToString($value["type"]);
-		    	$newArray[]=array(0=>$type,1=>$value["count"]);
+		    	$strength = $value["elo"] - $min + 100; //Subtract smallest element..
+		    	$newArray[]=array(0=>$type,1=>$strength);
 		    }
 	    }
 
@@ -196,7 +199,6 @@ switch ($option) {
 	case "player_duel_graph":
 		$username = $_POST["player"];
 		$newArray = null;
-	    //$query ="SELECT end_time, CAST(winner_elo AS INT) AS winner_elo FROM LocalDuel WHERE winner = 'source' ORDER BY end_time ASC"; // This needs to also search for them as loser
 
 		//Should select type, and let client filter that.. should apply smoothing? 
 		$stmt = $db->prepare("SELECT end_time, CAST(winner_elo AS INT) AS elo FROM LocalDuel WHERE winner = :username AND type = 0 
@@ -223,7 +225,7 @@ switch ($option) {
 		$newArray = null;
 
 	   	$stmt = $db->prepare("SELECT x.style AS style, ROUND(x.score/y.avg_score, 0) AS diff FROM (SELECT style, score from RaceRanks WHERE username=:username) as x, 
-	    	(SELECT style, AVG(score) AS avg_score FROM RaceRanks GROUP BY style) as y WHERE x.style = y.style ORDER BY diff DESC");
+	    	(SELECT style, AVG(score) AS avg_score FROM RaceRanks GROUP BY style) as y WHERE x.style = y.style ORDER BY diff DESC LIMIT 5");
 		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
 
 		$result = $stmt->execute();

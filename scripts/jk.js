@@ -287,8 +287,8 @@ function ladder_duel_list(){
     panel += '              <p>Here you can see the registri of all saber duels in japro server.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_ladder_duel_list" width="100%" class="table table-striped table-hover">';
-    panel += '                      <thead><tr><th>Winner</th><th>Loser</th><th>Type</th><th>Winner Health</th><th data-hide="phone,table">Duration</th><th>Time</th></tr></thead>';
-    panel += '                      <tfoot><tr><th>Winner</th><th>Loser</th><th>Type</th><th>Winner Health</th><th data-hide="phone,table">Duration</th><th>Time</th></tr></tfoot>';
+    panel += '                      <thead><tr><th>Winner</th><th>Loser</th><th>Type</th><th>Winner Health</th><th data-hide="phone,table">Duration</th><th>Time</th><th>Odds</th></tr></thead>';
+    panel += '                      <tfoot><tr><th>Winner</th><th>Loser</th><th>Type</th><th>Winner Health</th><th data-hide="phone,table">Duration</th><th>Time</th><th>Odds</th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -322,7 +322,8 @@ function ladder_duel_list(){
                 { "data": "type" },
                 { "data": "winner_health" }, //This does not sort properly - x/y  format, sort by sum(x+y)
                 { "data": "duration" },
-                { "data": "end_time" }
+                { "data": "end_time" },
+                { "data": "odds" }
             ],
             initComplete: function () {            
                 this.api().columns([0, 1, 2]).every( function () { //This doesn't activate?

@@ -55,7 +55,7 @@ switch ($option) {
 
 	case "ladder_duel_list":
 		$newArray = null;
-	    $query ="SELECT winner, loser, type, winner_hp, winner_shield, duration, end_time 
+	    $query ="SELECT winner, loser, type, winner_hp, winner_shield, duration, end_time, ROUND(winner_TSSUM*100,0) AS odds
 	    		FROM LocalDuel 
 	    		ORDER BY end_time DESC";
 
@@ -67,7 +67,12 @@ switch ($option) {
 		    	$end_time = date('y-m-d H:i', $value["end_time"]);
 		    	$type = DuelToString($value["type"]);
 		    	$winner_health = $value["winner_hp"] . " / " . $value["winner_shield"];
-		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$type,"winner_health"=>$winner_health,"duration"=>$duration,"end_time"=>$end_time);
+		    	$odds = $value["odds"];
+		    	if ($odds < 15) //If low, highlight since it would be unexpected/rare ?
+		    		$odds =  "<b><font color='gold'>{$odds}%</font></b>";
+		    	else
+		    		$odds = "{$odds}%";
+		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$type,"winner_health"=>$winner_health,"duration"=>$duration,"end_time"=>$end_time,"odds"=>$odds);
 		    }
 	    }
 

@@ -17,11 +17,13 @@ switch ($option) {
 	    //$query ="SELECT username, type, ROUND(rank,0) AS rank, 100-ROUND(100*TSSUM/count, 0) AS TS, count FROM DuelRanks ORDER BY rank DESC";
 	    //$query = "SELECT winner, type, elo FROM (SELECT winner, type, ROUND(winner_elo,0) AS elo, end_time FROM LocalDuel UNION SELECT loser, type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel ORDER BY end_time ASC) 
 		//	GROUP BY winner, type ORDER BY elo DESC";
-		$query = "SELECT D1.username, type, elo, odds AS TS, count 
-			FROM (SELECT username, type, elo, odds FROM (SELECT winner AS username, type, ROUND(winner_elo,0) AS elo, odds, end_time FROM LocalDuel 
-			UNION SELECT loser AS username, type, ROUND(loser_elo,0) AS elo, odds, end_time FROM LocalDuel ORDER BY end_time ASC) GROUP BY username, type ORDER BY elo DESC) AS D1 
+		$query = "SELECT D1.username, type, elo, 100-ROUND(100*TS/count, 0) AS TS, count 
+			FROM (SELECT username, type, elo FROM (SELECT winner AS username, type, ROUND(winner_elo,0) AS elo, end_time FROM LocalDuel 
+			UNION SELECT loser AS username, type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel ORDER BY end_time ASC) GROUP BY username, type ORDER BY elo DESC) AS D1 
 			INNER JOIN (SELECT winner AS username2, loser AS username2, type AS type2, COUNT(*) AS count FROM LocalDuel GROUP BY username2, type2) AS D2
-			ON D1.username = D2.username2 AND D1.type = D2.type2";
+			ON D1.username = D2.username2 AND D1.type = D2.type2
+			INNER JOIN (SELECT winner AS username3, loser AS username3, type AS type3, SUM(ODDS) AS TS From LocalDuel GROUP BY username3, type3) AS D3
+			ON D1.username = D3.username3 AND D1.type = D3.type3";
 
 	    $arr = sql2arr($query);
 	    $count = 1;
@@ -30,7 +32,7 @@ switch ($option) {
 		    foreach ($arr as $key => $value) {
 
 		    	$type = DuelToString($value["type"]);
-		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"type"=>$type,"elo"=>$value["elo"],"TS"=>1); 
+		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"type"=>$type,"elo"=>$value["elo"],"TS"=>$value["TS"]); 
 		    	$count++;
 		    }
 	    }

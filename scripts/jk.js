@@ -194,8 +194,8 @@ function ladder_duel_rank(){
     panel += '              <p>This is the saber rank list, ordered by ELO.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_ladder_duel_rank" width="100%" class="table table-striped table-hover">';
-    panel += '                      <thead><tr><th>Position</th><th>Player</th><th>Type</th><th>Elo</th><th data-hide="phone,table">TS</th><th>Count</th></tr></thead>';
-    panel += '                      <tfoot><tr><th>Position</th><th>Player</th><th>Type</th><th>Elo</th><th data-hide="phone,table">TS</th><th>Count</th></tr></tfoot>';
+    panel += '                      <thead><tr><th>Position</th><th>Player</th><th>Type</th><th>Elo</th><th data-hide="phone,table"><label title="Average strength of opponent. A lower value means this player faces easier opponents.">TS</label></th><th>Count</th></tr></thead>';
+    panel += '                      <tfoot><tr><th>Position</th><th>Player</th><th>Type</th><th>Elo</th><th data-hide="phone,table"><label title="Average strength of opponent. A lower value means this player faces easier opponents.">TS</label></th><th>Count</th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';

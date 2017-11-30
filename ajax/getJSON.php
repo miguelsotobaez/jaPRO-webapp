@@ -17,9 +17,9 @@ switch ($option) {
 	    //$query ="SELECT username, type, ROUND(rank,0) AS rank, 100-ROUND(100*TSSUM/count, 0) AS TS, count FROM DuelRanks ORDER BY rank DESC";
 	    //$query = "SELECT winner, type, elo FROM (SELECT winner, type, ROUND(winner_elo,0) AS elo, end_time FROM LocalDuel UNION SELECT loser, type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel ORDER BY end_time ASC) 
 		//	GROUP BY winner, type ORDER BY elo DESC";
-		$query = "SELECT D1.username, type, elo, TSSUM, count 
-			FROM (SELECT username, type, elo, TSSUM FROM (SELECT winner AS username, type, ROUND(winner_elo,0) AS elo, winner_TSSUM AS TSSUM, end_time FROM LocalDuel 
-			UNION SELECT loser AS username, type, ROUND(loser_elo,0) AS elo, loser_TSSUM AS TSSUM, end_time FROM LocalDuel ORDER BY end_time ASC) GROUP BY username, type ORDER BY elo DESC) AS D1 
+		$query = "SELECT D1.username, type, elo, odds AS TS, count 
+			FROM (SELECT username, type, elo, odds FROM (SELECT winner AS username, type, ROUND(winner_elo,0) AS elo, odds, end_time FROM LocalDuel 
+			UNION SELECT loser AS username, type, ROUND(loser_elo,0) AS elo, odds, end_time FROM LocalDuel ORDER BY end_time ASC) GROUP BY username, type ORDER BY elo DESC) AS D1 
 			INNER JOIN (SELECT winner AS username2, loser AS username2, type AS type2, COUNT(*) AS count FROM LocalDuel GROUP BY username2, type2) AS D2
 			ON D1.username = D2.username2 AND D1.type = D2.type2";
 
@@ -55,7 +55,7 @@ switch ($option) {
 
 	case "ladder_duel_list":
 		$newArray = null;
-	    $query ="SELECT winner, loser, type, winner_hp, winner_shield, duration, end_time, ROUND(winner_TSSUM*100,0) AS odds
+	    $query ="SELECT winner, loser, type, winner_hp, winner_shield, duration, end_time, ROUND(odds*100,0) AS odds
 	    		FROM LocalDuel 
 	    		ORDER BY end_time DESC";
 

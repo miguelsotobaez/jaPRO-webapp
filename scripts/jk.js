@@ -91,6 +91,8 @@ $(document).ready(function () {
         ladder_race_count();
     }else if(option=="maps"){
         maps();
+    }else if(option=="servers"){
+        servers();
     }else{
 
     }
@@ -227,8 +229,12 @@ function ladder_duel_rank(){
             "data": data,
             "columns": [
                 { "data": null, defaultContent: "N/A" }, //How get position for this
-                { "data": "username" },
-                { "data": "type" },
+                { "data": "username", "render": 
+                    function ( data, type, row, meta ) { 
+                        return '<a href=player.php?p='+encodeURIComponent(data)+'>'+data+'</a>'; }},
+                { "data": "type", "render": 
+                    function ( data, type, row, meta ) { 
+                        return DuelToString(data) }},
                 { "data": "elo" },
                 { "data": "TS" },
                 { "data": "count" }
@@ -251,7 +257,7 @@ function ladder_duel_rank(){
             "aaSorting": [[ 1, 'asc' ]], // ?
 
             initComplete: function () {
-                this.api().columns([1, 2]).every( function () {
+                this.api().columns([1]).every( function () {
                     var column = this;
                     var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
                         .appendTo( $(column.footer()).empty() )
@@ -260,11 +266,27 @@ function ladder_duel_rank(){
                                 $(this).val()
                             );
                             column
-                                .search( val ? '^'+val+'$' : '', true, false )
+                                search( val ? '^'+val+'$' : '', true, false ) //IDK
                                 .draw();
                         } );
                     column.data().unique().sort().each( function ( d, j ) {
                         select.append( '<option value="'+d+'">'+d+'</option>' )
+                    } );
+                } );
+                this.api().columns([2]).every( function () {
+                    var column = this;
+                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                        .appendTo( $(column.footer()).empty() )
+                        .on( 'change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+                            column
+                                .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
+                                .draw();
+                        } );
+                    column.data().unique().sort().each( function ( d, j ) {
+                        select.append( '<option value="'+(d)+'">'+DuelToString(d)+'</option>' )
                     } );
                 } );
             }
@@ -317,16 +339,27 @@ function ladder_duel_list(){
             "deferRender": true,
             "data": data,
             "columns": [
-                { "data": "winner" },
-                { "data": "loser" },
-                { "data": "type" },
+                { "data": "winner", "render": 
+                    function ( data, type, row, meta ) { 
+                        return '<a href=player.php?p='+encodeURIComponent(data)+'> '+data+'</a>'; }},
+                { "data": "loser", "render": 
+                    function ( data, type, row, meta ) { 
+                        return '<a href=player.php?p='+encodeURIComponent(data)+'> '+data+'</a>'; }},
+                { "data": "type", "render": 
+                    function ( data, type, row, meta ) { 
+                        return DuelToString(data) }},
                 { "data": "winner_health" }, //This does not sort properly - x/y  format, sort by sum(x+y)
                 { "data": "duration" },
                 { "data": "end_time" },
-                { "data": "odds" }
+                { "data": "odds", "render": 
+                    function ( data, type, row, meta ) {
+                    if (data <= 15) 
+                        return '<b><font color="gold">'+data+'%</font></b>'; 
+                    else 
+                        return data+'%'; }}
             ],
             initComplete: function () {            
-                this.api().columns([0, 1, 2]).every( function () { //This doesn't activate?
+                this.api().columns([0, 1]).every( function () { //This doesn't activate?
                     var column = this;
                     var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
                         .appendTo( $(column.footer()).empty() )
@@ -340,6 +373,22 @@ function ladder_duel_list(){
                         } );
                     column.data().unique().sort().each( function ( d, j ) {
                         select.append( '<option value="'+d+'">'+d+'</option>' )
+                    } );
+                } );
+                this.api().columns([2]).every( function () { //This doesn't activate?
+                    var column = this;
+                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                        .appendTo( $(column.footer()).empty() )
+                        .on( 'change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+                            column
+                                .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
+                                .draw();
+                        } );
+                    column.data().unique().sort().each( function ( d, j ) {
+                        select.append( '<option value="'+d+'">'+DuelToString(d)+'</option>' )
                     } );
                 } );
             }
@@ -407,7 +456,7 @@ function ladder_duel_count(){
             },
             series: [{
                 type: 'pie',
-                name: 'Race count',
+                name: 'Duel count',
                 data: data //DuelRankData?
             }]
         });
@@ -462,8 +511,8 @@ function ladder_race_rank(){
     panel += '              <p>This is the race rank.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_ladder_race_rank" width="100%" class="table table-striped table-hover">';
-    panel += '                      <thead><tr><th>Position</th><th>Username</th><th>Style</th><th>Score</th><th>Avgerage Score</th><th>Average Percentile</th><th>Golds</th><th>Silvers</th><th>Bronzes</th><th>Count</th></tr></thead>';
-    panel += '                      <tfoot><tr><th>Position</th><th>Username</th><th>Style</th><th>Score</th><th>Avgerage Score</th><th>Average Percentile</th><th>Golds</th><th>Silvers</th><th>Bronzes</th><th>Count</th></tr></tfoot>';
+    panel += '                      <thead><tr><th>Position</th><th>Username</th><th>Style</th><th>Score</th><th>Average Score</th><th>Average Percentile</th><th>Golds</th><th>Silvers</th><th>Bronzes</th><th>Count</th></tr></thead>';
+    panel += '                      <tfoot><tr><th>Position</th><th>Username</th><th>Style</th><th>Score</th><th>Average Score</th><th>Average Percentile</th><th>Golds</th><th>Silvers</th><th>Bronzes</th><th>Count</th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -494,8 +543,12 @@ function ladder_race_rank(){
             "data": data,
             "columns": [
                 { "data": null, defaultContent: "N/A" }, //How get position for this
-                { "data": "username" },
-                { "data": "style" },
+                { "data": "username", "render": 
+                    function ( data, type, row, meta ) { 
+                        return '<a href=player.php?p='+encodeURIComponent(data)+'> '+data+'</a>'; }},
+                { "data": "style", "render": 
+                    function ( data, type, row, meta ) { 
+                        return RaceToString(data) }},
                 { "data": "score" },
                 { "data": "avg_score" },
                 { "data": "avg_percentile" },
@@ -521,7 +574,7 @@ function ladder_race_rank(){
             ],
             "aaSorting": [[ 1, 'asc' ]],
             initComplete: function () {            
-                this.api().columns([1, 2, 3]).every( function () {
+                this.api().columns([1]).every( function () {
                     var column = this;
                     var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
                         .appendTo( $(column.footer()).empty() )
@@ -535,6 +588,22 @@ function ladder_race_rank(){
                         } );
                     column.data().unique().sort().each( function ( d, j ) {
                         select.append( '<option value="'+d+'">'+d+'</option>' )
+                    } );
+                } );
+                this.api().columns([2]).every( function () {
+                    var column = this;
+                    var select = $('<select class="filter form-control input-sm"></select>') //Why does jetpack and swoop show up in middle - because it sorts by string not numeric? Why does it not filter by all on pageload even though its selected
+                        .appendTo( $(column.footer()).empty() )
+                        .on( 'change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+                            column
+                                .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
+                                .draw();
+                        } );
+                    column.data().unique().sort().each( function ( d, j ) {
+                        select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
                     } );
                 } );
             }
@@ -571,37 +640,53 @@ function ladder_race_list(){
         var data = null;
         var item = "ladder_race_list";
         var url = "ajax/getJSON.php";
-        $.ajax({
-            type: "POST",
-            url: url,
-            dataType: "JSON",
-            async: false,
-            data: { option: item },
-            success: function(res) {
-                data = res;
-            }
-        });
+
+        /*if(localStorage.getItem("dataCache")) { //We also have to check if its up to date? hmm.
+            data = JSON.parse(localStorage.getItem("dataCache"));
+        } else*/ {
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: "JSON",
+                async: false,
+                data: { option: item },
+                success: function(res) {
+                    data = res;
+                    localStorage.setItem("dataCache", JSON.stringify(res));
+                }
+            });
+        }
 
         $('#datatable_ladder_race_list').DataTable( {
             "order": [[ 6, "desc" ]],
             "deferRender": true,
             "data": data,
             "columns": [
-                { "data": "rank" },
-                { "data": "username" },
-                { "data": "coursename" },
-                { "data": "style" },
+                { "data": "rank", "render": 
+                    function ( data, type, row, meta ) {
+                    if (data == 1) 
+                        return '<b><font color="gold">1</font></b>'; 
+                    else 
+                        return data; }},
+                { "data": "username", "render": 
+                    function ( data, type, row, meta ) { 
+                        return '<a href=player.php?p='+encodeURIComponent(data)+'> '+data+'</a>'; }},
+                { "data": "coursename" }, 
+                { "data": "style", "render": 
+                    function ( data, type, row, meta ) { 
+                        return RaceToString(data) }},
                 { "data": "topspeed" },
                 { "data": "average" },
                 { "data": "date" },
                 { "data": "duration" }
-            ],
+            ],  
+
             "columnDefs": [
               { "sType": "num-html", "aTargets": [ 0 ] } //numbers-html plugin
               //{ "sType": "numeric", "aTargets": [ 7 ] } //time-uni sort plugin
             ],
-            initComplete: function () {            
-                this.api().columns([1, 2, 3]).every( function () {
+            initComplete: function () {         
+                this.api().columns([1, 2]).every( function () {
                     var column = this;
                     var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
                         .appendTo( $(column.footer()).empty() )
@@ -615,6 +700,22 @@ function ladder_race_list(){
                         } );
                     column.data().unique().sort().each( function ( d, j ) {
                         select.append( '<option value="'+d+'">'+d+'</option>' )
+                    } );
+                } );
+                this.api().columns([3]).every( function () {
+                    var column = this;
+                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                        .appendTo( $(column.footer()).empty() )
+                        .on( 'change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+                            column
+                                .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
+                                .draw();
+                        } );
+                    column.data().unique().sort().each( function ( d, j ) {
+                        select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
                     } );
                 } );
             }
@@ -965,6 +1066,19 @@ function maps(){
         $('#menu_maps').addClass("active");
 }
 
+function servers(){
+        HTML='<div class="row">';
+        HTML+='<div class="col-md-4">';
+        HTML+='  <h2>..a</h2>';
+        HTML+='  <p>..b</p>';
+        HTML+='</div>';
+        HTML+='</div>';
+        $("#main-content").html(HTML);
+
+        $('.jk-nav li').removeClass("active");
+        $('#menu_maps').addClass("active");
+}
+
 function DuelToString(type) {
   typeStr = "Unknown";
   if (type == 0)
@@ -1008,31 +1122,73 @@ function DuelToString(type) {
 
 function RaceToString(val){
     style="Unknown";
+    if (val==-1)
+        style="All";
     if (val==0)
-        style="0-SIEGE";
+        style="Siege";
     else if(val==1)
-        style="1-JKA";
+        style="JKA";
     else if(val==2)
-        style="2-QW";
+        style="QW";
     else if(val==3)
-        style="3-CPM";
+        style="CPM";
     else if(val==4)
-        style="4-Q3";
+        style="Q3";
     else if(val==5)
-        style="5-PJK";
+        style="PJK";
     else if(val==6)
-        style="6-WSW";
+        style="WSW";
     else if(val==7)
-        style="7-RJQ3";
+        style="RJQ3";
     else if(val==8)
-        style="8-RJCPM";
+        style="RJCPM";
     else if(val==9)
-        style="9-SWOOP";
+        style="Swoop";
     else if(val==10)
-        style="10-JETPACK";
+        style="Jetpack";
     else if(val==11)
-        style="11-SPEED";
+        style="Speed";
     else if(val==12)
-        style="12-SP";
+        style="SP";
     return style;
 }
+
+
+function TimeToString(duration_ms) {
+    timeStr = duration_ms;
+
+
+
+    return timeStr;
+}
+
+/*
+function TimeToString(duration_ms) { //loda fixme... has to be a standard way to do this
+  if (duration_ms >= (60*60*1000)) {
+    hours = (int)((duration_ms / (1000*60*60)) % 24);
+    minutes = (int)((duration_ms / (1000*60)) % 60);
+    seconds = (int)(duration_ms / 1000) % 60;
+    milliseconds = duration_ms % 1000; 
+
+    //minutes = sprintf("%02d", minutes);
+    //seconds = sprintf("%02d", seconds );
+    //milliseconds = sprintf("%03d", milliseconds );
+
+    timeStr = hours+":"+minutes+":"+seconds+"."+milliseconds;
+  }
+  else if (duration_ms >= (60*1000)) {
+    minutes = (int)((duration_ms / (1000*60)) % 60);
+    seconds = (int)(duration_ms / 1000) % 60;
+    milliseconds = duration_ms % 1000; 
+
+    //seconds = sprintf("%02d", $seconds );
+    //milliseconds = sprintf("%03d", $milliseconds );
+
+    timeStr = minutes+":"+seconds+"."+milliseconds;
+  }
+  else 
+    timeStr = number_format(duration_ms * 0.001, 3);
+    timeStr = duration_ms;
+  return timeStr;
+}
+*/

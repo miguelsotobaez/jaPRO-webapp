@@ -26,14 +26,9 @@ switch ($option) {
 			ON D1.username = D3.username3 AND D1.type = D3.type3 ORDER BY elo desc";
 
 	    $arr = sql2arr($query);
-	    $count = 1;
-
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-
-		    	$type = DuelToString($value["type"]);
-		    	$newArray[]=array("position"=>$count,"count"=>$value["count"],"username"=>$value["username"],"type"=>$type,"elo"=>$value["elo"],"TS"=>$value["TS"]); 
-		    	$count++;
+		    	$newArray[]=array("count"=>$value["count"],"username"=>$value["username"],"type"=>$value["type"],"elo"=>$value["elo"],"TS"=>$value["TS"]); 
 		    }
 	    }
 
@@ -45,7 +40,6 @@ switch ($option) {
 	    $query ="SELECT username, SUM(count) AS count FROM DuelRanks GROUP BY username ORDER BY count DESC";
 
 	    $arr = sql2arr($query);
-
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 		    	$newArray[]=array(0=>$value["username"],1=>$value["count"]);
@@ -62,19 +56,9 @@ switch ($option) {
 	    		ORDER BY end_time DESC";
 
 	    $arr = sql2arr($query);
-
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$duration = date("i:s", $value["duration"] / 1000);
-		    	$end_time = date('y-m-d H:i', $value["end_time"]);
-		    	$type = DuelToString($value["type"]);
-		    	$winner_health = $value["winner_hp"] . " / " . $value["winner_shield"];
-		    	$odds = $value["odds"];
-		    	if ($odds < 15) //If low, highlight since it would be unexpected/rare ?
-		    		$odds =  "<b><font color='gold'>{$odds}%</font></b>";
-		    	else
-		    		$odds = "{$odds}%";
-		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$type,"winner_health"=>$winner_health,"duration"=>$duration,"end_time"=>$end_time,"odds"=>$odds);
+		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$value["type"],"winner_health"=>($value["winner_hp"] . " / " . $value["winner_shield"]),"duration"=>TimeToString($value["duration"]),"end_time"=>date('y-m-d H:i', $value["end_time"]),"odds"=>$value["odds"]);
 		    }
 	    }
 
@@ -114,13 +98,9 @@ switch ($option) {
 				//From RaceRanks WHERE score > 10 - to cut out the useless crap, if it really is affecting pageload, but then we cant trust distinct username/style(?) to be complete for other dropdowns
 
 	    $arr = sql2arr($query);
-	    $count = 1;
-
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$style = StyleToString($value["style"]);
-		    	$newArray[]=array("username"=>$value["username"],"position"=>$count,"style"=>$style,"score"=>$value["score_sum"],"avg_score"=>$value["avg_score"],"avg_percentile"=>$value["avg_percentile"],"avg_rank"=>$value["avg_rank"],"golds"=>$value["golds_sum"],"silvers"=>$value["silvers_sum"],"bronzes"=>$value["bronzes_sum"],"count"=>$value["count_sum"]); 
-		    	$count++;
+		    	$newArray[]=array("username"=>$value["username"],"style"=>$value["style"],"score"=>$value["score_sum"],"avg_score"=>$value["avg_score"],"avg_percentile"=>$value["avg_percentile"],"avg_rank"=>$value["avg_rank"],"golds"=>$value["golds_sum"],"silvers"=>$value["silvers_sum"],"bronzes"=>$value["bronzes_sum"],"count"=>$value["count_sum"]); 
 		    }
 	    }
 
@@ -132,7 +112,6 @@ switch ($option) {
 	    $query ="SELECT username, SUM(count) AS count FROM RaceRanks GROUP BY username ORDER BY count DESC";
 
 	    $arr = sql2arr($query);
-
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 		    	$newArray[]=array(0=>$value["username"],1=>$value["count"]);
@@ -147,7 +126,6 @@ switch ($option) {
 	    $query = "SELECT DISTINCT coursename FROM LocalRun";
 
 	    $arr = sql2arr($query);
-
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 		    	$newArray[]=array(0=>$value["coursename"]);
@@ -162,22 +140,16 @@ switch ($option) {
 		$query = "SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY end_time DESC";
 
 		$arr = sql2arr($query);
-
 		if($arr) {
 		    foreach ($arr as $key => $value) {
-		    	$duration_ms = TimeToString($value["duration_ms"]);
-		    	$style = StyleToString($value["style"]);
-		    	$demoStyle = StyleToDemoString($value["style"]);
-		    	$coursenameCleaned = str_replace(" ","",$value["coursename"]); //Remove the spaces
-		    	$username = $value["username"];
+			    $demoStyle = StyleToDemoString($value["style"]);
+				$coursenameCleaned = urlencode(str_replace(" ","",$value["coursename"])); //Remove the spaces
+				$username = urlencode($value["username"]);
 		    	$end_time = date('y-m-d H:i', $value["end_time"]);
-		    	$date = "<a href='../races/{$username}/{$username}-{$coursenameCleaned}-{$demoStyle}.dm_26'>{$end_time}</a>";
-		    	$duration = "<td align='right'>{$duration_ms}</td>"; //Why doesn't this work
-		    	$rank = $value["rank"];
-		    	if ($rank == 1)
-		    		$rank =  "<b><font color='gold'>1</font></b>";
+				$date = "<a href='../races/{$username}/{$username}-{$coursenameCleaned}-{$demoStyle}.dm_26'>{$end_time}</a>";
+				$duration = "<td align='right'>" . TimeToString($value["duration_ms"]) . "</td>"; //Why doesn't this work
 
-		    	$newArray[]=array("rank"=>$rank,"username"=>$username,"coursename"=>$value["coursename"],"duration"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$style,"date"=>$date);
+				$newArray[]=array("rank"=>$value["rank"],"username"=>$value["username"],"coursename"=>$value["coursename"],"duration"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$value["style"],"date"=>$date);
 		    }
 		}
 		
@@ -192,7 +164,6 @@ switch ($option) {
 				UNION
 				SELECT type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel WHERE loser = :username GROUP BY type) GROUP BY type ORDER BY elo DESC LIMIT 5");
 		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
-
 		$result = $stmt->execute();
 		$exists = sql2arr2($result);
 		$result->finalize();
@@ -219,7 +190,6 @@ switch ($option) {
 			select end_time, CAST(loser_elo AS INT) AS elo FROM LocalDuel WHERE loser = :username AND type = 0
 			ORDER BY end_time ASC");
 		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
-
 		$result = $stmt->execute();
 		$exists = sql2arr2($result);
 		$result->finalize();
@@ -240,7 +210,6 @@ switch ($option) {
 	   	$stmt = $db->prepare("SELECT x.style AS style, ROUND(x.score/y.avg_score, 0) AS diff FROM (SELECT style, score from RaceRanks WHERE username=:username) as x, 
 	    	(SELECT style, AVG(score) AS avg_score FROM RaceRanks GROUP BY style) as y WHERE x.style = y.style ORDER BY diff DESC LIMIT 5");
 		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
-
 		$result = $stmt->execute();
 		$exists = sql2arr2($result);
 		$result->finalize();
@@ -259,39 +228,6 @@ switch ($option) {
 
 echo $json;
 $db->close();
-
-function StyleToString($val){
-	$style="UNKNOWN";
-	if($val==-1)
-		$style="-1-All Styles";
-	if($val==0)
-		$style="0-SIEGE";
-	else if($val==1)
-		$style="1-JKA";
-	else if($val==2)
-		$style="2-QW";
-	else if($val==3)
-		$style="3-CPM";
-	else if($val==4)
-		$style="4-Q3";
-	else if($val==5)
-		$style="5-PJK";
-	else if($val==6)
-		$style="6-WSW";
-	else if($val==7)
-		$style="7-RJQ3";
-	else if($val==8)
-		$style="8-RJCPM";
-	else if($val==9)
-		$style="9-SWOOP";
-	else if($val==10)
-		$style="10-JETPACK";
-	else if($val==11)
-		$style="11-SPEED";
-	else if($val==12)
-		$style="12-SP";
-	return $style;
-}
 
 function StyleToDemoString($val){
 	$style="UNKNOWN";
@@ -324,73 +260,32 @@ function StyleToDemoString($val){
 	return $style;
 }
 
-function DuelToString($type) {
-  $typeStr = "Unknown";
-  if ($type == 0)
-    $typeStr = "Saber";
-  else if ($type == 1)
-    $typeStr =  "Force";
-  else if ($type == 4)
-    $typeStr =  "Melee";
-  else if ($type == 6)
-    $typeStr =  "Pistol";
-  else if ($type == 7)
-    $typeStr =  "Blaster";
-  else if ($type == 8)
-    $typeStr =  "Sniper";
-  else if ($type == 9)
-    $typeStr =  "Bowcaster";
-  else if ($type == 10)
-    $typeStr =  "Repeater";
-  else if ($type == 11)
-    $typeStr =  "Demp2";
-  else if ($type == 12)
-    $typeStr =  "Flechette";
-  else if ($type == 13)
-    $typeStr =  "Rocket";
-  else if ($type == 14)
-    $typeStr =  "Thermal";
-  else if ($type == 15)
-    $typeStr =  "Trip mine";
-  else if ($type == 16)
-    $typeStr =  "Det pack";
-  else if ($type == 17)
-    $typeStr =  "Concussion";
-  else if ($type == 18)
-    $typeStr =  "Bryar pistol";
-  else if ($type == 19)
-    $typeStr =  "Stun baton";
-  else if ($type == 20)
-    $typeStr =  "All weapons";
-  return $typeStr;
-}
+function TimeToString($duration_ms) { //loda fixme... has to be a standard way to do this
+	if ($duration_ms >= (60*60*1000)) {
+    	$hours = (int)(($duration_ms / (1000*60*60)) % 24);
+    	$minutes = (int)(($duration_ms / (1000*60)) % 60);
+    	$seconds = (int)($duration_ms / 1000) % 60;
+    	$milliseconds = $duration_ms % 1000; 
 
-function TimeToSTring($duration_ms) { //loda fixme... has to be a standard way to do this
-  if ($duration_ms >= (60*60*1000)) {
-    $hours = (int)(($duration_ms / (1000*60*60)) % 24);
-    $minutes = (int)(($duration_ms / (1000*60)) % 60);
-    $seconds = (int)($duration_ms / 1000) % 60;
-    $milliseconds = $duration_ms % 1000; 
+    	$minutes = sprintf("%02d", $minutes);
+    	$seconds = sprintf("%02d", $seconds );
+    	$milliseconds = sprintf("%03d", $milliseconds );
 
-    $minutes = sprintf("%02d", $minutes);
-    $seconds = sprintf("%02d", $seconds );
-    $milliseconds = sprintf("%03d", $milliseconds );
+    	$timeStr = "$hours:$minutes:$seconds.$milliseconds";
+	}
+  	else if ($duration_ms >= (60*1000)) {
+    	$minutes = (int)(($duration_ms / (1000*60)) % 60);
+    	$seconds = (int)($duration_ms / 1000) % 60;
+    	$milliseconds = $duration_ms % 1000; 
 
-    $timeStr = "$hours:$minutes:$seconds.$milliseconds";
-  }
-  else if ($duration_ms >= (60*1000)) {
-    $minutes = (int)(($duration_ms / (1000*60)) % 60);
-    $seconds = (int)($duration_ms / 1000) % 60;
-    $milliseconds = $duration_ms % 1000; 
+    	$seconds = sprintf("%02d", $seconds );
+    	$milliseconds = sprintf("%03d", $milliseconds );
 
-    $seconds = sprintf("%02d", $seconds );
-    $milliseconds = sprintf("%03d", $milliseconds );
-
-    $timeStr = "$minutes:$seconds.$milliseconds";
-  }
-  else 
-    $timeStr = number_format($duration_ms * 0.001, 3);
-  return $timeStr;
+    	$timeStr = "$minutes:$seconds.$milliseconds";
+  	}
+ 	else 
+    	$timeStr = number_format($duration_ms * 0.001, 3);
+  	return $timeStr;
 }
 
 ?>

@@ -58,7 +58,7 @@ switch ($option) {
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$value["type"],"winner_health"=>($value["winner_hp"] . " / " . $value["winner_shield"]),"duration"=>TimeToString($value["duration"]),"end_time"=>date('y-m-d H:i', $value["end_time"]),"odds"=>$value["odds"]);
+		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$value["type"],"winner_health"=>($value["winner_hp"] . " / " . $value["winner_shield"]),"duration"=>$value["duration"],"end_time"=>date('y-m-d H:i', $value["end_time"]),"odds"=>$value["odds"]);
 		    }
 	    }
 
@@ -147,9 +147,8 @@ switch ($option) {
 				$username = urlencode($value["username"]);
 		    	$end_time = date('y-m-d H:i', $value["end_time"]);
 				$date = "<a href='../races/{$username}/{$username}-{$coursenameCleaned}-{$demoStyle}.dm_26'>{$end_time}</a>";
-				$duration = "<td align='right'>" . TimeToString($value["duration_ms"]) . "</td>"; //Why doesn't this work
 
-				$newArray[]=array("rank"=>$value["rank"],"username"=>$value["username"],"coursename"=>$value["coursename"],"duration"=>$duration,"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$value["style"],"date"=>$date);
+				$newArray[]=array("rank"=>$value["rank"],"username"=>$value["username"],"coursename"=>$value["coursename"],"duration"=>$value["duration_ms"],"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$value["style"],"date"=>$date);
 		    }
 		}
 		
@@ -258,34 +257,6 @@ function StyleToDemoString($val){
 	else if($val==12)
 		$style="sp";
 	return $style;
-}
-
-function TimeToString($duration_ms) { //loda fixme... has to be a standard way to do this
-	if ($duration_ms >= (60*60*1000)) {
-    	$hours = (int)(($duration_ms / (1000*60*60)) % 24);
-    	$minutes = (int)(($duration_ms / (1000*60)) % 60);
-    	$seconds = (int)($duration_ms / 1000) % 60;
-    	$milliseconds = $duration_ms % 1000; 
-
-    	$minutes = sprintf("%02d", $minutes);
-    	$seconds = sprintf("%02d", $seconds );
-    	$milliseconds = sprintf("%03d", $milliseconds );
-
-    	$timeStr = "$hours:$minutes:$seconds.$milliseconds";
-	}
-  	else if ($duration_ms >= (60*1000)) {
-    	$minutes = (int)(($duration_ms / (1000*60)) % 60);
-    	$seconds = (int)($duration_ms / 1000) % 60;
-    	$milliseconds = $duration_ms % 1000; 
-
-    	$seconds = sprintf("%02d", $seconds );
-    	$milliseconds = sprintf("%03d", $milliseconds );
-
-    	$timeStr = "$minutes:$seconds.$milliseconds";
-  	}
- 	else 
-    	$timeStr = number_format($duration_ms * 0.001, 3);
-  	return $timeStr;
 }
 
 ?>

@@ -26,6 +26,9 @@ require_once('inc/option.inc.php');
                 <li id="menu_maps">
                     <a href="?option=maps">Maps</a>
                 </li>
+                <li id="menu_servers">
+                    <a href="?option=servers">Servers</a>
+                </li>
                 
                 <li class="nav-category">
                     Stats

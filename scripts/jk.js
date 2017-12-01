@@ -349,7 +349,9 @@ function ladder_duel_list(){
                     function ( data, type, row, meta ) { 
                         return DuelToString(data) }},
                 { "data": "winner_health" }, //This does not sort properly - x/y  format, sort by sum(x+y)
-                { "data": "duration" },
+                { "data": "duration", "render": 
+                    function ( data, type, row, meta ) { 
+                        return DuelTimeToString(data) }},
                 { "data": "end_time" },
                 { "data": "odds", "render": 
                     function ( data, type, row, meta ) {
@@ -678,7 +680,9 @@ function ladder_race_list(){
                 { "data": "topspeed" },
                 { "data": "average" },
                 { "data": "date" },
-                { "data": "duration" }
+                { "data": "duration", "render": 
+                    function ( data, type, row, meta ) { 
+                        return '<td style="text-align: right;">'+RaceTimeToString(data)+'<td>' }} //Why doesnt this work..
             ],  
 
             "columnDefs": [
@@ -1153,42 +1157,27 @@ function RaceToString(val){
     return style;
 }
 
-
-function TimeToString(duration_ms) {
-    timeStr = duration_ms;
-
-
-
-    return timeStr;
+function RaceTimeToString(duration_ms) {
+    var milliseconds = duration_ms % 1000;
+    var seconds = Math.floor((duration_ms / 1000) % 60);
+    var minutes = Math.floor((duration_ms / (60 * 1000)) % 60);
+    var hours = Math.floor(duration_ms / (60 * 60 * 1000));
+          
+    if (hours)
+            return hours+":"+((minutes<10) ? ("0"+minutes) : (minutes))+":"+seconds+"."+milliseconds;
+    if (minutes)
+            return minutes+":"+((seconds<10) ? ("0"+seconds) : (seconds))+"."+milliseconds;
+    return seconds+"."+milliseconds;
 }
 
-/*
-function TimeToString(duration_ms) { //loda fixme... has to be a standard way to do this
-  if (duration_ms >= (60*60*1000)) {
-    hours = (int)((duration_ms / (1000*60*60)) % 24);
-    minutes = (int)((duration_ms / (1000*60)) % 60);
-    seconds = (int)(duration_ms / 1000) % 60;
-    milliseconds = duration_ms % 1000; 
-
-    //minutes = sprintf("%02d", minutes);
-    //seconds = sprintf("%02d", seconds );
-    //milliseconds = sprintf("%03d", milliseconds );
-
-    timeStr = hours+":"+minutes+":"+seconds+"."+milliseconds;
-  }
-  else if (duration_ms >= (60*1000)) {
-    minutes = (int)((duration_ms / (1000*60)) % 60);
-    seconds = (int)(duration_ms / 1000) % 60;
-    milliseconds = duration_ms % 1000; 
-
-    //seconds = sprintf("%02d", $seconds );
-    //milliseconds = sprintf("%03d", $milliseconds );
-
-    timeStr = minutes+":"+seconds+"."+milliseconds;
-  }
-  else 
-    timeStr = number_format(duration_ms * 0.001, 3);
-    timeStr = duration_ms;
-  return timeStr;
+function DuelTimeToString(duration_ms) {
+    var seconds = Math.floor((duration_ms / 1000) % 60);
+    var minutes = Math.floor((duration_ms / (60 * 1000)) % 60);
+    var hours = Math.floor(duration_ms / (60 * 60 * 1000));
+          
+    if (hours)
+            return hours+":"+((minutes<10) ? ("0"+minutes) : (minutes))+":"+seconds;
+    if (minutes)
+            return minutes+":"+((seconds<10) ? ("0"+seconds) : (seconds));
+    return seconds;
 }
-*/

@@ -82,6 +82,9 @@ require_once('inc/option.inc.php');
 <script src="vendor/highcharts/js/highcharts.js"></script>
 <script src="scripts/highcharts.jk.theme.js"></script>
 
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/js/bootstrap-select.min.js"></script>
+
+
 <!-- App scripts -->
 <script src="scripts/jk.js"></script>
 

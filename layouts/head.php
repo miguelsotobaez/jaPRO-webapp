@@ -19,4 +19,7 @@
     <link rel="stylesheet" href="styles/pe-icons/helper.css"/>
     <link rel="stylesheet" href="styles/stroke-icons/style.css"/>
     <link rel="stylesheet" href="styles/style.css">
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/css/bootstrap-select.min.css" />
+
 </head>

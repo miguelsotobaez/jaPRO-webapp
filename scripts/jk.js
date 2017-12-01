@@ -10,6 +10,9 @@ $(document).ready(function () {
     //ladder_race
     //download
 
+
+    $('.selectpicker').selectpicker();
+
     if(option=="home"){
         home();
     }else if(option=="ladder_player"){
@@ -259,7 +262,8 @@ function ladder_duel_rank(){
             initComplete: function () {
                 this.api().columns([1]).every( function () {
                     var column = this;
-                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                    //var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                    var select = $('<select class="filter form-control input-sm selectpicker" data-live-search="true"><option value="">Show all</option></select>')
                         .appendTo( $(column.footer()).empty() )
                         .on( 'change', function () {
                             var val = $.fn.dataTable.util.escapeRegex(

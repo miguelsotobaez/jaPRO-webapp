@@ -17,11 +17,13 @@ switch ($option) {
 	    //$query ="SELECT username, type, ROUND(rank,0) AS rank, 100-ROUND(100*TSSUM/count, 0) AS TS, count FROM DuelRanks ORDER BY rank DESC";
 	    //$query = "SELECT winner, type, elo FROM (SELECT winner, type, ROUND(winner_elo,0) AS elo, end_time FROM LocalDuel UNION SELECT loser, type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel ORDER BY end_time ASC) 
 		//	GROUP BY winner, type ORDER BY elo DESC";
-		$query = "SELECT D1.username, type, elo, 100-ROUND(100*TS/count, 0) AS TS, count 
-			FROM (SELECT username, type, elo FROM (SELECT winner AS username, type, ROUND(winner_elo,0) AS elo, end_time FROM LocalDuel 
-			UNION SELECT loser AS username, type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel ORDER BY end_time ASC) GROUP BY username, type ORDER BY elo DESC) AS D1 
-			INNER JOIN (SELECT winner AS username2, loser AS username2, type AS type2, COUNT(*) AS count, SUM(ODDS) AS TS FROM LocalDuel GROUP BY username2, type2) AS D2
-			ON D1.username = D2.username2 AND D1.type = D2.type2";
+		$query = "SELECT D1.username, type, elo, 100-ROUND(100*(win_ts + loss_ts)/(win_count+loss_count), 0) AS TS, win_count+loss_count AS count FROM 
+			((SELECT username, type, elo FROM ((SELECT winner AS username, type, ROUND(winner_elo,0) AS elo, end_time FROM LocalDuel 
+			UNION ALL SELECT loser AS username, type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel ORDER BY end_time ASC)) GROUP BY username, type ORDER BY elo DESC) AS D1 
+			INNER JOIN (SELECT winner AS username2, type AS type2, COUNT(*) AS win_count, SUM(odds) AS win_ts FROM LocalDuel GROUP BY username2, type2) AS D2
+			ON D1.username = D2.username2 AND D1.type = D2.type2)
+			INNER JOIN (SELECT loser AS username3, type AS type3, COUNT(*) AS loss_count, SUM(1-odds) AS loss_ts FROM LocalDuel GROUP BY username3, type3) AS D3
+			ON D1.username = D3.username3 AND D1.type = D3.type3 ORDER BY elo desc";
 
 	    $arr = sql2arr($query);
 	    $count = 1;
@@ -94,7 +96,7 @@ switch ($option) {
 				    SUM(count) AS count_sum
 				FROM RaceRanks
 				GROUP BY username
-				UNION
+				UNION ALL
 				SELECT DISTINCT
 				    username,
 				    style,
@@ -187,7 +189,8 @@ switch ($option) {
 		$newArray = null;
 
 		$stmt = $db->prepare("SELECT type, elo from (SELECT type, ROUND(winner_elo,0) AS elo, end_time FROM LocalDuel WHERE winner = :username GROUP BY type
-				UNION SELECT type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel WHERE loser = :username GROUP BY type) GROUP BY type ORDER BY elo DESC LIMIT 5");
+				UNION
+				SELECT type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel WHERE loser = :username GROUP BY type) GROUP BY type ORDER BY elo DESC LIMIT 5");
 		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
 
 		$result = $stmt->execute();

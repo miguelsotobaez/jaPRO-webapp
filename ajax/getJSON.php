@@ -69,7 +69,7 @@ switch ($option) {
 		$newArray = null;
 		$query = "SELECT DISTINCT
 				    username,
-				    -1 AS style,
+				    99 AS style,
 				    ROUND(SUM(score),0) AS score_sum,
 				    ROUND((SUM(score) / SUM(COUNT)),2) AS avg_score,
 				    CAST((SUM(percentilesum) / SUM(COUNT))*100 AS INT) AS avg_percentile,

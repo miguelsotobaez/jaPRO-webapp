@@ -11,8 +11,6 @@ $(document).ready(function () {
     //download
 
 
-    $('.selectpicker').selectpicker();
-
     if(option=="home"){
         home();
     }else if(option=="ladder_player"){
@@ -254,16 +252,25 @@ function ladder_duel_rank(){
                 }
             },
             */
+/*
+            "columnDefs": [
+              { "sType": "html", "aTargets": [ 1 ] } //numbers-html plugin
+              //{ "sType": "numeric", "aTargets": [ 7 ] } //time-uni sort plugin
+            ],
+            */
             "aoColumnDefs": [
                 { "bSortable": false, "aTargets": [ 0 ] }
             ],
+            "oLanguage": {
+                        "sInfo": '',
+                        "sInfoFiltered": ''
+            },
             "aaSorting": [[ 1, 'asc' ]], // ?
 
             initComplete: function () {
                 this.api().columns([1]).every( function () {
                     var column = this;
-                    //var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-                    var select = $('<select class="filter form-control input-sm selectpicker" data-live-search="true"><option value="">Show all</option></select>')
+                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
                         .appendTo( $(column.footer()).empty() )
                         .on( 'change', function () {
                             var val = $.fn.dataTable.util.escapeRegex(
@@ -360,7 +367,7 @@ function ladder_duel_list(){
                 { "data": "odds", "render": 
                     function ( data, type, row, meta ) {
                     if (data <= 15) 
-                        return '<b><font color="gold">'+data+'%</font></b>'; 
+                        return '<b><font color="#bc5700">'+data+'%</font></b>'; 
                     else 
                         return data+'%'; }}
             ],
@@ -578,6 +585,10 @@ function ladder_race_rank(){
             "aoColumnDefs": [
                 { "bSortable": false, "aTargets": [ 0 ] }
             ],
+             "oLanguage": {
+                        "sInfo": '',
+                        "sInfoFiltered": ''
+            },  
             "aaSorting": [[ 1, 'asc' ]],
             initComplete: function () {            
                 this.api().columns([1]).every( function () {
@@ -598,7 +609,7 @@ function ladder_race_rank(){
                 } );
                 this.api().columns([2]).every( function () {
                     var column = this;
-                    var select = $('<select class="filter form-control input-sm"></select>') //Why does jetpack and swoop show up in middle - because it sorts by string not numeric? Why does it not filter by all on pageload even though its selected
+                    var select = $('<select class="filter form-control input-sm" id="MySelect"></select>') //Why does jetpack and swoop show up in middle - because it sorts by string not numeric? Why does it not filter by all on pageload even though its selected
                         .appendTo( $(column.footer()).empty() )
                         .on( 'change', function () {
                             var val = $.fn.dataTable.util.escapeRegex(
@@ -609,9 +620,14 @@ function ladder_race_rank(){
                                 .draw();
                         } );
                     column.data().unique().sort().each( function ( d, j ) {
-                        select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
+                        if (d == 99) //Style for "ALL"
+                            select.append( '<option selected="selected" value="'+d+'">'+RaceToString(d)+'</option>' )
+                        else
+                            select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
                     } );
                 } );
+                this.api().columns(2).search('All')
+                this.api().draw();
             }
         });
     });
@@ -671,7 +687,7 @@ function ladder_race_list(){
                 { "data": "rank", "render": 
                     function ( data, type, row, meta ) {
                     if (data == 1) 
-                        return '<b><font color="gold">1</font></b>'; 
+                        return '<b><font color="#bc5700">1</font></b>'; //Muted orange
                     else 
                         return data; }},
                 { "data": "username", "render": 
@@ -1130,9 +1146,9 @@ function DuelToString(type) {
 
 function RaceToString(val){
     style="Unknown";
-    if (val==-1)
+    if (val==99)
         style="All";
-    if (val==0)
+    else if (val==0)
         style="Siege";
     else if(val==1)
         style="JKA";

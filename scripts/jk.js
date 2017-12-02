@@ -320,7 +320,7 @@ function ladder_duel_list(){
     panel += '              <p>Here you can see the registri of all saber duels in japro server.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_ladder_duel_list" width="100%" class="table table-striped table-hover">';
-    panel += '                      <thead><tr><th>Winner</th><th>Loser</th><th>Type</th><th>Winner Health</th><th data-hide="phone,table">Duration</th><th>Time</th><th>Odds</th></tr></thead>';
+    panel += '                      <thead><tr><th>Winner</th><th>Loser</th><th>Type</th><th>Winner Health</th><th>Odds</th><th>Date</th><th data-hide="phone,table">Duration</th></tr></thead>';
     panel += '                      <tfoot><tr><th>Winner</th><th>Loser</th><th>Type</th><th></th><th></th><th></th><th></th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
@@ -360,16 +360,16 @@ function ladder_duel_list(){
                     function ( data, type, row, meta ) { 
                         return DuelToString(data) }},
                 { "data": "winner_health" }, //This does not sort properly - x/y  format, sort by sum(x+y)
-                { "data": "duration", "render": 
-                    function ( data, type, row, meta ) { 
-                        return DuelTimeToString(data) }},
-                { "data": "end_time" },
                 { "data": "odds", "render": 
                     function ( data, type, row, meta ) {
                     if (data <= 15) 
                         return '<b><font color="#bc5700">'+data+'%</font></b>'; 
                     else 
-                        return data+'%'; }}
+                        return data+'%'; }},
+                { "data": "end_time" },
+                { "data": "duration", "className": "duration_ms", "render":
+                    function ( data, type, row, meta ) { 
+                        return DuelTimeToString(data) }}
             ],
             initComplete: function () {            
                 this.api().columns([0, 1]).every( function () { //This doesn't activate?
@@ -525,7 +525,7 @@ function ladder_race_rank(){
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_ladder_race_rank" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Position</th><th>Username</th><th>Style</th><th>Score</th><th>Average Score</th><th>Average Percentile</th><th>Golds</th><th>Silvers</th><th>Bronzes</th><th>Count</th></tr></thead>';
-    panel += '                      <tfoot><tr><th></th><th>Username</th><th>Style</th><th></th><th></th><th></th><th></th><th></th><th></th><th>Count</th></tr></tfoot>';
+    panel += '                      <tfoot><tr><th></th><th>Username</th><th>Style</th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -583,7 +583,7 @@ function ladder_race_rank(){
             },
             */
             "aoColumnDefs": [
-                { "bSortable": false, "aTargets": [ 0 ] }
+                { "bSortable": false, "aTargets": [ 0,2 ] }
             ],
              "oLanguage": {
                         "sInfo": '',
@@ -684,7 +684,7 @@ function ladder_race_list(){
             "deferRender": true,
             "data": data,
             "columns": [
-                { "data": "rank", "render": 
+                { "data": "rank", "sType": "num-html", "render": 
                     function ( data, type, row, meta ) {
                     if (data == 1) 
                         return '<b><font color="#bc5700">1</font></b>'; //Muted orange
@@ -700,15 +700,11 @@ function ladder_race_list(){
                 { "data": "topspeed" },
                 { "data": "average" },
                 { "data": "date" },
-                { "data": "duration", "render": 
+                { "data": "duration", "className": "duration_ms", "render":
                     function ( data, type, row, meta ) { 
                         return '<td style="text-align: right;">'+RaceTimeToString(data)+'<td>' }} //Why doesnt this work..
             ],  
 
-            "columnDefs": [
-              { "sType": "num-html", "aTargets": [ 0 ] } //numbers-html plugin
-              //{ "sType": "numeric", "aTargets": [ 7 ] } //time-uni sort plugin
-            ],
             initComplete: function () {         
                 this.api().columns([1, 2]).every( function () {
                     var column = this;

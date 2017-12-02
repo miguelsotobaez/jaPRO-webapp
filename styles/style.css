@@ -2629,3 +2629,7 @@ table.dataTable.dtr-inline.collapsed>tbody>tr.parent>td:first-child:before, tabl
 .navbar-default .navbar-brand, .navbar-default .navbar-brand:focus {
     letter-spacing: 5px;
 }
+
+.duration_ms{
+  text-align: right
+}

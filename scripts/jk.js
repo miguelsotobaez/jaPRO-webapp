@@ -227,12 +227,13 @@ function ladder_duel_rank(){
             "order": [[ 3, "desc" ]],
             "bLengthChange": false,
             "deferRender": true,
+            "dom": 'lrtp', //Hide search box
             "data": data,
             "columns": [
                 { "data": null, defaultContent: "N/A" }, //How get position for this
                 { "data": "username", "render": 
                     function ( data, type, row, meta ) { 
-                        return '<a href=player.php?p='+encodeURIComponent(data)+'>'+data+'</a>'; }},
+                        return (type == 'filter') ? (data) : ('<a href=player.php?p='+encodeURIComponent(data)+'>'+data+'</a>'); }},
                 { "data": "type", "render": 
                     function ( data, type, row, meta ) { 
                         return DuelToString(data) }},
@@ -348,14 +349,16 @@ function ladder_duel_list(){
         $('#datatable_ladder_duel_list').DataTable( {
             "order": [[ 5, "desc" ]],
             "deferRender": true,
+            "bLengthChange": false,
             "data": data,
+            "dom": 'lrtp', //Hide search box
             "columns": [
                 { "data": "winner", "render": 
                     function ( data, type, row, meta ) { 
-                        return '<a href=player.php?p='+encodeURIComponent(data)+'> '+data+'</a>'; }},
+                        return (type == 'filter') ? (data) : ('<a href=player.php?p='+encodeURIComponent(data)+'>'+data+'</a>'); }},
                 { "data": "loser", "render": 
                     function ( data, type, row, meta ) { 
-                        return '<a href=player.php?p='+encodeURIComponent(data)+'> '+data+'</a>'; }},
+                        return (type == 'filter') ? (data) : ('<a href=player.php?p='+encodeURIComponent(data)+'>'+data+'</a>'); }},
                 { "data": "type", "render": 
                     function ( data, type, row, meta ) { 
                         return DuelToString(data) }},
@@ -553,12 +556,13 @@ function ladder_race_rank(){
             "order": [[ 3, "desc" ]],
             "bLengthChange": false,
             "deferRender": true,
+            "dom": 'lrtp', //Hide search box
             "data": data,
             "columns": [
                 { "data": null, defaultContent: "N/A" }, //How get position for this
                 { "data": "username", "render": 
                     function ( data, type, row, meta ) { 
-                        return '<a href=player.php?p='+encodeURIComponent(data)+'> '+data+'</a>'; }},
+                        return (type == 'filter') ? (data) : ('<a href=player.php?p='+encodeURIComponent(data)+'>'+data+'</a>'); }},   
                 { "data": "style", "sType": "numeric", "render": 
                     function ( data, type, row, meta ) { 
                         return RaceToString(data) }},
@@ -682,6 +686,8 @@ function ladder_race_list(){
         $('#datatable_ladder_race_list').DataTable( {
             "order": [[ 6, "desc" ]],
             "deferRender": true,
+            "bLengthChange": false,
+            "dom": 'lrtp', //Hide search box
             "data": data,
             "columns": [
                 { "data": "rank", "sType": "num-html", "render": 
@@ -692,7 +698,7 @@ function ladder_race_list(){
                         return data; }},
                 { "data": "username", "render": 
                     function ( data, type, row, meta ) { 
-                        return '<a href=player.php?p='+encodeURIComponent(data)+'> '+data+'</a>'; }},
+                        return (type == 'filter') ? (data) : ('<a href=player.php?p='+encodeURIComponent(data)+'> '+data+'</a>'); }},
                 { "data": "coursename" }, 
                 { "data": "style", "render": 
                     function ( data, type, row, meta ) { 
@@ -1007,6 +1013,10 @@ function player_duel_graph(){
 
     var chart;
         chart = new Highcharts.Chart({
+            data: {
+                data: data
+            },
+
             chart: {
                 renderTo: 'player_duel_graph',
                 plotBackgroundColor: null,
@@ -1017,9 +1027,9 @@ function player_duel_graph(){
             plotOptions: {
             },
             series: [{
-                type: 'spline',
-                name: 'Player Elo',
-                data: data //type, elo, end_time  - each 'type' should be specific to its own line
+                name: 's1',
+                }, {
+                name: 's2'
             }]
         });
 

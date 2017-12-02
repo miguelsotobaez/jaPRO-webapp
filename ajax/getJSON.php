@@ -184,9 +184,9 @@ switch ($option) {
 		$newArray = null;
 
 		//Should select type, and let client filter that.. should apply smoothing? 
-		$stmt = $db->prepare("SELECT end_time, CAST(winner_elo AS INT) AS elo FROM LocalDuel WHERE winner = :username AND type = 0 
+		$stmt = $db->prepare("SELECT end_time, type, CAST(winner_elo AS INT) AS elo FROM LocalDuel WHERE winner = :username 
 			UNION
-			select end_time, CAST(loser_elo AS INT) AS elo FROM LocalDuel WHERE loser = :username AND type = 0
+			select end_time, type, CAST(loser_elo AS INT) AS elo FROM LocalDuel WHERE loser = :username 
 			ORDER BY end_time ASC");
 		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
 		$result = $stmt->execute();

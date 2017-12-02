@@ -198,7 +198,7 @@ function ladder_duel_rank(){
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_ladder_duel_rank" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Position</th><th>Player</th><th>Type</th><th>Elo</th><th data-hide="phone,table"><label title="Average strength of opponent. A lower value means this player faces easier opponents.">TS</label></th><th>Count</th></tr></thead>';
-    panel += '                      <tfoot><tr><th>Position</th><th>Player</th><th>Type</th><th>Elo</th><th data-hide="phone,table"><label title="Average strength of opponent. A lower value means this player faces easier opponents.">TS</label></th><th>Count</th></tr></tfoot>';
+    panel += '                      <tfoot><tr><th></th><th>Player</th><th>Type</th><th></th><th></th><th></th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -321,7 +321,7 @@ function ladder_duel_list(){
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_ladder_duel_list" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Winner</th><th>Loser</th><th>Type</th><th>Winner Health</th><th data-hide="phone,table">Duration</th><th>Time</th><th>Odds</th></tr></thead>';
-    panel += '                      <tfoot><tr><th>Winner</th><th>Loser</th><th>Type</th><th>Winner Health</th><th data-hide="phone,table">Duration</th><th>Time</th><th>Odds</th></tr></tfoot>';
+    panel += '                      <tfoot><tr><th>Winner</th><th>Loser</th><th>Type</th><th></th><th></th><th></th><th></th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -525,7 +525,7 @@ function ladder_race_rank(){
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_ladder_race_rank" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Position</th><th>Username</th><th>Style</th><th>Score</th><th>Average Score</th><th>Average Percentile</th><th>Golds</th><th>Silvers</th><th>Bronzes</th><th>Count</th></tr></thead>';
-    panel += '                      <tfoot><tr><th>Position</th><th>Username</th><th>Style</th><th>Score</th><th>Average Score</th><th>Average Percentile</th><th>Golds</th><th>Silvers</th><th>Bronzes</th><th>Count</th></tr></tfoot>';
+    panel += '                      <tfoot><tr><th></th><th>Username</th><th>Style</th><th></th><th></th><th></th><th></th><th></th><th></th><th>Count</th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -650,7 +650,7 @@ function ladder_race_list(){
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_ladder_race_list" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th>Topspeed</th><th>Average</th><th>Date</th><th>Time</th></tr></thead>';
-    panel += '                      <tfoot><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th>Topspeed</th><th>Average</th><th>Date</th><th>Time</th></tr></tfoot></table>';
+    panel += '                      <tfoot><tr><th></th><th>Username</th><th>Coursename</th><th>Style</th><th></th><th></th><th></th><th></th></tr></tfoot></table>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';

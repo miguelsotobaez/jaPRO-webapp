@@ -296,7 +296,7 @@ function ladder_duel_rank(){
                                 .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
                                 .draw();
                         } );
-                    column.data().unique().sort().each( function ( d, j ) {
+                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
                         select.append( '<option value="'+(d)+'">'+DuelToString(d)+'</option>' )
                     } );
                 } );
@@ -367,7 +367,7 @@ function ladder_duel_list(){
                     else 
                         return data+'%'; }},
                 { "data": "end_time" },
-                { "data": "duration", "className": "duration_ms", "render":
+                { "data": "duration", "sType": "numeric", "className": "duration_ms", "render": //should be uni-time
                     function ( data, type, row, meta ) { 
                         return DuelTimeToString(data) }}
             ],
@@ -400,7 +400,7 @@ function ladder_duel_list(){
                                 .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
                                 .draw();
                         } );
-                    column.data().unique().sort().each( function ( d, j ) {
+                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
                         select.append( '<option value="'+d+'">'+DuelToString(d)+'</option>' )
                     } );
                 } );
@@ -559,7 +559,7 @@ function ladder_race_rank(){
                 { "data": "username", "render": 
                     function ( data, type, row, meta ) { 
                         return '<a href=player.php?p='+encodeURIComponent(data)+'> '+data+'</a>'; }},
-                { "data": "style", "render": 
+                { "data": "style", "sType": "numeric", "render": 
                     function ( data, type, row, meta ) { 
                         return RaceToString(data) }},
                 { "data": "score" },
@@ -609,7 +609,7 @@ function ladder_race_rank(){
                 } );
                 this.api().columns([2]).every( function () {
                     var column = this;
-                    var select = $('<select class="filter form-control input-sm" id="MySelect"></select>') //Why does jetpack and swoop show up in middle - because it sorts by string not numeric? Why does it not filter by all on pageload even though its selected
+                    var select = $('<select class="filter form-control input-sm"></select>') //Why does jetpack and swoop show up in middle - because it sorts by string not numeric? Why does it not filter by all on pageload even though its selected
                         .appendTo( $(column.footer()).empty() )
                         .on( 'change', function () {
                             var val = $.fn.dataTable.util.escapeRegex(
@@ -619,7 +619,7 @@ function ladder_race_rank(){
                                 .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
                                 .draw();
                         } );
-                    column.data().unique().sort().each( function ( d, j ) {
+                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
                         if (d == 99) //Style for "ALL"
                             select.append( '<option selected="selected" value="'+d+'">'+RaceToString(d)+'</option>' )
                         else
@@ -700,7 +700,7 @@ function ladder_race_list(){
                 { "data": "topspeed" },
                 { "data": "average" },
                 { "data": "date" },
-                { "data": "duration", "className": "duration_ms", "render":
+                { "data": "duration", "sType": "numeric", "className": "duration_ms", "render":
                     function ( data, type, row, meta ) { 
                         return '<td style="text-align: right;">'+RaceTimeToString(data)+'<td>' }} //Why doesnt this work..
             ],  
@@ -734,7 +734,7 @@ function ladder_race_list(){
                                 .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
                                 .draw();
                         } );
-                    column.data().unique().sort().each( function ( d, j ) {
+                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
                         select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
                     } );
                 } );
@@ -1174,16 +1174,16 @@ function RaceToString(val){
 }
 
 function RaceTimeToString(duration_ms) {
-    var milliseconds = duration_ms % 1000;
-    var seconds = Math.floor((duration_ms / 1000) % 60);
+    //var milliseconds = (duration_ms % 1000);
+    var seconds = (Math.floor((duration_ms / 1000) % 60) + ((duration_ms % 1000) / 1000)).toFixed(3);
     var minutes = Math.floor((duration_ms / (60 * 1000)) % 60);
     var hours = Math.floor(duration_ms / (60 * 60 * 1000));
           
     if (hours)
-            return hours+":"+((minutes<10) ? ("0"+minutes) : (minutes))+":"+seconds+"."+milliseconds;
+            return hours+":"+((minutes<10) ? ("0"+minutes) : (minutes))+":"+seconds;
     if (minutes)
-            return minutes+":"+((seconds<10) ? ("0"+seconds) : (seconds))+"."+milliseconds;
-    return seconds+"."+milliseconds;
+            return minutes+":"+((seconds<10) ? ("0"+seconds) : (seconds));
+    return seconds;
 }
 
 function DuelTimeToString(duration_ms) {
@@ -1197,3 +1197,9 @@ function DuelTimeToString(duration_ms) {
             return minutes+":"+((seconds<10) ? ("0"+seconds) : (seconds));
     return seconds;
 }
+
+var sortFunction = function(a, b) {
+    if(a < b) return -1;
+    if(a > b) return 1;
+    return 0;
+};

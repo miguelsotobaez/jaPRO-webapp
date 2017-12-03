@@ -210,17 +210,15 @@ function duel_rank(){
 
     $(document).ready(function() {
         var item = "duel_rank";
-        var content = "";
-        var header = "";
         var url = "ajax/getJSON.php";
         $.ajax({
             type: "POST",
             url: url,
-            dataType: "JSON",
+            dataType: "text",
             async: false,
-            data: { option: item},
+            data: { option: item },
             success: function(res) {
-                data = res;
+                data = $.csv.toArrays(res, { separator: ';' });
             }
         });
 
@@ -230,6 +228,19 @@ function duel_rank(){
             "deferRender": true,
             "dom": 'lrtp', //Hide search box
             "data": data,
+            "columns": [
+                { "data": null, defaultContent: "N/A" }, //How get position for this
+                { "data": 0, "render": 
+                    function ( data, type, row, meta ) { 
+                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+                { "data": 1, "render": 
+                    function ( data, type, row, meta ) { 
+                        return DuelToString(data) }},
+                { "data": 2 },
+                { "data": 3 },
+                { "data": 4 }
+            ],
+            /*
             "columns": [
                 { "data": null, defaultContent: "N/A" }, //How get position for this
                 { "data": "username", "render": 
@@ -242,6 +253,7 @@ function duel_rank(){
                 { "data": "TS" },
                 { "data": "count" }
             ],
+            */
             /*
             "fnDrawCallback": function ( oSettings ) {
             //Need to redo the counters if filtered or sorted
@@ -339,11 +351,11 @@ function duel_list(){
         $.ajax({
             type: "POST",
             url: url,
-            dataType: "JSON",
+            dataType: "text",
             async: false,
             data: { option: item },
             success: function(res) {
-                data = res;
+                data = $.csv.toArrays(res, { separator: ';' });
             }
         });
 
@@ -354,24 +366,24 @@ function duel_list(){
             "data": data,
             "dom": 'lrtp', //Hide search box
             "columns": [
-                { "data": "winner", "render": 
+                { "data": 0, "render": 
                     function ( data, type, row, meta ) { 
                         return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
-                { "data": "loser", "render": 
+                { "data": 1, "render": 
                     function ( data, type, row, meta ) { 
                         return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
-                { "data": "type", "render": 
+                { "data": 2, "render": 
                     function ( data, type, row, meta ) { 
                         return DuelToString(data) }},
-                { "data": "winner_health" }, //This does not sort properly - x/y  format, sort by sum(x+y)
-                { "data": "odds", "render": 
+                { "data": 3 }, //This does not sort properly - x/y  format, sort by sum(x+y)
+                { "data": 4, "render": 
                     function ( data, type, row, meta ) {
                     if (data <= 15) 
                         return '<b><font color="#bc5700">'+data+'%</font></b>'; 
                     else 
                         return data+'%'; }},
-                { "data": "end_time" },
-                { "data": "duration", "sType": "num-dur", "className": "duration_ms", "render": //should be uni-time
+                { "data": 5 },
+                { "data": 6, "sType": "num-dur", "className": "duration_ms", "render": //should be uni-time
                     function ( data, type, row, meta ) { 
                         return DuelTimeToString(data) }}
             ],
@@ -442,11 +454,11 @@ function duel_count(){
         $.ajax({
             type: "POST",
             url: url,
-            dataType: "JSON",
+            dataType: "text",
             async: false,
             data: { option: item},
             success: function(res) {
-                data = res;
+                data = $.csv.toArrays(res, { separator: ';' });
             }
         });
 
@@ -544,12 +556,12 @@ function race_rank(){
         $.ajax({
             type: "POST",
             url: url,
-            dataType: "JSON",
+            dataType: "text",
             async: false,
             data: { option: item },
             success: function(res) {
-                data = res;
-                //RaceRankData = res;
+                data = $.csv.toArrays(res, { separator: ';' });
+                //RaceRankData = data
             }
         });
 
@@ -561,19 +573,19 @@ function race_rank(){
             "data": data,
             "columns": [
                 { "data": null, defaultContent: "N/A" }, //How get position for this
-                { "data": "username", "render": 
+                { "data": 0, "render": 
                     function ( data, type, row, meta ) { 
                         return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},   
-                { "data": "style", "sType": "numeric", "render": 
+                { "data": 1, "sType": "numeric", "render": 
                     function ( data, type, row, meta ) { 
                         return RaceToString(data) }},
-                { "data": "score" },
-                { "data": "avg_score" },
-                { "data": "avg_percentile" },
-                { "data": "golds" },
-                { "data": "silvers" },
-                { "data": "bronzes" },
-                { "data": "count" }
+                { "data": 2 },
+                { "data": 3 },
+                { "data": 4 },
+                { "data": 5 },
+                { "data": 6 },
+                { "data": 7 },
+                { "data": 8 }
             ],
             /*
              "fnDrawCallback": function ( oSettings ) {
@@ -679,7 +691,7 @@ function race_list(){
                 data: { option: item },
                 success: function(res) {
                     data = res;
-                    localStorage.setItem("dataCache", JSON.stringify(res));
+                    //localStorage.setItem("dataCache", JSON.stringify(res));
                 }
             });
         }

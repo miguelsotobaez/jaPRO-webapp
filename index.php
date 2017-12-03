@@ -82,6 +82,7 @@ require_once('inc/page.inc.php');
 <script src="vendor/datatables/plugins.js"></script>
 <script src="vendor/highcharts/js/highcharts.js"></script>
 <script src="scripts/highcharts.jk.theme.js"></script>
+<script src="vendor/jquery-csv/jquery.csv.min.js"></script>
 
 <!-- App scripts -->
 <script src="scripts/jk.js"></script>

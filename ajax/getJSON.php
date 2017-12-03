@@ -24,7 +24,7 @@ switch ($option) {
 			ON D1.username = D2.username2 AND D1.type = D2.type2)
 			INNER JOIN (SELECT loser AS username3, type AS type3, COUNT(*) AS loss_count, SUM(1-odds) AS loss_ts FROM LocalDuel GROUP BY username3, type3) AS D3
 			ON D1.username = D3.username3 AND D1.type = D3.type3 ORDER BY elo desc";
-
+	/*
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
@@ -32,13 +32,25 @@ switch ($option) {
 		    }
 	    }
 
-	    $json = json_encode($newArray);
+	    $out = json_encode($newArray);
+	*/
+
+	    $array = sql2arr($query);
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $out = $newArray;
+
+
 	break;
 
 	case "duel_count": //Loda fixme, we could just do one query maybe and have duel_rank also return the counts and use that?
 		$newArray = null;
 	    $query ="SELECT username, SUM(count) AS count FROM DuelRanks GROUP BY username ORDER BY count DESC";
 
+	/*
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
@@ -46,15 +58,23 @@ switch ($option) {
 		    }
 	    }
 
-	    $json = json_encode($newArray);
+	    $out = json_encode($newArray);
+	*/
+	   	$array = sql2arr($query);
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $out = $newArray;
 	break;
 
 	case "duel_list":
 		$newArray = null;
-	    $query ="SELECT winner, loser, type, winner_hp, winner_shield, duration, end_time, ROUND(odds*100,0) AS odds
+	    $query ="SELECT winner, loser, type, (winner_hp || '/' || winner_shield) AS winner_health, ROUND(odds*100,0) AS odds, end_time, duration
 	    		FROM LocalDuel 
 	    		ORDER BY end_time DESC";
-
+	/*
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
@@ -62,7 +82,15 @@ switch ($option) {
 		    }
 	    }
 
-	    $json = json_encode($newArray);
+	    $out = json_encode($newArray);
+	*/
+	   	$array = sql2arr($query);
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $out = $newArray;
 	break;
 
 	case "race_rank":
@@ -96,7 +124,7 @@ switch ($option) {
 				GROUP BY style, username
 				ORDER BY SumScore DESC";
 				//From RaceRanks WHERE score > 10 - to cut out the useless crap, if it really is affecting pageload, but then we cant trust distinct username/style(?) to be complete for other dropdowns
-
+	/*
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
@@ -105,12 +133,20 @@ switch ($option) {
 	    }
 
 	    $json = json_encode($newArray);
+	*/
+	   	$array = sql2arr($query);
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $out = $newArray;
 	break;
 
 	case "race_count":
 		$newArray = null;
 	    $query ="SELECT username, SUM(count) AS count FROM RaceRanks GROUP BY username ORDER BY count DESC";
-
+	/*
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
@@ -118,23 +154,19 @@ switch ($option) {
 		    }
 	    }
 
-	    $json = json_encode($newArray);
+	    $out = json_encode($newArray);
+	*/
+	
+	   	$array = sql2arr($query);
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $csv = $newArray;
+	 
 	break;
 	
-	case "map_dropdown": //Get a json that can populate all our dropdown filters by getting the minimum amount necessary in one query
-		$newArray = null;
-	    $query = "SELECT DISTINCT coursename FROM LocalRun";
-
-	    $arr = sql2arr($query);
-	    if($arr){
-		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array(0=>$value["coursename"]);
-		    }
-	    }
-
-	    $json = json_encode($newArray);
-	break;
-
 	case "race_list":	
 		$newArray = null;
 		$query = "SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY end_time DESC";
@@ -152,7 +184,7 @@ switch ($option) {
 		    }
 		}
 		
-		$json = json_encode($newArray);
+		$out = json_encode($newArray);
 	break;
 
 	case "player_duel_chart":
@@ -167,6 +199,7 @@ switch ($option) {
 		$exists = sql2arr2($result);
 		$result->finalize();
 
+	
 	    if($exists){
 			$min = min(array_column($exists, 'elo'));
 		    foreach ($exists as $key => $value) {
@@ -176,7 +209,17 @@ switch ($option) {
 		    }
 	    }
 
-	    $json = json_encode($newArray);
+	    $out = json_encode($newArray);
+	
+		/*
+	   	$array = sql2arr($query);
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $csv = $newArray;
+	    */
 	break;
 
 	case "player_duel_graph":
@@ -192,14 +235,24 @@ switch ($option) {
 		$result = $stmt->execute();
 		$exists = sql2arr2($result);
 		$result->finalize();
-
+	
 	    if($exists){
 		    foreach ($exists as $key => $value) {
 		    	$newArray[]=array(0=>$value["end_time"],1=>$value["elo"]);
 		    }
 	    }
 
-	    $json = json_encode($newArray);
+	    $out = json_encode($newArray);
+	
+	    /*
+	   	$array = sql2arr($query);
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $out = $newArray;
+	    */
 	break;
 
 	case "player_race_chart": //Get relative strength of each race style for this player
@@ -212,7 +265,7 @@ switch ($option) {
 		$result = $stmt->execute();
 		$exists = sql2arr2($result);
 		$result->finalize();
-
+	
 	    if($exists){
 		    foreach ($exists as $key => $value) {
 		    	$type = $value["style"];
@@ -220,12 +273,22 @@ switch ($option) {
 		    }
 	    }
 
-	    $json = json_encode($newArray);
+	    $out = json_encode($newArray);
+	
+	    /*
+		$array = sql2arr($query);
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $out = $newArray;
+	    */
 	break;
 
 }
 
-echo $json;
+echo $out;
 $db->close();
 
 function StyleToDemoString($val){

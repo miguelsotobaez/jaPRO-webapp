@@ -37,5 +37,17 @@ jQuery.extend( jQuery.fn.dataTableExt.oSort, {
 
     "num-durhtml-desc": function ( a, b ) {
         return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+    },
+
+    "num-duelhp-pre": function ( a ) {
+        return Number(a.split('/')[0]) + Number(a.split('/')[1]);
+    },
+
+    "num-duelhp-asc": function ( a, b ) {
+        return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+    },
+
+    "num-duelhp-desc": function ( a, b ) {
+        return ((a < b) ? 1 : ((a > b) ? -1 : 0));
     }
 } );

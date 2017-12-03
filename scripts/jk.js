@@ -375,14 +375,19 @@ function duel_list(){
                 { "data": 2, "render": 
                     function ( data, type, row, meta ) { 
                         return DuelToString(data) }},
-                { "data": 3 }, //This does not sort properly - x/y  format, sort by sum(x+y)
+                { "data": 3 , sType: "num-duelhp" }, //This does not sort properly - x/y  format, sort by sum(x+y)
                 { "data": 4, "render": 
                     function ( data, type, row, meta ) {
                     if (data <= 15) 
                         return '<b><font color="#bc5700">'+data+'%</font></b>'; 
                     else 
                         return data+'%'; }},
-                { "data": 5 },
+                { "data": 5, "render": 
+                    function ( data, type, row, meta ) { 
+                        var date = new Date(data*1000);
+                        //+RaceToString(row[3]).toLowerCase()+'.dm_26">'+date.toISOString().substring(0, 10)+'<a>' }},
+                        return (date.getYear()-100) + '-' + ('0'+(date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + ' ' 
+                            + ('0'+(date.getHours()+1)).slice(-2) + ':' + ('0'+(date.getMinutes()+1)).slice(-2) + '<a>' }},
                 { "data": 6, "sType": "num-dur", "className": "duration_ms", "render": //should be uni-time
                     function ( data, type, row, meta ) { 
                         return DuelTimeToString(data) }}
@@ -540,8 +545,8 @@ function race_rank(){
     panel += '              <p>This is the race rank.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_race_rank" width="100%" class="table table-striped table-hover">';
-    panel += '                      <thead><tr><th>Position</th><th>Username</th><th>Style</th><th>Score</th><th>Average Score</th><th>Average Percentile</th><th>Golds</th><th>Silvers</th><th>Bronzes</th><th>Count</th></tr></thead>';
-    panel += '                      <tfoot><tr><th></th><th>Username</th><th>Style</th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr></tfoot>';
+    panel += '                      <thead><tr><th>Position</th><th>Username</th><th>Style</th><th>Score</th><th>Average Score</th><th>Average Percentile</th><th>Average Rank</th><th>Golds</th><th>Silvers</th><th>Bronzes</th><th>Count</th></tr></thead>';
+    panel += '                      <tfoot><tr><th></th><th>Username</th><th>Style</th><th></th><th></th><th></th><th></th><th></th><th><th></th></th><th></th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -585,7 +590,8 @@ function race_rank(){
                 { "data": 5 },
                 { "data": 6 },
                 { "data": 7 },
-                { "data": 8 }
+                { "data": 8 },
+                { "data": 9 }
             ],
             /*
              "fnDrawCallback": function ( oSettings ) {
@@ -680,21 +686,38 @@ function race_list(){
         var item = "race_list";
         var url = "ajax/getJSON.php";
 
+/*
+var d1 = new Date();
+var date1_ms = d1.getTime();
+*/
+
         /*if(localStorage.getItem("dataCache")) { //We also have to check if its up to date? hmm.
             data = JSON.parse(localStorage.getItem("dataCache"));
         } else*/ {
             $.ajax({
                 type: "POST",
                 url: url,
-                dataType: "JSON",
+                dataType: "text",
                 async: false,
                 data: { option: item },
-                success: function(res) {
-                    data = res;
+                //success: function(res) {//JSON
+                    //data = res;
                     //localStorage.setItem("dataCache", JSON.stringify(res));
+
+                //}
+                success: function(res) {//CSV
+                    data = $.csv.toArrays(res, { separator: ';' });
                 }
+
             });
         }
+/*
+var d2 = new Date();
+var date2_ms = d2.getTime();
+var diff1 = date2_ms - date1_ms;
+*/
+          // Calculate the difference in milliseconds
+
 
         $('#datatable_race_list').DataTable( {
             "order": [[ 6, "desc" ]],
@@ -702,29 +725,73 @@ function race_list(){
             "bLengthChange": false,
             "dom": 'lrtp', //Hide search box
             "data": data,
-            "columns": [
-                { "data": "rank", "sType": "num-html", "render": 
+/*
+            "columns": [ //JSON
+                { "data": "a", "sType": "num-html", "render": 
                     function ( data, type, row, meta ) {
                     if (data == 1) 
                         return '<b><font color="#bc5700">1</font></b>'; //Muted orange
                     else 
                         return data; }},
-                { "data": "username", "render": 
+                { "data": "b", "render": 
                     function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'> '+data+'</a>'); }},
-                { "data": "coursename" }, 
-                { "data": "style", "render": 
+                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+                { "data": "c" }, 
+                { "data": "d", "render": 
                     function ( data, type, row, meta ) { 
                         return RaceToString(data) }},
-                { "data": "topspeed" },
-                { "data": "average" },
-                { "data": "date" },
-                { "data": "duration", "sType": "num-durhtml", "className": "duration_ms", "render":
+                { "data": "e" },
+                { "data": "f" },
+                { "data": "g", "render": 
                     function ( data, type, row, meta ) { 
-                        return '<td style="text-align: right;">'+RaceTimeToString(data)+'<td>' }} //Why doesnt this work..
+                        return '<a href="../races/'+encodeURIComponent(row["b"])+'/'+encodeURIComponent(row["b"])+'-'+encodeURIComponent(row["c"].replace(" ", ""))+'-'
+                            +RaceToString(row["d"]).toLowerCase()+'.dm_26">'+Date(data*1000)+'<a>' }},
+                        //return '<a href="../races/'+encodeURIComponent(row[1])+'/'+encodeURIComponent(row[1])+'-'+encodeURIComponent(row[2].replace(" ", ""))+'-'
+                            //+RaceToString(row[3]).toLowerCase()+'.dm_26">'+data+'<a>' }},
+                { "data": "h", "sType": "num-durhtml", "className": "duration_ms", "render":
+                    function ( data, type, row, meta ) { 
+                        return '<td style="text-align: right;">'+RaceTimeToString(data)+'</td>' }} //Why doesnt this work..
             ],  
 
-            initComplete: function () {         
+*/
+
+            "columns": [ //CSV
+                { "data": 0, "sType": "num-html", "render": 
+                    function ( data, type, row, meta ) {
+                    if (data == 1) 
+                        return '<b><font color="#bc5700">1</font></b>'; //Muted orange
+                    else 
+                        return data; }},
+                { "data": 1, "render": 
+                    function ( data, type, row, meta ) { 
+                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+                { "data": 2 }, 
+                { "data": 3, "render": 
+                    function ( data, type, row, meta ) { 
+                        return RaceToString(data) }},
+                { "data": 4 },
+                { "data": 5 },
+                { "data": 6, "render": 
+                    function ( data, type, row, meta ) { 
+                        var date = new Date(data*1000);
+                        return '<a href="../races/'+encodeURIComponent(row[1])+'/'+encodeURIComponent(row[1])+'-'+encodeURIComponent(row[2].replace(" ", ""))+'-'
+                            +RaceToString(row[3]).toLowerCase()+'.dm_26">'+(date.getYear()-100) + '-' + ('0'+(date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + ' ' 
+                            + ('0'+(date.getHours()+1)).slice(-2) + ':' + ('0'+(date.getMinutes()+1)).slice(-2) + '<a>' }},
+                { "data": 7, "sType": "num-durhtml", "className": "duration_ms", "render":
+                    function ( data, type, row, meta ) { 
+                        return '<td style="text-align: right;">'+RaceTimeToString(data)+'</td>' }} //Why doesnt this work..
+            ],  
+
+            initComplete: function () {     
+
+/*
+var d3 = new Date();
+var date3_ms = d3.getTime();
+var diff2 = date3_ms - date2_ms;
+alert("diff 1:   " + diff1 +"diff 2:   " + diff2);
+*/
+
+
                 this.api().columns([1, 2]).every( function () {
                     var column = this;
                     var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')

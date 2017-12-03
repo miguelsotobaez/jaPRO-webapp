@@ -10,6 +10,7 @@ $option = $_POST["option"];
                   //$player = substr($player, 0, 32);
 			//Also htmlentities? or check special characters?
 
+//todo - alias all columns to 1 letter to make json smaller filesize
 switch ($option) {
 	case "duel_rank":
 		$newArray = null;
@@ -163,28 +164,35 @@ switch ($option) {
 
 		}
 
-	    $csv = $newArray;
+	    $out = $newArray;
 	 
 	break;
 	
 	case "race_list":	
 		$newArray = null;
-		$query = "SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY end_time DESC";
+		$query = "SELECT rank, username, coursename, style, topspeed, average, end_time, MIN(duration_ms) AS duration_ms FROM LocalRun GROUP BY username, style, coursename ORDER BY end_time DESC";
 
-		$arr = sql2arr($query);
+/*
+		$arr = sql2arr($query);//JSON
 		if($arr) {
 		    foreach ($arr as $key => $value) {
-			    $demoStyle = StyleToDemoString($value["style"]);
-				$coursenameCleaned = urlencode(str_replace(" ","",$value["coursename"])); //Remove the spaces
-				$username = urlencode($value["username"]);
-		    	$end_time = date('y-m-d H:i', $value["end_time"]);
-				$date = "<a href='../races/{$username}/{$username}-{$coursenameCleaned}-{$demoStyle}.dm_26'>{$end_time}</a>";
-
-				$newArray[]=array("rank"=>$value["rank"],"username"=>$value["username"],"coursename"=>$value["coursename"],"duration"=>$value["duration_ms"],"topspeed"=>$value["topspeed"],"average"=>$value["average"],"style"=>$value["style"],"date"=>$date);
+				//$date = date('y-m-d H:i', $value["end_time"]);
+				$newArray[]=array("a"=>$value["rank"],"b"=>$value["username"],"c"=>$value["coursename"],"d"=>$value["duration_ms"],"e"=>$value["topspeed"],"f"=>$value["average"],"g"=>$value["style"],"h"=>$value["end_time"]);
 		    }
 		}
 		
 		$out = json_encode($newArray);
+*/
+
+		$array = sql2arr($query);//CSV
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $out = $newArray;
+	    
+
 	break;
 
 	case "player_duel_chart":

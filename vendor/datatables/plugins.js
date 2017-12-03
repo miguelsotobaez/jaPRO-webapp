@@ -37,9 +37,7 @@ jQuery.extend( jQuery.fn.dataTableExt.oSort, {
 	},
 
     "num-dur-pre": function ( a ) {
-        var x = String(a).replace( /<[\s\S]*?>/g, "" ); //loda fixme
-        var x = String(x).replace( ":", "" );
-        var x = String(x).replace( ":", "" );
+        var x = String(a).replace(/:/g, "");
         return parseFloat( x );
     },
 
@@ -48,6 +46,20 @@ jQuery.extend( jQuery.fn.dataTableExt.oSort, {
     },
 
     "num-dur-desc": function ( a, b ) {
+        return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+    },
+
+    "num-durhtml-pre": function ( a ) {
+        var x = String(a).replace( /<[\s\S]*?>/g, "" ); //loda fixme
+        x = String(x).replace(/:/g, "");
+        return parseFloat( x );
+    },
+
+    "num-durhtml-asc": function ( a, b ) {
+        return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+    },
+
+    "num-durhtml-desc": function ( a, b ) {
         return ((a < b) ? 1 : ((a > b) ? -1 : 0));
     }
 

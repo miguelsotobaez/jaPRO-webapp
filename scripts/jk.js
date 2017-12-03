@@ -706,7 +706,7 @@ function ladder_race_list(){
                 { "data": "topspeed" },
                 { "data": "average" },
                 { "data": "date" },
-                { "data": "duration", "sType": "num-dur", "className": "duration_ms", "render":
+                { "data": "duration", "sType": "num-durhtml", "className": "duration_ms", "render":
                     function ( data, type, row, meta ) { 
                         return '<td style="text-align: right;">'+RaceTimeToString(data)+'<td>' }} //Why doesnt this work..
             ],  

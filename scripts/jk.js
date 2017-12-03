@@ -278,7 +278,7 @@ function ladder_duel_rank(){
                                 $(this).val()
                             );
                             column
-                                search( val ? '^'+val+'$' : '', true, false ) //IDK
+                                .search( val ? '^'+val+'$' : '', true, false ) //IDK
                                 .draw();
                         } );
                     column.data().unique().sort().each( function ( d, j ) {

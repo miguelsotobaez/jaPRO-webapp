@@ -170,7 +170,7 @@ switch ($option) {
 	    if($exists){
 			$min = min(array_column($exists, 'elo'));
 		    foreach ($exists as $key => $value) {
-		    	$type = DuelToString($value["type"]);
+		    	$type = $value["type"];
 		    	$strength = $value["elo"] - $min + 100; //Subtract smallest element..
 		    	$newArray[]=array(0=>$type,1=>$strength);
 		    }
@@ -215,7 +215,7 @@ switch ($option) {
 
 	    if($exists){
 		    foreach ($exists as $key => $value) {
-		    	$type = StyleToString($value["style"]);
+		    	$type = $value["style"];
 		    	$newArray[]=array(0=>$type,1=>$value["diff"]);
 		    }
 	    }

@@ -8,10 +8,17 @@ $(document).ready(function () {
     if(page=="home"){
         home();
     }else if(page=="player"){
-        player_title();
-        player_duel_chart();
-        player_race_chart();
-        player_duel_graph();
+
+        //var player = <?php echo $_GET['name'] ?>;
+        if (player) {
+            player_title();
+            player_duel_chart();
+            player_race_chart();
+            player_duel_graph();
+        }
+        else {
+            player_title();
+        }
         
         //Global info for players, or should this be in a header shown on every page?
             //Number of accounts
@@ -227,7 +234,7 @@ function duel_rank(){
                 { "data": null, defaultContent: "N/A" }, //How get position for this
                 { "data": "username", "render": 
                     function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=?page=player?name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
                 { "data": "type", "render": 
                     function ( data, type, row, meta ) { 
                         return DuelToString(data) }},
@@ -349,10 +356,10 @@ function duel_list(){
             "columns": [
                 { "data": "winner", "render": 
                     function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=?page=player?name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
                 { "data": "loser", "render": 
                     function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=?page=player?name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
                 { "data": "type", "render": 
                     function ( data, type, row, meta ) { 
                         return DuelToString(data) }},
@@ -556,7 +563,7 @@ function race_rank(){
                 { "data": null, defaultContent: "N/A" }, //How get position for this
                 { "data": "username", "render": 
                     function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=?page=player?name='+encodeURIComponent(data)+'>'+data+'</a>'); }},   
+                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},   
                 { "data": "style", "sType": "numeric", "render": 
                     function ( data, type, row, meta ) { 
                         return RaceToString(data) }},
@@ -692,7 +699,7 @@ function race_list(){
                         return data; }},
                 { "data": "username", "render": 
                     function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=?page=player?name='+encodeURIComponent(data)+'> '+data+'</a>'); }},
+                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'> '+data+'</a>'); }},
                 { "data": "coursename" }, 
                 { "data": "style", "render": 
                     function ( data, type, row, meta ) { 
@@ -833,7 +840,7 @@ function player_title(){
     HTML+='                    <div class="header-title">';
     HTML+='                        <h3>Players</h3>';
     HTML+='                        <small>';
-    HTML+='                            Select the player you want to see.';
+    HTML+='                            '+player ? player : 'Select the player you want to see.';
     HTML+='                        </small>';
     HTML+='                    </div>';
     HTML+='                </div>';
@@ -862,7 +869,7 @@ function player_duel_chart(){
     panel += '            </div>';
     $("#main-content").append(panel);
 
-    var username = "source";
+    var username = player;
     var data = null;
     var item = "player_duel_chart";
     var url = "ajax/getJSON.php";
@@ -926,7 +933,7 @@ function player_race_chart(){ //This should be a stacked horizontal bar graph li
     panel += '            </div>';
     $("#main-content").append(panel);
 
-    var username = "source";
+    var username = player;
     var data = null;
     var item = "player_race_chart";
     var url = "ajax/getJSON.php";
@@ -990,7 +997,7 @@ function player_duel_graph(){
     panel += '            </div>';
     $("#main-content").append(panel);
 
-    var username = "source";
+    var username = player;
     var data = null;
     var item = "player_duel_graph";
     var url = "ajax/getJSON.php";

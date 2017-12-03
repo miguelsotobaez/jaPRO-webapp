@@ -1,6 +1,6 @@
 <?php
 require_once('inc/config.inc.php');
-require_once('inc/option.inc.php');
+require_once('inc/page.inc.php');
 
 ?>
 <!DOCTYPE html>
@@ -72,6 +72,7 @@ require_once('inc/option.inc.php');
 
 <script type="text/javascript">
     var page = "<?php Print($page); ?>";
+    var player = "<?php Print($player); ?>";
 </script>
 
 <!-- Vendor scripts -->

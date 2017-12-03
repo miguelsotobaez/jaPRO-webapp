@@ -11,7 +11,7 @@ $option = $_POST["option"];
 			//Also htmlentities? or check special characters?
 
 switch ($option) {
-	case "ladder_duel_rank":
+	case "duel_rank":
 		$newArray = null;
 
 	    //$query ="SELECT username, type, ROUND(rank,0) AS rank, 100-ROUND(100*TSSUM/count, 0) AS TS, count FROM DuelRanks ORDER BY rank DESC";
@@ -35,7 +35,7 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-	case "ladder_duel_count": //Loda fixme, we could just do one query maybe and have duel_rank also return the counts and use that?
+	case "duel_count": //Loda fixme, we could just do one query maybe and have duel_rank also return the counts and use that?
 		$newArray = null;
 	    $query ="SELECT username, SUM(count) AS count FROM DuelRanks GROUP BY username ORDER BY count DESC";
 
@@ -49,7 +49,7 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-	case "ladder_duel_list":
+	case "duel_list":
 		$newArray = null;
 	    $query ="SELECT winner, loser, type, winner_hp, winner_shield, duration, end_time, ROUND(odds*100,0) AS odds
 	    		FROM LocalDuel 
@@ -65,7 +65,7 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-	case "ladder_race_rank":
+	case "race_rank":
 		$newArray = null;
 		$query = "SELECT DISTINCT
 				    username,
@@ -107,7 +107,7 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-	case "ladder_race_count":
+	case "race_count":
 		$newArray = null;
 	    $query ="SELECT username, SUM(count) AS count FROM RaceRanks GROUP BY username ORDER BY count DESC";
 
@@ -121,7 +121,7 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 	
-	case "ladder_map_dropdown": //Get a json that can populate all our dropdown filters by getting the minimum amount necessary in one query
+	case "map_dropdown": //Get a json that can populate all our dropdown filters by getting the minimum amount necessary in one query
 		$newArray = null;
 	    $query = "SELECT DISTINCT coursename FROM LocalRun";
 
@@ -135,7 +135,7 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-	case "ladder_race_list":	
+	case "race_list":	
 		$newArray = null;
 		$query = "SELECT username, coursename, MIN(duration_ms) AS duration_ms, topspeed, average, style, rank, end_time FROM LocalRun GROUP BY username, style, coursename ORDER BY end_time DESC";
 

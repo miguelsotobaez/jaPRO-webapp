@@ -1,9 +1,9 @@
 <?php
 
-if(isset($_GET["option"])){
-    $option = $_GET["option"];
+if(isset($_GET["page"])){
+    $page = $_GET["page"];
 }else{
-    $option = "home";
+    $page = "home";
 }
 
 ?>

@@ -5,15 +5,9 @@
 
 
 $(document).ready(function () {
-    //home
-    //ladder_duels
-    //ladder_race
-    //download
-
-
-    if(option=="home"){
+    if(page=="home"){
         home();
-    }else if(option=="ladder_player"){
+    }else if(page=="player"){
         player_title();
         player_duel_chart();
         player_race_chart();
@@ -80,19 +74,19 @@ $(document).ready(function () {
 
         
     }
-    else if(option=="ladder_duel"){
-        ladder_duel_title();
-        ladder_duel_rank();
-        ladder_duel_list();
-        ladder_duel_count();
-    }else if(option=="ladder_race"){
-        ladder_race_title();
-        ladder_race_rank();
-        ladder_race_list();
-        ladder_race_count();
-    }else if(option=="maps"){
+    else if(page=="duel"){
+        duel_title();
+        duel_rank();
+        duel_list();
+        duel_count();
+    }else if(page=="race"){
+        race_title();
+        race_rank();
+        race_list();
+        race_count();
+    }else if(page=="maps"){
         maps();
-    }else if(option=="servers"){
+    }else if(page=="servers"){
         servers();
     }else{
 
@@ -161,7 +155,7 @@ function home(){
 /////////////////////////////////DUELS////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-function ladder_duel_title(){
+function duel_title(){
     var HTML;
     HTML='<div class="row">';
     HTML+='            <div class="col-lg-12">';
@@ -185,7 +179,7 @@ function ladder_duel_title(){
     $("#main-content").append(HTML);
 }
 
-function ladder_duel_rank(){
+function duel_rank(){
     var panel;
     panel = '<div id="first_row" class="row">';
     panel += '  <div class="col-md-12">';
@@ -196,7 +190,7 @@ function ladder_duel_rank(){
     panel += '          <div class="panel-body">';
     panel += '              <p>This is the saber rank list, ordered by ELO.</p>';
     panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_duel_rank" width="100%" class="table table-striped table-hover">';
+    panel += '                  <table id="datatable_duel_rank" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Position</th><th>Player</th><th>Type</th><th>Elo</th><th data-hide="phone,table"><label title="Average strength of opponent. A lower value means this player faces easier opponents.">TS</label></th><th>Count</th></tr></thead>';
     panel += '                      <tfoot><tr><th></th><th>Player</th><th>Type</th><th></th><th></th><th></th></tr></tfoot>';
     panel += '              </div>';
@@ -208,7 +202,7 @@ function ladder_duel_rank(){
     $("#main-content").append(panel);
 
     $(document).ready(function() {
-        var item = "ladder_duel_rank";
+        var item = "duel_rank";
         var content = "";
         var header = "";
         var url = "ajax/getJSON.php";
@@ -223,7 +217,7 @@ function ladder_duel_rank(){
             }
         });
 
-        $('#datatable_ladder_duel_rank').DataTable( {
+        $('#datatable_duel_rank').DataTable( {
             "order": [[ 3, "desc" ]],
             "bLengthChange": false,
             "deferRender": true,
@@ -233,7 +227,7 @@ function ladder_duel_rank(){
                 { "data": null, defaultContent: "N/A" }, //How get position for this
                 { "data": "username", "render": 
                     function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=player.php?p='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+                        return (type == 'filter') ? (data) : ('<a href=?page=player?name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
                 { "data": "type", "render": 
                     function ( data, type, row, meta ) { 
                         return DuelToString(data) }},
@@ -309,7 +303,7 @@ function ladder_duel_rank(){
     $('#menu_duel').addClass("active");
 }
 
-function ladder_duel_list(){  
+function duel_list(){  
     var panel;
     panel = '<div id="second_row" class="row">';
     panel += '  <div class="col-md-12">';
@@ -320,7 +314,7 @@ function ladder_duel_list(){
     panel += '          <div class="panel-body">';
     panel += '              <p>Here you can see the registri of all saber duels in japro server.</p>';
     panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_duel_list" width="100%" class="table table-striped table-hover">';
+    panel += '                  <table id="datatable_duel_list" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Winner</th><th>Loser</th><th>Type</th><th>Winner Health</th><th>Odds</th><th>Date</th><th data-hide="phone,table">Duration</th></tr></thead>';
     panel += '                      <tfoot><tr><th>Winner</th><th>Loser</th><th>Type</th><th></th><th></th><th></th><th></th></tr></tfoot>';
     panel += '              </div>';
@@ -333,7 +327,7 @@ function ladder_duel_list(){
 
     $(document).ready(function() {
         var data = null;
-        var item = "ladder_duel_list";
+        var item = "duel_list";
         var url = "ajax/getJSON.php";
         $.ajax({
             type: "POST",
@@ -346,7 +340,7 @@ function ladder_duel_list(){
             }
         });
 
-        $('#datatable_ladder_duel_list').DataTable( {
+        $('#datatable_duel_list').DataTable( {
             "order": [[ 5, "desc" ]],
             "deferRender": true,
             "bLengthChange": false,
@@ -355,10 +349,10 @@ function ladder_duel_list(){
             "columns": [
                 { "data": "winner", "render": 
                     function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=player.php?p='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+                        return (type == 'filter') ? (data) : ('<a href=?page=player?name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
                 { "data": "loser", "render": 
                     function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=player.php?p='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+                        return (type == 'filter') ? (data) : ('<a href=?page=player?name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
                 { "data": "type", "render": 
                     function ( data, type, row, meta ) { 
                         return DuelToString(data) }},
@@ -416,7 +410,7 @@ function ladder_duel_list(){
 
 }
 
-function ladder_duel_count(){
+function duel_count(){
     var panel = "";
     panel += '<div id="third_row" class="row">';
     panel += '  <div class="col-md-6">';
@@ -436,7 +430,7 @@ function ladder_duel_count(){
 
     $(document).ready(function() {
         var data = null;
-        var item = "ladder_duel_count";
+        var item = "duel_count";
         var url = "ajax/getJSON.php";
         $.ajax({
             type: "POST",
@@ -449,7 +443,7 @@ function ladder_duel_count(){
             }
         });
 
-        //Loda fixme, this can use the json from datatable_ladder_duel_rank maybe and avoid a query?
+        //Loda fixme, this can use the json from datatable_duel_rank maybe and avoid a query?
         var chart;
         chart = new Highcharts.Chart({
             chart: {
@@ -489,7 +483,7 @@ function ladder_duel_count(){
 /////////////////////////////////////////////////////////////////////
 
 
-function ladder_race_title(){
+function race_title(){
     var HTML;
     HTML='<div class="row">';
     HTML+='            <div class="col-lg-12">';
@@ -515,7 +509,7 @@ function ladder_race_title(){
 
 //var RaceRankData;
 
-function ladder_race_rank(){
+function race_rank(){
     var panel;
     panel = '<div id="first_row" class="row">';
     panel += '  <div class="col-md-12">';
@@ -526,7 +520,7 @@ function ladder_race_rank(){
     panel += '          <div class="panel-body">';
     panel += '              <p>This is the race rank.</p>';
     panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_race_rank" width="100%" class="table table-striped table-hover">';
+    panel += '                  <table id="datatable_race_rank" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Position</th><th>Username</th><th>Style</th><th>Score</th><th>Average Score</th><th>Average Percentile</th><th>Golds</th><th>Silvers</th><th>Bronzes</th><th>Count</th></tr></thead>';
     panel += '                      <tfoot><tr><th></th><th>Username</th><th>Style</th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr></tfoot>';
     panel += '              </div>';
@@ -538,7 +532,7 @@ function ladder_race_rank(){
 
     $(document).ready(function() {
         var data = null;
-        var item = "ladder_race_rank";
+        var item = "race_rank";
         var url = "ajax/getJSON.php";
         $.ajax({
             type: "POST",
@@ -552,7 +546,7 @@ function ladder_race_rank(){
             }
         });
 
-        $('#datatable_ladder_race_rank').DataTable( {
+        $('#datatable_race_rank').DataTable( {
             "order": [[ 3, "desc" ]],
             "bLengthChange": false,
             "deferRender": true,
@@ -562,7 +556,7 @@ function ladder_race_rank(){
                 { "data": null, defaultContent: "N/A" }, //How get position for this
                 { "data": "username", "render": 
                     function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=player.php?p='+encodeURIComponent(data)+'>'+data+'</a>'); }},   
+                        return (type == 'filter') ? (data) : ('<a href=?page=player?name='+encodeURIComponent(data)+'>'+data+'</a>'); }},   
                 { "data": "style", "sType": "numeric", "render": 
                     function ( data, type, row, meta ) { 
                         return RaceToString(data) }},
@@ -641,7 +635,7 @@ function ladder_race_rank(){
    
 }
 
-function ladder_race_list(){
+function race_list(){
     var panel;
     panel = '<div id="second_row" class="row">';
     panel += '  <div class="col-md-12">';
@@ -652,7 +646,7 @@ function ladder_race_list(){
     panel += '          <div class="panel-body">';
     panel += '              <p>This is the race list, ordered by date.</p>';
     panel += '              <div class="table-responsive">';
-    panel += '                  <table id="datatable_ladder_race_list" width="100%" class="table table-striped table-hover">';
+    panel += '                  <table id="datatable_race_list" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th>Topspeed</th><th>Average</th><th>Date</th><th>Time</th></tr></thead>';
     panel += '                      <tfoot><tr><th></th><th>Username</th><th>Coursename</th><th>Style</th><th></th><th></th><th></th><th></th></tr></tfoot></table>';
     panel += '              </div>';
@@ -664,7 +658,7 @@ function ladder_race_list(){
 
     $(document).ready(function() {
         var data = null;
-        var item = "ladder_race_list";
+        var item = "race_list";
         var url = "ajax/getJSON.php";
 
         /*if(localStorage.getItem("dataCache")) { //We also have to check if its up to date? hmm.
@@ -683,7 +677,7 @@ function ladder_race_list(){
             });
         }
 
-        $('#datatable_ladder_race_list').DataTable( {
+        $('#datatable_race_list').DataTable( {
             "order": [[ 6, "desc" ]],
             "deferRender": true,
             "bLengthChange": false,
@@ -698,7 +692,7 @@ function ladder_race_list(){
                         return data; }},
                 { "data": "username", "render": 
                     function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=player.php?p='+encodeURIComponent(data)+'> '+data+'</a>'); }},
+                        return (type == 'filter') ? (data) : ('<a href=?page=player?name='+encodeURIComponent(data)+'> '+data+'</a>'); }},
                 { "data": "coursename" }, 
                 { "data": "style", "render": 
                     function ( data, type, row, meta ) { 
@@ -753,7 +747,7 @@ function ladder_race_list(){
    
 }
 
-function ladder_race_count(){
+function race_count(){
     var panel = "";
     panel += '<div id="third_row" class="row">';
     panel += '  <div class="col-md-6">';
@@ -773,7 +767,7 @@ function ladder_race_count(){
 
     $(document).ready(function() {
         var data = null;
-        var item = "ladder_race_count";
+        var item = "race_count";
         var url = "ajax/getJSON.php";
         $.ajax({
             type: "POST",
@@ -786,7 +780,7 @@ function ladder_race_count(){
             }
         });
 
-        //Loda fixme, this can use the json from datatable_ladder_duel_rank maybe and avoid a query?
+        //Loda fixme, this can use the json from datatable_duel_rank maybe and avoid a query?
         var chart;
         chart = new Highcharts.Chart({
             chart: {

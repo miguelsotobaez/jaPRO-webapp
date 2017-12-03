@@ -1,27 +1,3 @@
-/**
- * This sorting plug-in allows for HTML tags with numeric data. With the 'html'
- * type it will strip the HTML and then sorts by strings, with this type it 
- * strips the HTML and then sorts by numbers. Note also that this sorting 
- * plug-in has an equivalent type detection plug-in which can make integration
- * easier.
- * 
- * DataTables 1.10+ has HTML numeric data type detection and sorting abilities
- * built-in. As such this plug-in is marked as deprecated, but might be useful
- * when working with old versions of DataTables.
- *
- *  @name Numbers with HTML
- *  @summary Sort data which is a mix of HTML and numeric data.
- *  @deprecated
- *  @author [Allan Jardine](http://sprymedia.co.uk)
- *
- *  @example
- *    $('#example').dataTable( {
- *       columnDefs: [
- *         { type: 'num-html', targets: 0 }
- *       ]
- *    } );
- */
-
 jQuery.extend( jQuery.fn.dataTableExt.oSort, {
 	"num-html-pre": function ( a ) {
 		var x = String(a).replace( /<[\s\S]*?>/g, "" );
@@ -62,38 +38,4 @@ jQuery.extend( jQuery.fn.dataTableExt.oSort, {
     "num-durhtml-desc": function ( a, b ) {
         return ((a < b) ? 1 : ((a > b) ? -1 : 0));
     }
-
-	/*
-    "time-uni-pre": function (a) {
-        var uniTime;
- 
-        if (a.toLowerCase().indexOf("am") > -1 || (a.toLowerCase().indexOf("pm") > -1 && Number(a.split(":")[0]) === 12)) {
-            uniTime = a.toLowerCase().split("pm")[0].split("am")[0];
-            while (uniTime.indexOf(":") > -1) {
-                uniTime = uniTime.replace(":", "");
-            }
-        } else if (a.toLowerCase().indexOf("pm") > -1 || (a.toLowerCase().indexOf("am") > -1 && Number(a.split(":")[0]) === 12)) {
-            uniTime = Number(a.split(":")[0]) + 12;
-            var leftTime = a.toLowerCase().split("pm")[0].split("am")[0].split(":");
-            for (var i = 1; i < leftTime.length; i++) {
-                uniTime = uniTime + leftTime[i].trim().toString();
-            }
-        } else {
-            uniTime = a.replace(":", "");
-            while (uniTime.indexOf(":") > -1) {
-                uniTime = uniTime.replace(":", "");
-            }
-        }
-        return Number(uniTime);
-    },
- 
-    "time-uni-asc": function (a, b) {
-        return ((a < b) ? -1 : ((a > b) ? 1 : 0));
-    },
- 
-    "time-uni-desc": function (a, b) {
-        return ((a < b) ? 1 : ((a > b) ? -1 : 0));
-    }
-    */
-
 } );

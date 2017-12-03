@@ -21,13 +21,13 @@ require_once('inc/option.inc.php');
                     Main
                 </li>
                 <li id="menu_home">
-                    <a href="?option=home">Home</a>
+                    <a href="?page=home">Home</a>
                 </li>
                 <li id="menu_maps">
-                    <a href="?option=maps">Maps</a>
+                    <a href="?page=maps">Maps</a>
                 </li>
                 <li id="menu_servers">
-                    <a href="?option=servers">Servers</a>
+                    <a href="?page=servers">Servers</a>
                 </li>
                 
                 <li class="nav-category">
@@ -35,13 +35,13 @@ require_once('inc/option.inc.php');
                 </li>
 
                 <li id="menu_player">
-                    <a href="?option=ladder_player"> Player</a>
+                    <a href="?page=player"> Player</a>
                 </li>        
                 <li id="menu_duel">
-                    <a href="?option=ladder_duel"> Duel</a>
+                    <a href="?page=duel"> Duel</a>
                 </li>
                 <li id="menu_race">
-                    <a href="?option=ladder_race"> Race</a>
+                    <a href="?page=race"> Race</a>
                 </li>
                 
 
@@ -71,7 +71,7 @@ require_once('inc/option.inc.php');
 <!-- End wrapper-->
 
 <script type="text/javascript">
-    var option = "<?php Print($option); ?>";
+    var page = "<?php Print($page); ?>";
 </script>
 
 <!-- Vendor scripts -->

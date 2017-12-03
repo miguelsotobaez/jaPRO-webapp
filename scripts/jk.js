@@ -370,7 +370,7 @@ function ladder_duel_list(){
                     else 
                         return data+'%'; }},
                 { "data": "end_time" },
-                { "data": "duration", "sType": "numeric", "className": "duration_ms", "render": //should be uni-time
+                { "data": "duration", "sType": "num-dur", "className": "duration_ms", "render": //should be uni-time
                     function ( data, type, row, meta ) { 
                         return DuelTimeToString(data) }}
             ],
@@ -594,7 +594,7 @@ function ladder_race_rank(){
                         "sInfoFiltered": ''
             },  
             "aaSorting": [[ 1, 'asc' ]],
-            initComplete: function () {            
+            initComplete: function () {
                 this.api().columns([1]).every( function () {
                     var column = this;
                     var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
@@ -706,7 +706,7 @@ function ladder_race_list(){
                 { "data": "topspeed" },
                 { "data": "average" },
                 { "data": "date" },
-                { "data": "duration", "sType": "numeric", "className": "duration_ms", "render":
+                { "data": "duration", "sType": "num-dur", "className": "duration_ms", "render":
                     function ( data, type, row, meta ) { 
                         return '<td style="text-align: right;">'+RaceTimeToString(data)+'<td>' }} //Why doesnt this work..
             ],  
@@ -1184,7 +1184,6 @@ function RaceToString(val){
 }
 
 function RaceTimeToString(duration_ms) {
-    //var milliseconds = (duration_ms % 1000);
     var seconds = (Math.floor((duration_ms / 1000) % 60) + ((duration_ms % 1000) / 1000)).toFixed(3);
     var minutes = Math.floor((duration_ms / (60 * 1000)) % 60);
     var hours = Math.floor(duration_ms / (60 * 60 * 1000));

@@ -49,7 +49,7 @@ switch ($option) {
 
 	case "duel_count": //Loda fixme, we could just do one query maybe and have duel_rank also return the counts and use that?
 		$newArray = null;
-	    $query ="SELECT username, SUM(count) AS count FROM DuelRanks GROUP BY username ORDER BY count DESC";
+	    $query ="SELECT winner, COUNT(*) AS count FROM LocalDuel GROUP BY winner ORDER BY count DESC";
 
 	/*
 	    $arr = sql2arr($query);
@@ -285,6 +285,67 @@ switch ($option) {
 	
 	    /*
 		$array = sql2arr($query);
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $out = $newArray;
+	    */
+	break;
+
+	case "player_accounts":
+		$newArray = null;
+		$query = "SELECT username, lastlogin, created FROM LocalAccount";
+
+
+		$arr = sql2arr($query);//JSON
+		if($arr) {
+		    foreach ($arr as $key => $value) {
+				//$date = date('y-m-d H:i', $value["end_time"]);
+				$newArray[]=array("username"=>$value["username"],"lastlogin"=>$value["lastlogin"],"created"=>$value["created"]);
+		    }
+		}
+		
+		$out = json_encode($newArray);
+
+		/*
+		$array = sql2arr($query);//CSV
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $out = $newArray;
+	    */
+	break;
+
+	case "player_map_charts": //Get Most popular courses, most popular styles, most exclusive course-styles, total number of races
+		$newArray = null;
+		$query = "SELECT coursename, -1 AS style, count FROM (
+		    SELECT coursename, COUNT(*) as count FROM LocalRun GROUP BY coursename ORDER BY count DESC LIMIT 5)
+			UNION ALL
+			SELECT -1 AS coursename, style, count FROM (
+		    SELECT style, COUNT(*) as count FROM LocalRun GROUP BY style ORDER BY count DESC LIMIT 10)
+		    UNION ALL
+			SELECT coursename, style, count FROM (
+		    SELECT coursename, style, COUNT(*) as count FROM LocalRun GROUP BY coursename, style ORDER BY count ASC LIMIT 5)
+			UNION ALL
+			SELECT -1 AS coursename, -1 AS style, count FROM (SELECT COUNT(*) as count FROM LocalRun)
+			ORDER BY count DESC";
+
+		$arr = sql2arr($query);//JSON
+		if($arr) {
+		    foreach ($arr as $key => $value) {
+				//$date = date('y-m-d H:i', $value["end_time"]);
+				$newArray[]=array("coursename"=>$value["coursename"],"style"=>$value["style"],"count"=>$value["count"]);
+		    }
+		}
+		
+		$out = json_encode($newArray);
+
+		/*
+		$array = sql2arr($query);//CSV
 		foreach($array as $arr) {
 		    $newArray .= implode(";", $arr) . "\n";
 

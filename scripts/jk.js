@@ -8,16 +8,28 @@ $(document).ready(function () {
     if(page=="home"){
         home();
     }else if(page=="player"){
+        player_title();//Show total number of players, get each playername for dropdown select
+        if (player) { //Player selected, show specific stats
+            player_header(); //Shows avatar and has buttons to switch between race and duel
+            player_overall_stats();
 
-        //var player = <?php echo $_GET['name'] ?>;
-        if (player) {
-            player_title();
-            player_duel_chart();
-            player_race_chart();
-            player_duel_graph();
+            if (player_option == "combat") {
+                if (player_duel_type)//Ditch this maybe?
+                    player_duel_type_stats();//Ditch this maybe?
+                else
+                    player_duel_stats();
+            }
+            else {
+                if (player_race_style) //Ditch this maybe?
+                    player_race_style_stats();//Ditch this maybe?
+                else
+                    player_race_stats();
+            }
+
         }
-        else {
-            player_title();
+        else { //No one selected, show global stats
+            player_map_charts(); //Most popular courses, most popular styles, most exclusive course-styles, total # of races
+            player_duel_charts(); //Most popular duel styles, total number of duels
         }
         
         //Global info for players, or should this be in a header shown on every page?
@@ -927,8 +939,85 @@ function player_title(){
     HTML+='            </div>';
     HTML+='        </div>';
     $("#main-content").append(HTML);
+
+    var data = null;
+    var item = "player_accounts";
+    var url = "ajax/getJSON.php";
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "JSON",
+        async: false,
+        data: { option: item },
+        success: function(res) {
+            data = res;
+        }
+    });
 }
 
+function player_map_charts(){
+    //Most popular maps, most popular styles, most exclusive map-styles, total races
+    var panel = "";
+    panel += '<div id="third_row" class="row">';
+    panel += '  <div class="col-md-6">';
+    panel += '                    <div class="panel panel-filled">';
+    panel += '                      <div class="panel-heading">';
+    panel += '                          Most Popular Maps';
+    panel += '                      </div>';
+    panel += '                        <div class="panel-body">';
+    panel += '                            <p>Favorite duel types.</p>';
+    panel += '                            <div id="player_map_charts">';
+    panel += '                            </div>';
+    panel += '                        </div>';
+    panel += '                    </div>';
+    panel += '                </div>';
+    panel += '            </div>';
+    $("#main-content").append(panel);
+
+    var data = null;
+    var item = "player_map_charts";
+    var url = "ajax/getJSON.php";
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "JSON",
+        async: false,
+        data: { option: item },
+        success: function(res) {
+            data = res;
+        }
+    });
+
+    var chart;
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'player_map_charts',
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: null,
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Count',
+                data: data
+            }]
+        });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_player').addClass("active");
+}
 
 function player_duel_chart(){
     var panel = "";

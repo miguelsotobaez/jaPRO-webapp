@@ -49,18 +49,19 @@ switch ($option) {
 
 	case "duel_count": //Loda fixme, we could just do one query maybe and have duel_rank also return the counts and use that?
 		$newArray = null;
-	    $query ="SELECT winner, COUNT(*) AS count FROM LocalDuel GROUP BY winner ORDER BY count DESC";
+	    $query ="SELECT type, COUNT(*) AS count FROM LocalDuel GROUP BY winner ORDER BY count DESC";
 
-	/*
+	
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array(0=>$value["username"],1=>$value["count"]);
+		    	$newArray[]=array(0=>$value["type"],1=>$value["count"]);
 		    }
 	    }
 
 	    $out = json_encode($newArray);
-	*/
+	
+	    /*
 	   	$array = sql2arr($query);
 		foreach($array as $arr) {
 		    $newArray .= implode(";", $arr) . "\n";
@@ -68,6 +69,7 @@ switch ($option) {
 		}
 
 	    $out = $newArray;
+	    */
 	break;
 
 	case "duel_list":
@@ -146,18 +148,19 @@ switch ($option) {
 
 	case "race_count":
 		$newArray = null;
-	    $query ="SELECT username, SUM(count) AS count FROM RaceRanks GROUP BY username ORDER BY count DESC";
-	/*
+	    $query ="SELECT style, SUM(count) AS count FROM RaceRanks GROUP BY style ORDER BY count DESC";
+
+	
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array(0=>$value["username"],1=>$value["count"]);
+		    	$newArray[]=array(0=>$value["style"],1=>$value["count"]);
 		    }
 	    }
 
 	    $out = json_encode($newArray);
-	*/
 	
+	/*
 	   	$array = sql2arr($query);
 		foreach($array as $arr) {
 		    $newArray .= implode(";", $arr) . "\n";
@@ -165,6 +168,7 @@ switch ($option) {
 		}
 
 	    $out = $newArray;
+	    */
 	 
 	break;
 	
@@ -192,10 +196,104 @@ switch ($option) {
 
 	    $out = $newArray;
 	    
-
 	break;
 
-	case "player_duel_chart":
+	case "player_accounts":
+		$newArray = null;
+		$query = "SELECT username, lastlogin, created FROM LocalAccount";
+
+		$arr = sql2arr($query);//JSON
+		if($arr) {
+		    foreach ($arr as $key => $value) {
+				//$date = date('y-m-d H:i', $value["end_time"]);
+				$newArray[]=array("username"=>$value["username"],"lastlogin"=>$value["lastlogin"],"created"=>$value["created"]);
+		    }
+		}
+		
+		$out = json_encode($newArray);
+
+		/*
+		$array = sql2arr($query);//CSV
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $out = $newArray;
+	    */
+	break;
+
+	case "player_map_charts": //Get Most popular courses,  most exclusive course-styles
+		$newArray = null;
+		/*
+		$query = "SELECT coursename, -1 AS style, count FROM (
+		    SELECT coursename, COUNT(*) as count FROM LocalRun GROUP BY coursename ORDER BY count DESC LIMIT 5)
+			UNION ALL
+			SELECT -1 AS coursename, style, count FROM (
+		    SELECT style, COUNT(*) as count FROM LocalRun GROUP BY style ORDER BY count DESC LIMIT 10)
+		    UNION ALL
+			SELECT coursename, style, count FROM (
+		    SELECT coursename, style, COUNT(*) as count FROM LocalRun GROUP BY coursename, style ORDER BY count ASC LIMIT 5)
+			UNION ALL
+			SELECT -1 AS coursename, -1 AS style, count FROM (SELECT COUNT(*) as count FROM LocalRun)
+			ORDER BY count DESC";
+			*/
+		$query = "SELECT coursename, -1 AS style, count FROM (
+		    SELECT coursename, COUNT(*) as count FROM LocalRun GROUP BY coursename ORDER BY count DESC LIMIT 5)
+			UNION ALL
+			SELECT coursename, style, count FROM (
+		    SELECT coursename, style, COUNT(*) as count FROM LocalRun GROUP BY coursename, style ORDER BY count ASC LIMIT 5)
+			ORDER BY count DESC";
+
+		$arr = sql2arr($query);//JSON
+		if($arr) {
+		    foreach ($arr as $key => $value) {
+				//$date = date('y-m-d H:i', $value["end_time"]);
+				$newArray[]=array(0=>$value["coursename"],1=>$value["style"],2=>$value["count"]);
+		    }
+		}
+		
+		$out = json_encode($newArray);
+
+		/*
+		$array = sql2arr($query);//CSV
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $out = $newArray;
+	    */
+	break;
+
+	case "player_duel_charts": //IDK what this should be
+		$newArray = null;
+		$query = "SELECT type, COUNT(*) AS count FROM LocalDuel GROUP BY type
+			UNION ALL
+			SELECT -1 AS type, COUNT(*) AS count FROM LocalDuel";
+
+		$arr = sql2arr($query);//JSON
+		if($arr) {
+		    foreach ($arr as $key => $value) {
+				//$date = date('y-m-d H:i', $value["end_time"]);
+				$newArray[]=array(0=>$value["type"],1=>$value["count"]);
+		    }
+		}
+		
+		$out = json_encode($newArray);
+
+		/*
+		$array = sql2arr($query);//CSV
+		foreach($array as $arr) {
+		    $newArray .= implode(";", $arr) . "\n";
+
+		}
+
+	    $out = $newArray;
+	    */
+	break;
+
+	case "player_duel_stats":
 		$username = $_POST["player"];
 		$newArray = null;
 
@@ -207,7 +305,6 @@ switch ($option) {
 		$exists = sql2arr2($result);
 		$result->finalize();
 
-	
 	    if($exists){
 			$min = min(array_column($exists, 'elo'));
 		    foreach ($exists as $key => $value) {
@@ -230,40 +327,7 @@ switch ($option) {
 	    */
 	break;
 
-	case "player_duel_graph":
-		$username = $_POST["player"];
-		$newArray = null;
-
-		//Should select type, and let client filter that.. should apply smoothing? 
-		$stmt = $db->prepare("SELECT end_time, type, CAST(winner_elo AS INT) AS elo FROM LocalDuel WHERE winner = :username 
-			UNION
-			select end_time, type, CAST(loser_elo AS INT) AS elo FROM LocalDuel WHERE loser = :username 
-			ORDER BY end_time ASC");
-		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
-		$result = $stmt->execute();
-		$exists = sql2arr2($result);
-		$result->finalize();
-	
-	    if($exists){
-		    foreach ($exists as $key => $value) {
-		    	$newArray[]=array(0=>$value["end_time"],1=>$value["elo"]);
-		    }
-	    }
-
-	    $out = json_encode($newArray);
-	
-	    /*
-	   	$array = sql2arr($query);
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $out = $newArray;
-	    */
-	break;
-
-	case "player_race_chart": //Get relative strength of each race style for this player
+	case "player_race_stats": //Get relative strength of each race style for this player
 		$username = $_POST["player"];
 		$newArray = null;
 
@@ -294,58 +358,30 @@ switch ($option) {
 	    */
 	break;
 
-	case "player_accounts":
+	case "player_duel_graph":
+		$username = $_POST["player"];
 		$newArray = null;
-		$query = "SELECT username, lastlogin, created FROM LocalAccount";
 
-
-		$arr = sql2arr($query);//JSON
-		if($arr) {
-		    foreach ($arr as $key => $value) {
-				//$date = date('y-m-d H:i', $value["end_time"]);
-				$newArray[]=array("username"=>$value["username"],"lastlogin"=>$value["lastlogin"],"created"=>$value["created"]);
+		//Should select type, and let client filter that.. should apply smoothing? 
+		$stmt = $db->prepare("SELECT end_time, type, CAST(winner_elo AS INT) AS elo FROM LocalDuel WHERE winner = :username 
+			UNION
+			select end_time, type, CAST(loser_elo AS INT) AS elo FROM LocalDuel WHERE loser = :username 
+			ORDER BY end_time ASC");
+		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
+		$result = $stmt->execute();
+		$exists = sql2arr2($result);
+		$result->finalize();
+	
+	    if($exists){
+		    foreach ($exists as $key => $value) {
+		    	$newArray[]=array(0=>$value["end_time"],1=>$value["elo"]);
 		    }
-		}
-		
-		$out = json_encode($newArray);
+	    }
 
-		/*
-		$array = sql2arr($query);//CSV
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $out = $newArray;
-	    */
-	break;
-
-	case "player_map_charts": //Get Most popular courses, most popular styles, most exclusive course-styles, total number of races
-		$newArray = null;
-		$query = "SELECT coursename, -1 AS style, count FROM (
-		    SELECT coursename, COUNT(*) as count FROM LocalRun GROUP BY coursename ORDER BY count DESC LIMIT 5)
-			UNION ALL
-			SELECT -1 AS coursename, style, count FROM (
-		    SELECT style, COUNT(*) as count FROM LocalRun GROUP BY style ORDER BY count DESC LIMIT 10)
-		    UNION ALL
-			SELECT coursename, style, count FROM (
-		    SELECT coursename, style, COUNT(*) as count FROM LocalRun GROUP BY coursename, style ORDER BY count ASC LIMIT 5)
-			UNION ALL
-			SELECT -1 AS coursename, -1 AS style, count FROM (SELECT COUNT(*) as count FROM LocalRun)
-			ORDER BY count DESC";
-
-		$arr = sql2arr($query);//JSON
-		if($arr) {
-		    foreach ($arr as $key => $value) {
-				//$date = date('y-m-d H:i', $value["end_time"]);
-				$newArray[]=array("coursename"=>$value["coursename"],"style"=>$value["style"],"count"=>$value["count"]);
-		    }
-		}
-		
-		$out = json_encode($newArray);
-
-		/*
-		$array = sql2arr($query);//CSV
+	    $out = json_encode($newArray);
+	
+	    /*
+	   	$array = sql2arr($query);
 		foreach($array as $arr) {
 		    $newArray .= implode(";", $arr) . "\n";
 

@@ -11,25 +11,30 @@ $(document).ready(function () {
         player_title();//Show total number of players, get each playername for dropdown select
         if (player) { //Player selected, show specific stats
             player_header(); //Shows avatar and has buttons to switch between race and duel
-            player_overall_stats();
+            player_overall_stats(); //Combined stats for all duel types, all race styles, etc.
 
-            if (player_option == "combat") {
-                if (player_duel_type)//Ditch this maybe?
+            if (race) {//==1
+                if (0)//(player_race_style) //Ditch this maybe?
+                    player_race_style_stats();//Ditch this maybe?
+                else
+                    player_race_stats();//Do we have to get literally everything for this since we have to compare it to other players to get percentile?
+            }
+            else {
+                if (0)//(player_duel_type)//Ditch this maybe?
                     player_duel_type_stats();//Ditch this maybe?
                 else
                     player_duel_stats();
             }
-            else {
-                if (player_race_style) //Ditch this maybe?
-                    player_race_style_stats();//Ditch this maybe?
-                else
-                    player_race_stats();
-            }
 
         }
         else { //No one selected, show global stats
-            player_map_charts(); //Most popular courses, most popular styles, most exclusive course-styles, total # of races
-            player_duel_charts(); //Most popular duel styles, total number of duels
+            //This should be stuff that isnt viewable in other places, and relevant to the players page...
+            //Total # of races is viewable on race page
+            //Most popular styles is viewable on race page
+            //I guess it could be course based?
+
+            player_map_charts(); //Most popular courses, most exclusive course-styles
+            player_duel_charts(); // ?? what should this display
         }
         
         //Global info for players, or should this be in a header shown on every page?
@@ -471,11 +476,12 @@ function duel_count(){
         $.ajax({
             type: "POST",
             url: url,
-            dataType: "text",
+            dataType: "JSON",
             async: false,
             data: { option: item},
             success: function(res) {
-                data = $.csv.toArrays(res, { separator: ';' });
+                data = res;
+                //data = $.csv.toArrays(res, { separator: ';' });
             }
         });
 
@@ -917,7 +923,7 @@ function race_count(){
 ///////////////////////////////PLAYER////////////////////////////////
 /////////////////////////////////////////////////////////////////////
 
-function player_title(){
+function player_title(){ //Show total number of players, get each playername for dropdown select
     var HTML;
     HTML='<div class="row">';
     HTML+='            <div class="col-lg-12">';
@@ -955,8 +961,7 @@ function player_title(){
     });
 }
 
-function player_map_charts(){
-    //Most popular maps, most popular styles, most exclusive map-styles, total races
+function player_map_charts(){//Most popular maps, most popular styles, most exclusive map-styles, total races
     var panel = "";
     panel += '<div id="third_row" class="row">';
     panel += '  <div class="col-md-6">';
@@ -965,7 +970,7 @@ function player_map_charts(){
     panel += '                          Most Popular Maps';
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
-    panel += '                            <p>Favorite duel types.</p>';
+    panel += '                            <p>Favorite maps.</p>';
     panel += '                            <div id="player_map_charts">';
     panel += '                            </div>';
     panel += '                        </div>';
@@ -1019,17 +1024,88 @@ function player_map_charts(){
     $('#menu_player').addClass("active");
 }
 
-function player_duel_chart(){
+function player_duel_charts(){//Most popular maps, most popular styles, most exclusive map-styles, total races
     var panel = "";
     panel += '<div id="third_row" class="row">';
     panel += '  <div class="col-md-6">';
     panel += '                    <div class="panel panel-filled">';
     panel += '                      <div class="panel-heading">';
-    panel += '                          Duel Types';
+    panel += '                          Most Popular Duels';
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
     panel += '                            <p>Favorite duel types.</p>';
-    panel += '                            <div id="player_duel_count_chart">';
+    panel += '                            <div id="player_duel_charts">';
+    panel += '                            </div>';
+    panel += '                        </div>';
+    panel += '                    </div>';
+    panel += '                </div>';
+    panel += '            </div>';
+    $("#main-content").append(panel);
+
+    var data = null;
+    var item = "player_duel_charts";
+    var url = "ajax/getJSON.php";
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "JSON",
+        async: false,
+        data: { option: item },
+        success: function(res) {
+            data = res;
+        }
+    });
+
+    var chart;
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'player_duel_charts',
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: null,
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Count',
+                data: data
+            }]
+        });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_player').addClass("active");
+}
+
+function player_header() {//Shows avatar and has buttons to switch between race and duel
+
+}
+
+function player_overall_stats() {//Combined stats for all duel types, all race styles, etc
+
+}
+
+function player_race_stats(){//Most popular duels, total number of duels
+    var panel = "";
+    panel += '<div id="third_row" class="row">';
+    panel += '  <div class="col-md-6">';
+    panel += '                    <div class="panel panel-filled">';
+    panel += '                      <div class="panel-heading">';
+    panel += '                          Race Types';
+    panel += '                      </div>';
+    panel += '                        <div class="panel-body">';
+    panel += '                            <p>Favorite race types.</p>';
+    panel += '                            <div id="player_race_stats">';
     panel += '                            </div>';
     panel += '                        </div>';
     panel += '                    </div>';
@@ -1039,7 +1115,7 @@ function player_duel_chart(){
 
     var username = player;
     var data = null;
-    var item = "player_duel_chart";
+    var item = "player_race_stats";
     var url = "ajax/getJSON.php";
     $.ajax({
         type: "POST",
@@ -1055,7 +1131,71 @@ function player_duel_chart(){
     var chart;
         chart = new Highcharts.Chart({
             chart: {
-                renderTo: 'player_duel_count_chart',
+                renderTo: 'player_race_stats',
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: null,
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Strength',
+                data: data
+            }]
+        });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_player').addClass("active");
+}
+
+function player_duel_stats(){//Most popular duels, total number of duels
+    var panel = "";
+    panel += '<div id="third_row" class="row">';
+    panel += '  <div class="col-md-6">';
+    panel += '                    <div class="panel panel-filled">';
+    panel += '                      <div class="panel-heading">';
+    panel += '                          Duel Types';
+    panel += '                      </div>';
+    panel += '                        <div class="panel-body">';
+    panel += '                            <p>Favorite duel types.</p>';
+    panel += '                            <div id="player_duel_stats">';
+    panel += '                            </div>';
+    panel += '                        </div>';
+    panel += '                    </div>';
+    panel += '                </div>';
+    panel += '            </div>';
+    $("#main-content").append(panel);
+
+    var username = player;
+    var data = null;
+    var item = "player_duel_stats";
+    var url = "ajax/getJSON.php";
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "JSON",
+        async: false,
+        data: { option: item, player: username},
+        success: function(res) {
+            data = res;
+        }
+    });
+
+    var chart;
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'player_duel_stats',
                 plotBackgroundColor: null,
                 plotBorderWidth: null,
                 plotShadow: false

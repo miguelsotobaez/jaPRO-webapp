@@ -73,6 +73,7 @@ require_once('inc/page.inc.php');
 <script type="text/javascript">
     var page = "<?php Print($page); ?>";
     var player = "<?php Print($player); ?>";
+    var race = "<?php Print($race); ?>";
 </script>
 
 <!-- Vendor scripts -->

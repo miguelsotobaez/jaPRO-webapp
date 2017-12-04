@@ -215,8 +215,8 @@ function duel_rank(){
     panel += '              <p>This is the saber rank list, ordered by ELO.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_duel_rank" width="100%" class="table table-striped table-hover">';
-    panel += '                      <thead><tr><th>Position</th><th>Player</th><th>Type</th><th>Elo</th><th data-hide="phone,table"><label title="Average strength of opponent. A lower value means this player faces easier opponents.">TS</label></th><th>Count</th></tr></thead>';
-    panel += '                      <tfoot><tr><th></th><th>Player</th><th>Type</th><th></th><th></th><th></th></tr></tfoot>';
+    panel += '                      <thead><tr><th><label title="Elo rank compared to every other elo regardless of type.">Rank</label></th><th>Player</th><th>Type</th><th>Elo</th><th data-hide="phone,table"><label title="Average strength of opponent. A lower value means this player faces easier opponents.">TS</label></th><th>Count</th></tr></thead>';
+    panel += '                      <tfoot><tr><th></th><th>Player</th><th>Type</th><th></th><th data-hide="phone,table"></th><th></th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -246,7 +246,9 @@ function duel_rank(){
             "dom": 'lrtp', //Hide search box
             "data": data,
             "columns": [
-                { "data": null, defaultContent: "N/A" }, //How get position for this
+                { "data": null,  "render": 
+                    function ( data, type, row, meta ) { 
+                     return meta.row+1 }}, //Well.. this is not quite what we want, but I guess it will be ok (shows rank of their elo compared to every other elo regardless of type)
                 { "data": 0, "render": 
                     function ( data, type, row, meta ) { 
                         return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
@@ -351,8 +353,8 @@ function duel_list(){
     panel += '              <p>Here you can see the registri of all saber duels in japro server.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_duel_list" width="100%" class="table table-striped table-hover">';
-    panel += '                      <thead><tr><th>Winner</th><th>Loser</th><th>Type</th><th>Winner Health</th><th>Odds</th><th>Date</th><th data-hide="phone,table">Duration</th></tr></thead>';
-    panel += '                      <tfoot><tr><th>Winner</th><th>Loser</th><th>Type</th><th></th><th></th><th></th><th></th></tr></tfoot>';
+    panel += '                      <thead><tr><th>Winner</th><th>Loser</th><th>Type</th><th data-hide="phone,table">Winner Health</th><th>Odds</th><th>Date</th><th data-hide="phone,table">Duration</th></tr></thead>';
+    panel += '                      <tfoot><tr><th>Winner</th><th>Loser</th><th>Type</th><th data-hide="phone,table"></th><th></th><th></th><th data-hide="phone,table"></th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -457,17 +459,17 @@ function duel_count(){
     panel += '  <div class="col-md-6">';
     panel += '                    <div class="panel panel-filled">';
     panel += '                      <div class="panel-heading">';
-    panel += '                          Saber Duel Count';
+    panel += '                          Duel Count';
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
-    panel += '                            <p>Most active duelers.</p>';
+    panel += '                            <p>Most active duel types.</p>';
     panel += '                            <div id="chart_duel_count">';
     panel += '                            </div>';
     panel += '                        </div>';
     panel += '                    </div>';
     panel += '                </div>';
     panel += '            </div>';
-    $("#main-content").append(panel);
+    $("#main-content #second_row").append(panel);
 
     $(document).ready(function() {
         var data = null;
@@ -481,41 +483,64 @@ function duel_count(){
             data: { option: item},
             success: function(res) {
                 data = res;
-                //data = $.csv.toArrays(res, { separator: ';' });
             }
         });
 
         //Loda fixme, this can use the json from datatable_duel_rank maybe and avoid a query?
-        var chart;
+    var chart
         chart = new Highcharts.Chart({
             chart: {
-                renderTo: 'chart_duel_count',
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
+                type: 'bar',
+                renderTo: 'chart_duel_count'
             },
-            title: null,
+            title: {
+                text: ''
+            },
+            xAxis: {
+                labels: {
+                   enabled: false
+                },
+                lineColor: 'transparent',
+                minorTickLength: 0,
+                tickLength: 0,
+            },
+            yAxis: {
+                labels: {
+                    enabled: false
+                },
+                minorTickLength: 0,
+                tickLength: 0,
+                gridLineColor: 'transparent',
+                title: {
+                    enabled: false,
+                }
+            },
+            legend: {
+                enabled: false
+            },
+                labels: {
+                    enabled: false
+                },
             plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        color: '#000000',
-                        connectorColor: '#000000'
-                    }
+                series: {
+                    stacking: 'normal'
                 }
             },
             series: [{
-                type: 'pie',
-                name: 'Duel count',
-                data: data //DuelRankData?
+                name: 'John', //Should be [0][0]
+                data: data["1"] //[0][1]
+            }, {
+                name: 'Jane', //[1][0]
+                data: data["3"]//[1][1]
+            }, {
+                name: 'Joe', //[2][0]
+                data: data["2"] //[2][1]
             }]
         });
     });
 
     $('.jk-nav li').removeClass("active");
-    $('#menu_saber').addClass("active");
+    $('#menu_race').addClass("active");
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -563,8 +588,8 @@ function race_rank(){
     panel += '              <p>This is the race rank.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_race_rank" width="100%" class="table table-striped table-hover">';
-    panel += '                      <thead><tr><th>Position</th><th>Username</th><th>Style</th><th>Score</th><th>Average Score</th><th>Average Percentile</th><th>Average Rank</th><th>Golds</th><th>Silvers</th><th>Bronzes</th><th>Count</th></tr></thead>';
-    panel += '                      <tfoot><tr><th></th><th>Username</th><th>Style</th><th></th><th></th><th></th><th></th><th></th><th><th></th></th><th></th></tr></tfoot>';
+    panel += '                      <thead><tr><th><label title="Score rank compared to every other score regardless of style.">Rank</label></th><th>Username</th><th>Style</th><th>Score</th><th data-hide="phone,table">Average Score</th><th data-hide="phone,table">Average Percentile</th><th data-hide="phone,table">Average Rank</th><th data-hide="phone,table">Golds</th><th data-hide="phone,table">Silvers</th><th data-hide="phone,table">Bronzes</th><th>Count</th></tr></thead>';
+    panel += '                      <tfoot><tr><th></th><th>Username</th><th>Style</th><th></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th></th></tr></tfoot>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -594,8 +619,10 @@ function race_rank(){
             "deferRender": true,
             "dom": 'lrtp', //Hide search box
             "data": data,
-            "columns": [
-                { "data": null, defaultContent: "N/A" }, //How get position for this
+            "columns": [                
+                { "data": null,  "render":                 //{ "data": null, defaultContent: "N/A" }, //How get position for this
+                    function ( data, type, row, meta ) { 
+                     return meta.row+1 }}, //This is not what we want since it counts combined styles as a style.          
                 { "data": 0, "render": 
                     function ( data, type, row, meta ) { 
                         return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},   
@@ -690,8 +717,8 @@ function race_list(){
     panel += '              <p>This is the race list, ordered by date.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_race_list" width="100%" class="table table-striped table-hover">';
-    panel += '                      <thead><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th>Topspeed</th><th>Average</th><th>Date</th><th>Time</th></tr></thead>';
-    panel += '                      <tfoot><tr><th></th><th>Username</th><th>Coursename</th><th>Style</th><th></th><th></th><th></th><th></th></tr></tfoot></table>';
+    panel += '                      <thead><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th data-hide="phone,table">Topspeed</th><th data-hide="phone,table">Average</th><th>Date</th><th>Time</th></tr></thead>';
+    panel += '                      <tfoot><tr><th></th><th>Username</th><th>Coursename</th><th>Style</th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th></th><th></th></tr></tfoot></table>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -860,7 +887,7 @@ function race_count(){
     panel += '                          Race Count';
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
-    panel += '                            <p>Most active racers.</p>';
+    panel += '                            <p>Most active race styles.</p>';
     panel += '                            <div id="chart_race_count">';
     panel += '                            </div>';
     panel += '                        </div>';
@@ -885,31 +912,59 @@ function race_count(){
         });
 
         //Loda fixme, this can use the json from datatable_duel_rank maybe and avoid a query?
-        var chart;
+    var chart
         chart = new Highcharts.Chart({
             chart: {
-                renderTo: 'chart_race_count',
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
+                type: 'bar',
+                renderTo: 'chart_race_count'
             },
-            title: null,
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        color: '#000000',
-                        connectorColor: '#000000'
-                    }
+            title: {
+                text: ''
+            },
+            xAxis: {
+                labels: {
+                   enabled: false
+                },
+                lineColor: 'transparent',
+                minorTickLength: 0,
+                tickLength: 0,
+            },
+            yAxis: {
+                labels: {
+                    enabled: false
+                },
+                minorTickLength: 0,
+                tickLength: 0,
+                gridLineColor: 'transparent',
+                title: {
+                    enabled: false,
                 }
             },
-            series: [{
-                type: 'pie',
-                name: 'Race count',
-                data: data //RaceRankData? //Graph only entries where style is -1.  Graph username vs count.  
+            legend: {
+                enabled: false
+            },
+                labels: {
+                    enabled: false
+                },
+            plotOptions: {
+                series: {
+                    stacking: 'normal'
+                }
+            },
+            series: [{ 
+                data: data
             }]
+            /*
+            series: [{
+                name: 'John', //Should be [0][0]
+                data: data["1"] //[0][1]
+            }, {
+                name: 'Jane', //[1][0]
+                data: data["3"]//[1][1]
+            }, {
+                name: 'Joe', //[2][0]
+                data: data["2"] //[2][1]
+            }]*/
         });
     });
 

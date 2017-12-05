@@ -38,7 +38,7 @@ switch ($option) {
 
 	case "duel_count": //Loda fixme, we could just do one query maybe and have duel_rank also return the counts and use that?
 		$newArray = null;
-	    $query ="SELECT type, COUNT(*) AS count FROM LocalDuel GROUP BY winner ORDER BY count DESC";
+	    $query ="SELECT type, COUNT(*) AS count FROM LocalDuel GROUP BY type ORDER BY count DESC";
 
 	
 	    $arr = sql2arr($query);

@@ -456,7 +456,7 @@ function duel_list(){
 function duel_count(){
     var panel = "";
     panel += '<div id="third_row" class="row">';
-    panel += '  <div class="col-md-6">';
+    panel += '  <div class="col-md-12">';
     panel += '                    <div class="panel panel-filled">';
     panel += '                      <div class="panel-heading">';
     panel += '                          Duel Count';
@@ -510,6 +510,7 @@ function duel_count(){
                 },
                 minorTickLength: 0,
                 tickLength: 0,
+                reversedStacks: false,
                 gridLineColor: 'transparent',
                 title: {
                     enabled: false,
@@ -526,15 +527,21 @@ function duel_count(){
                     stacking: 'normal'
                 }
             },
-            series: [{
-                name: 'John', //Should be [0][0]
-                data: data["1"] //[0][1]
+            series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?  Also should skip if the item is less than like 5percent?
+                name: DuelToString(data[0][0]),
+                data: [data[0][1]] //[0][1]
             }, {
-                name: 'Jane', //[1][0]
-                data: data["3"]//[1][1]
+                name: DuelToString(data[1][0]),
+                data: [data[1][1]]
             }, {
-                name: 'Joe', //[2][0]
-                data: data["2"] //[2][1]
+                name: DuelToString(data[2][0]),
+                data: [data[2][1]]
+            }, {
+                name: DuelToString(data[3][0]),
+                data: [data[3][1]]
+            }, {
+                name: DuelToString(data[4][0]),
+                data: [data[4][1]]
             }]
         });
     });
@@ -824,13 +831,9 @@ function race_list(){
 function race_count(){
     var panel = "";
     panel += '<div id="third_row" class="row">';
-    panel += '  <div class="col-md-6">';
+    panel += '  <div class="col-md-12">';
     panel += '                    <div class="panel panel-filled">';
-    panel += '                      <div class="panel-heading">';
-    panel += '                          Race Count';
-    panel += '                      </div>';
     panel += '                        <div class="panel-body">';
-    panel += '                            <p>Most active race styles.</p>';
     panel += '                            <div id="chart_race_count">';
     panel += '                            </div>';
     panel += '                        </div>';
@@ -859,7 +862,8 @@ function race_count(){
         chart = new Highcharts.Chart({
             chart: {
                 type: 'bar',
-                renderTo: 'chart_race_count'
+                renderTo: 'chart_race_count',
+                margin: 0
             },
             title: {
                 text: ''
@@ -878,6 +882,7 @@ function race_count(){
                 },
                 minorTickLength: 0,
                 tickLength: 0,
+                reversedStacks: false,
                 gridLineColor: 'transparent',
                 title: {
                     enabled: false,
@@ -893,21 +898,23 @@ function race_count(){
                 series: {
                     stacking: 'normal'
                 }
-            },
-            series: [{ 
-                data: data
+            },            
+            series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?
+                name: RaceToString(data[0][0]),
+                data: [data[0][1]] //[0][1]
+            }, {
+                name: RaceToString(data[1][0]),
+                data: [data[1][1]]
+            }, {
+                name: RaceToString(data[2][0]),
+                data: [data[2][1]]
+            }, {
+                name: RaceToString(data[3][0]),
+                data: [data[3][1]]
+            }, {
+                name: RaceToString(data[4][0]),
+                data: [data[4][1]]
             }]
-            /*
-            series: [{
-                name: 'John', //Should be [0][0]
-                data: data["1"] //[0][1]
-            }, {
-                name: 'Jane', //[1][0]
-                data: data["3"]//[1][1]
-            }, {
-                name: 'Joe', //[2][0]
-                data: data["2"] //[2][1]
-            }]*/
         });
     });
 

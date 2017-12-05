@@ -231,11 +231,11 @@ function duel_rank(){
         $.ajax({
             type: "POST",
             url: url,
-            dataType: "text",
+            dataType: "JSON",
             async: false,
             data: { option: item },
             success: function(res) {
-                data = $.csv.toArrays(res, { separator: ';' });
+                data = res;
             }
         });
 
@@ -370,11 +370,11 @@ function duel_list(){
         $.ajax({
             type: "POST",
             url: url,
-            dataType: "text",
+            dataType: "JSON",
             async: false,
             data: { option: item },
             success: function(res) {
-                data = $.csv.toArrays(res, { separator: ';' });
+                data = res;
             }
         });
 
@@ -604,11 +604,11 @@ function race_rank(){
         $.ajax({
             type: "POST",
             url: url,
-            dataType: "text",
+            dataType: "JSON",
             async: false,
             data: { option: item },
             success: function(res) {
-                data = $.csv.toArrays(res, { separator: ';' });
+                data = res;
                 //RaceRankData = data
             }
         });
@@ -731,38 +731,21 @@ function race_list(){
         var item = "race_list";
         var url = "ajax/getJSON.php";
 
-/*
-var d1 = new Date();
-var date1_ms = d1.getTime();
-*/
-
         /*if(localStorage.getItem("dataCache")) { //We also have to check if its up to date? hmm.
             data = JSON.parse(localStorage.getItem("dataCache"));
         } else*/ {
             $.ajax({
                 type: "POST",
                 url: url,
-                dataType: "text",
+                dataType: "JSON",
                 async: false,
                 data: { option: item },
-                //success: function(res) {//JSON
-                    //data = res;
+                success: function(res) {//JSON
+                    data = res;
                     //localStorage.setItem("dataCache", JSON.stringify(res));
-
-                //}
-                success: function(res) {//CSV
-                    data = $.csv.toArrays(res, { separator: ';' });
                 }
-
             });
         }
-/*
-var d2 = new Date();
-var date2_ms = d2.getTime();
-var diff1 = date2_ms - date1_ms;
-*/
-          // Calculate the difference in milliseconds
-
 
         $('#datatable_race_list').DataTable( {
             "order": [[ 6, "desc" ]],
@@ -770,37 +753,7 @@ var diff1 = date2_ms - date1_ms;
             "bLengthChange": false,
             "dom": 'lrtp', //Hide search box
             "data": data,
-/*
-            "columns": [ //JSON
-                { "data": "a", "sType": "num-html", "render": 
-                    function ( data, type, row, meta ) {
-                    if (data == 1) 
-                        return '<b><font color="#bc5700">1</font></b>'; //Muted orange
-                    else 
-                        return data; }},
-                { "data": "b", "render": 
-                    function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
-                { "data": "c" }, 
-                { "data": "d", "render": 
-                    function ( data, type, row, meta ) { 
-                        return RaceToString(data) }},
-                { "data": "e" },
-                { "data": "f" },
-                { "data": "g", "render": 
-                    function ( data, type, row, meta ) { 
-                        return '<a href="../races/'+encodeURIComponent(row["b"])+'/'+encodeURIComponent(row["b"])+'-'+encodeURIComponent(row["c"].replace(" ", ""))+'-'
-                            +RaceToString(row["d"]).toLowerCase()+'.dm_26">'+Date(data*1000)+'<a>' }},
-                        //return '<a href="../races/'+encodeURIComponent(row[1])+'/'+encodeURIComponent(row[1])+'-'+encodeURIComponent(row[2].replace(" ", ""))+'-'
-                            //+RaceToString(row[3]).toLowerCase()+'.dm_26">'+data+'<a>' }},
-                { "data": "h", "sType": "num-durhtml", "className": "duration_ms", "render":
-                    function ( data, type, row, meta ) { 
-                        return '<td style="text-align: right;">'+RaceTimeToString(data)+'</td>' }} //Why doesnt this work..
-            ],  
-
-*/
-
-            "columns": [ //CSV
+            "columns": [
                 { "data": 0, "sType": "num-html", "render": 
                     function ( data, type, row, meta ) {
                     if (data == 1) 
@@ -826,17 +779,7 @@ var diff1 = date2_ms - date1_ms;
                     function ( data, type, row, meta ) { 
                         return '<td style="text-align: right;">'+RaceTimeToString(data)+'</td>' }} //Why doesnt this work..
             ],  
-
             initComplete: function () {     
-
-/*
-var d3 = new Date();
-var date3_ms = d3.getTime();
-var diff2 = date3_ms - date2_ms;
-alert("diff 1:   " + diff1 +"diff 2:   " + diff2);
-*/
-
-
                 this.api().columns([1, 2]).every( function () {
                     var column = this;
                     var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')

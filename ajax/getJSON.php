@@ -25,26 +25,15 @@ switch ($option) {
 			ON D1.username = D2.username2 AND D1.type = D2.type2)
 			INNER JOIN (SELECT loser AS username3, type AS type3, COUNT(*) AS loss_count, SUM(1-odds) AS loss_ts FROM LocalDuel GROUP BY username3, type3) AS D3
 			ON D1.username = D3.username3 AND D1.type = D3.type3 ORDER BY elo desc";
-	/*
+	
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("count"=>$value["count"],"username"=>$value["username"],"type"=>$value["type"],"elo"=>$value["elo"],"TS"=>$value["TS"]); 
+		    	$newArray[]=array(0=>$value["username"],1=>$value["type"],2=>$value["elo"],3=>$value["TS"],4=>$value["count"]); 
 		    }
 	    }
 
-	    $out = json_encode($newArray);
-	*/
-
-	    $array = sql2arr($query);
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $out = $newArray;
-
-
+	    $json = json_encode($newArray);
 	break;
 
 	case "duel_count": //Loda fixme, we could just do one query maybe and have duel_rank also return the counts and use that?
@@ -59,17 +48,7 @@ switch ($option) {
 		    }
 	    }
 
-	    $out = json_encode($newArray);
-	
-	    /*
-	   	$array = sql2arr($query);
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $out = $newArray;
-	    */
+	    $json = json_encode($newArray);
 	break;
 
 	case "duel_list":
@@ -77,23 +56,15 @@ switch ($option) {
 	    $query ="SELECT winner, loser, type, (winner_hp || '/' || winner_shield) AS winner_health, ROUND(odds*100,0) AS odds, end_time, duration
 	    		FROM LocalDuel 
 	    		ORDER BY end_time DESC";
-	/*
+	
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("winner"=>$value["winner"],"loser"=>$value["loser"],"type"=>$value["type"],"winner_health"=>($value["winner_hp"] . " / " . $value["winner_shield"]),"duration"=>$value["duration"],"end_time"=>date('y-m-d H:i', $value["end_time"]),"odds"=>$value["odds"]);
+		    	$newArray[]=array(0=>$value["winner"],1=>$value["loser"],2=>$value["type"],3=>$value["winner_health"],4=>$value["odds"],5=>$value["end_time"],6=>$value["duration"]);
 		    }
 	    }
 
-	    $out = json_encode($newArray);
-	*/
-	   	$array = sql2arr($query);
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $out = $newArray;
+	    $json = json_encode($newArray);
 	break;
 
 	case "race_rank":
@@ -127,23 +98,16 @@ switch ($option) {
 				GROUP BY style, username
 				ORDER BY SumScore DESC";
 				//From RaceRanks WHERE score > 10 - to cut out the useless crap, if it really is affecting pageload, but then we cant trust distinct username/style(?) to be complete for other dropdowns
-	/*
+	
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array("username"=>$value["username"],"style"=>$value["style"],"score"=>$value["score_sum"],"avg_score"=>$value["avg_score"],"avg_percentile"=>$value["avg_percentile"],"avg_rank"=>$value["avg_rank"],"golds"=>$value["golds_sum"],"silvers"=>$value["silvers_sum"],"bronzes"=>$value["bronzes_sum"],"count"=>$value["count_sum"]); 
+		    	$newArray[]=array(0=>$value["username"],1=>$value["style"],2=>$value["score_sum"],3=>$value["avg_score"],4=>$value["avg_percentile"],5=>$value["avg_rank"],6=>$value["golds_sum"],7=>$value["silvers_sum"],
+		    		8=>$value["bronzes_sum"],9=>$value["count_sum"]); 
 		    }
 	    }
 
 	    $json = json_encode($newArray);
-	*/
-	   	$array = sql2arr($query);
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $out = $newArray;
 	break;
 
 	case "race_count":
@@ -158,44 +122,23 @@ switch ($option) {
 		    }
 	    }
 
-	    $out = json_encode($newArray);
-	
-	/*
-	   	$array = sql2arr($query);
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $out = $newArray;
-	    */
-	 
+	    $json = json_encode($newArray);
 	break;
 	
 	case "race_list":	
 		$newArray = null;
 		$query = "SELECT rank, username, coursename, style, topspeed, average, end_time, MIN(duration_ms) AS duration_ms FROM LocalRun GROUP BY username, style, coursename ORDER BY end_time DESC";
 
-/*
+
 		$arr = sql2arr($query);//JSON
 		if($arr) {
 		    foreach ($arr as $key => $value) {
 				//$date = date('y-m-d H:i', $value["end_time"]);
-				$newArray[]=array("a"=>$value["rank"],"b"=>$value["username"],"c"=>$value["coursename"],"d"=>$value["duration_ms"],"e"=>$value["topspeed"],"f"=>$value["average"],"g"=>$value["style"],"h"=>$value["end_time"]);
+				$newArray[]=array(0=>$value["rank"],1=>$value["username"],2=>$value["coursename"],3=>$value["style"],4=>$value["topspeed"],5=>$value["average"],6=>$value["end_time"],7=>$value["duration_ms"]);
 		    }
 		}
 		
-		$out = json_encode($newArray);
-*/
-
-		$array = sql2arr($query);//CSV
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $out = $newArray;
-	    
+		$json = json_encode($newArray);
 	break;
 
 	case "player_accounts":
@@ -210,17 +153,7 @@ switch ($option) {
 		    }
 		}
 		
-		$out = json_encode($newArray);
-
-		/*
-		$array = sql2arr($query);//CSV
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $out = $newArray;
-	    */
+		$json = json_encode($newArray);
 	break;
 
 	case "player_map_charts": //Get Most popular courses,  most exclusive course-styles
@@ -253,17 +186,7 @@ switch ($option) {
 		    }
 		}
 		
-		$out = json_encode($newArray);
-
-		/*
-		$array = sql2arr($query);//CSV
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $out = $newArray;
-	    */
+		$json = json_encode($newArray);
 	break;
 
 	case "player_duel_charts": //IDK what this should be
@@ -280,17 +203,7 @@ switch ($option) {
 		    }
 		}
 		
-		$out = json_encode($newArray);
-
-		/*
-		$array = sql2arr($query);//CSV
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $out = $newArray;
-	    */
+		$json = json_encode($newArray);
 	break;
 
 	case "player_duel_stats":
@@ -314,17 +227,7 @@ switch ($option) {
 		    }
 	    }
 
-	    $out = json_encode($newArray);
-	
-		/*
-	   	$array = sql2arr($query);
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $csv = $newArray;
-	    */
+	    $json = json_encode($newArray);
 	break;
 
 	case "player_race_stats": //Get relative strength of each race style for this player
@@ -340,22 +243,11 @@ switch ($option) {
 	
 	    if($exists){
 		    foreach ($exists as $key => $value) {
-		    	$type = $value["style"];
-		    	$newArray[]=array(0=>$type,1=>$value["diff"]);
+		    	$newArray[]=array(0=>$value["style"],1=>$value["diff"]);
 		    }
 	    }
 
-	    $out = json_encode($newArray);
-	
-	    /*
-		$array = sql2arr($query);
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $out = $newArray;
-	    */
+	    $json = json_encode($newArray);
 	break;
 
 	case "player_duel_graph":
@@ -378,22 +270,13 @@ switch ($option) {
 		    }
 	    }
 
-	    $out = json_encode($newArray);
-	
-	    /*
-	   	$array = sql2arr($query);
-		foreach($array as $arr) {
-		    $newArray .= implode(";", $arr) . "\n";
-
-		}
-
-	    $out = $newArray;
-	    */
+	    $json = json_encode($newArray);
 	break;
 
 }
 
-echo $out;
+ob_start('ob_gzhandler'); //Compress json
+echo $json;
 $db->close();
 
 function StyleToDemoString($val){

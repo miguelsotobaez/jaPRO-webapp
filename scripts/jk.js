@@ -973,6 +973,8 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
     panel += '                            </div>';
     panel += '                            <div id="player_map_charts_least">';
     panel += '                            </div>';
+    panel += '                            <div id="player_map_charts_time">';
+    panel += '                            </div>';
     panel += '                        </div>';
     panel += '                    </div>';
     panel += '                </div>';
@@ -1003,43 +1005,6 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
             },
             credits: false,
             title: {
-                text: 'Most popular map-styles'
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        color: '#000000',
-                        connectorColor: '#000000'
-                    }
-                }
-            },
-            series: [{
-                type: 'pie',
-                name: 'Count',
-                data: [
-                      [data[0][0], data[0][2]],
-                      [data[1][0], data[1][2]],
-                      [data[2][0], data[2][2]],
-                      [data[3][0], data[3][2]],
-                      [data[4][0], data[4][2]]
-                ]
-            }]
-        });
-
-
-    var chart2;
-        chart2 = new Highcharts.Chart({
-            chart: {
-                renderTo: 'player_map_charts_least',
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
-            },
-            credits: false,
-            title: {
                 text: 'Most exclusive maps'
             },
             plotOptions: {
@@ -1056,12 +1021,93 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
             series: [{
                 type: 'pie',
                 name: 'Count',
+                data: [
+                      [data[5][0], data[5][2]],
+                      [data[6][0], data[6][2]],
+                      [data[7][0], data[7][2]],
+                      [data[8][0], data[8][2]],
+                      [data[9][0], data[9][2]]
+                ]
+            }]
+        });
+
+
+    var chart2;
+        chart2 = new Highcharts.Chart({
+            chart: {
+                renderTo: 'player_map_charts_least',
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            credits: false,
+            title: {
+                text: 'Most popular map-styles'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Count',
                 data:   [
-                        [data[5][0]+" "+RaceToString(data[5][1]), data[5][2]],
-                        [data[6][0]+" "+RaceToString(data[6][1]), data[6][2]],
-                        [data[7][0]+" "+RaceToString(data[7][1]), data[7][2]],
-                        [data[8][0]+" "+RaceToString(data[8][1]), data[8][2]],
-                        [data[9][0]+" "+RaceToString(data[9][1]), data[9][2]]
+                        [data[0][0]+" "+RaceToString(data[0][1]), data[0][2]],
+                        [data[1][0]+" "+RaceToString(data[1][1]), data[1][2]],
+                        [data[2][0]+" "+RaceToString(data[2][1]), data[2][2]],
+                        [data[3][0]+" "+RaceToString(data[3][1]), data[3][2]],
+                        [data[4][0]+" "+RaceToString(data[4][1]), data[4][2]]
+                ]
+            }]
+        });
+
+    var chart3;
+        chart3 = new Highcharts.Chart({
+            chart: {
+                renderTo: 'player_map_charts_time',
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            credits: false,
+            title: {
+                text: 'Average time'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000'
+                    }
+                }
+            },
+            series: [{
+                type: 'bar',
+                name: 'Seconds',
+                data: [
+                      [RaceToString(data[10][1]), data[10][2]/1000],
+                      [RaceToString(data[11][1]), data[11][2]/1000],
+                      [RaceToString(data[12][1]), data[12][2]/1000],
+                      [RaceToString(data[13][1]), data[13][2]/1000],
+                      [RaceToString(data[14][1]), data[14][2]/1000],
+                      [RaceToString(data[15][1]), data[15][2]/1000],
+                      [RaceToString(data[16][1]), data[16][2]/1000],
+                      [RaceToString(data[17][1]), data[17][2]/1000],
+                      [RaceToString(data[18][1]), data[18][2]/1000],
+                      [RaceToString(data[19][1]), data[19][2]/1000],
+                      [RaceToString(data[20][1]), data[20][2]/1000],
+                      [RaceToString(data[21][1]), data[21][2]/1000],
+                      [RaceToString(data[22][1]), data[22][2]/1000],
                 ]
             }]
         });
@@ -1076,7 +1122,7 @@ function player_duel_charts(){//Most popular maps, most popular styles, most exc
     panel += '  <div class="col-md-6">';
     panel += '                    <div class="panel panel-filled">';
     panel += '                      <div class="panel-heading">';
-    panel += '                          Most Popular Duels';
+    panel += '                          Average duel length';
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
     panel += '                            <div id="player_duel_charts">';
@@ -1123,15 +1169,9 @@ function player_duel_charts(){//Most popular maps, most popular styles, most exc
                 }
             },
             series: [{
-                type: 'pie',
-                name: 'Count',
-                data:   [
-                        [DuelToString(data[0][0]), data[0][1]],
-                        [DuelToString(data[1][0]), data[1][1]],
-                        [DuelToString(data[2][0]), data[2][1]],
-                        [DuelToString(data[3][0]), data[3][1]],
-                        [DuelToString(data[4][0]), data[4][1]]
-                ]
+                type: 'bar',
+                name: 'Time',
+                data: data
             }]
         });
 

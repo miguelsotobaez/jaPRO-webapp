@@ -171,12 +171,14 @@ switch ($option) {
 			SELECT -1 AS coursename, -1 AS style, count FROM (SELECT COUNT(*) as count FROM LocalRun)
 			ORDER BY count DESC";
 			*/
-		$query = "SELECT coursename, -1 AS style, count FROM (
-		    SELECT coursename, COUNT(*) as count FROM LocalRun GROUP BY coursename ORDER BY count DESC LIMIT 5)
+		$query = "SELECT coursename, -1 AS style, count FROM (SELECT coursename, COUNT(*) as count 
+				FROM LocalRun GROUP BY coursename ORDER BY count DESC LIMIT 5)
 			UNION ALL
-			SELECT coursename, style, count FROM (
-		    SELECT coursename, style, COUNT(*) as count FROM LocalRun GROUP BY coursename, style ORDER BY count ASC LIMIT 5)
-			ORDER BY count DESC";
+			SELECT coursename, style, count FROM (SELECT coursename, style, COUNT(*) as count 
+				FROM LocalRun GROUP BY coursename, style ORDER BY count ASC LIMIT 5)
+			UNION ALL
+			SELECT -1 AS coursename, style, CAST(AVG(duration_ms) AS INT) FROM LocalRun GROUP BY style
+			ORDER BY count ASC";
 
 		$arr = sql2arr($query);//JSON
 		if($arr) {
@@ -191,15 +193,13 @@ switch ($option) {
 
 	case "player_duel_charts": //IDK what this should be
 		$newArray = null;
-		$query = "SELECT type, COUNT(*) AS count FROM LocalDuel GROUP BY type
-			UNION ALL
-			SELECT -1 AS type, COUNT(*) AS count FROM LocalDuel";
+		$query = "SELECT type, CAST(AVG(duration)/1000 AS INT) as duration From LocalDuel WHERE duration != 0 GROUP BY type ORDER BY duration DESC";
 
 		$arr = sql2arr($query);//JSON
 		if($arr) {
 		    foreach ($arr as $key => $value) {
 				//$date = date('y-m-d H:i', $value["end_time"]);
-				$newArray[]=array(0=>$value["type"],1=>$value["count"]);
+				$newArray[]=array(0=>$value["type"],1=>$value["duration"]);
 		    }
 		}
 		

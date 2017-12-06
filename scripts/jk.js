@@ -203,9 +203,102 @@ function duel_title(){
     $("#main-content").append(HTML);
 }
 
+function duel_count(){
+    var panel = "";
+    panel += '  <div class="col-md-12">';
+    panel += '      <div id="chart_duel_count">';
+    panel += '      </div>';
+    panel += '                </div>';
+    $("#main-content").append(panel);
+
+    $(document).ready(function() {
+        var data = null;
+        var item = "duel_count";
+        var url = "ajax/getJSON.php";
+        $.ajax({
+            type: "POST",
+            url: url,
+            dataType: "JSON",
+            async: false,
+            data: { option: item},
+            success: function(res) {
+                data = res;
+            }
+        });
+
+        //Loda fixme, this can use the json from datatable_duel_rank maybe and avoid a query?
+    var chart
+        chart = new Highcharts.Chart({
+            chart: {
+                type: 'bar',
+                renderTo: 'chart_duel_count',
+                margin: 0,
+                height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
+            },
+            title: null,
+            credits: false,
+            xAxis: {
+                labels: {
+                   enabled: false
+                },
+                lineColor: 'transparent',
+                minorTickLength: 0,
+                tickLength: 0,
+            },
+            yAxis: {
+                labels: {
+                    enabled: false
+                },
+                minorTickLength: 0,
+                tickLength: 0,
+                reversedStacks: false,
+                gridLineColor: 'transparent',
+                title: {
+                    enabled: false,
+                }
+            },
+            legend: {
+                enabled: false
+            },
+                labels: {
+                    enabled: false
+                },
+            plotOptions: {
+                series: {
+                    stacking: 'normal'
+                }
+            },         
+            tooltip: {
+              formatter: function() {
+                return this.series.name + ' ('+ this.y +' duels)';
+              }
+            },   
+            series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?  Also should skip if the item is less than like 5percent?
+                name: DuelToString(data[0][0]),
+                data: [data[0][1]] //[0][1]
+            }, {
+                name: DuelToString(data[1][0]),
+                data: [data[1][1]]
+            }, {
+                name: DuelToString(data[2][0]),
+                data: [data[2][1]]
+            }, {
+                name: DuelToString(data[3][0]),
+                data: [data[3][1]]
+            }, {
+                name: DuelToString(data[4][0]),
+                data: [data[4][1]]
+            }]
+        });
+    });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_duel').addClass("active");
+}
+
 function duel_rank(){
     var panel;
-    panel = '<div id="first_row" class="row">';
+    panel = '<div id="second_row" class="row">';
     panel += '  <div class="col-md-12">';
     panel += '      <div class="panel panel-filled">';
     panel += '          <div class="panel-heading">';
@@ -343,7 +436,7 @@ function duel_rank(){
 
 function duel_list(){  
     var panel;
-    panel = '<div id="second_row" class="row">';
+    panel = '<div id="third_row" class="row">';
     panel += '  <div class="col-md-12">';
     panel += '      <div class="panel panel-filled">';
     panel += '          <div class="panel-heading">';
@@ -453,17 +546,50 @@ function duel_list(){
 
 }
 
-function duel_count(){
+/////////////////////////////////////////////////////////////////////
+///////////////////////////////RACE//////////////////////////////////
+///////////////////////////////RACE//////////////////////////////////
+///////////////////////////////RACE//////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+
+
+function race_title(){
+    var HTML;
+    HTML='<div class="row">';
+    HTML+='            <div class="col-lg-12">';
+    HTML+='                <div class="view-header">';
+    HTML+='                    <div class="pull-right text-right" style="line-height: 14px">';
+    HTML+='                        <small>Stats<br><span class="c-white">Race</span></small>';
+    HTML+='                    </div>';
+    HTML+='                    <div class="header-icon">';
+    HTML+='                        <i class="pe page-header-icon pe-7s-shield"></i>';
+    HTML+='                    </div>';
+    HTML+='                    <div class="header-title">';
+    HTML+='                        <h3>Race</h3>';
+    HTML+='                        <small>';
+    HTML+='                            Now you can see your race stats.';
+    HTML+='                        </small>';
+    HTML+='                    </div>';
+    HTML+='                </div>';
+    HTML+='                <hr>';
+    HTML+='            </div>';
+    HTML+='        </div>';
+    $("#main-content").append(HTML);
+}
+
+function race_count(){
     var panel = "";
+    panel = '<div id="first_row" class="row">';
     panel += '  <div class="col-md-12">';
-    panel += '      <div id="chart_duel_count">';
+    panel += '      <div id="chart_race_count">';
     panel += '      </div>';
     panel += '                </div>';
+     panel += '                </div>';
     $("#main-content").append(panel);
 
-    $(document).ready(function() {
+    //$(document).ready(function() {
         var data = null;
-        var item = "duel_count";
+        var item = "race_count";
         var url = "ajax/getJSON.php";
         $.ajax({
             type: "POST",
@@ -481,13 +607,11 @@ function duel_count(){
         chart = new Highcharts.Chart({
             chart: {
                 type: 'bar',
-                renderTo: 'chart_duel_count',
+                renderTo: 'chart_race_count',
                 margin: 0,
                 height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
             },
-            title: {
-                text: ''
-            },
+            title: null,
             credits: false,
             xAxis: {
                 labels: {
@@ -522,69 +646,36 @@ function duel_count(){
             },         
             tooltip: {
               formatter: function() {
-                return this.series.name + ' ('+ this.y +' duels)';
+                return this.series.name + ' ('+ this.y +' races)';
               }
-            },   
-            series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?  Also should skip if the item is less than like 5percent?
-                name: DuelToString(data[0][0]),
+            },      
+            series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?
+                name: RaceToString(data[0][0]),
                 data: [data[0][1]] //[0][1]
             }, {
-                name: DuelToString(data[1][0]),
+                name: RaceToString(data[1][0]),
                 data: [data[1][1]]
             }, {
-                name: DuelToString(data[2][0]),
+                name: RaceToString(data[2][0]),
                 data: [data[2][1]]
             }, {
-                name: DuelToString(data[3][0]),
+                name: RaceToString(data[3][0]),
                 data: [data[3][1]]
             }, {
-                name: DuelToString(data[4][0]),
+                name: RaceToString(data[4][0]),
                 data: [data[4][1]]
             }]
         });
-    });
+    //});
 
     $('.jk-nav li').removeClass("active");
-    $('#menu_duel').addClass("active");
-}
-
-
-/////////////////////////////////////////////////////////////////////
-///////////////////////////////RACE//////////////////////////////////
-///////////////////////////////RACE//////////////////////////////////
-///////////////////////////////RACE//////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-
-
-function race_title(){
-    var HTML;
-    HTML='<div class="row">';
-    HTML+='            <div class="col-lg-12">';
-    HTML+='                <div class="view-header">';
-    HTML+='                    <div class="pull-right text-right" style="line-height: 14px">';
-    HTML+='                        <small>Stats<br><span class="c-white">Race</span></small>';
-    HTML+='                    </div>';
-    HTML+='                    <div class="header-icon">';
-    HTML+='                        <i class="pe page-header-icon pe-7s-shield"></i>';
-    HTML+='                    </div>';
-    HTML+='                    <div class="header-title">';
-    HTML+='                        <h3>Race</h3>';
-    HTML+='                        <small>';
-    HTML+='                            Now you can see your race stats.';
-    HTML+='                        </small>';
-    HTML+='                    </div>';
-    HTML+='                </div>';
-    HTML+='                <hr>';
-    HTML+='            </div>';
-    HTML+='        </div>';
-    $("#main-content").append(HTML);
+    $('#menu_race').addClass("active");
 }
 
 //var RaceRankData;
-
 function race_rank(){
     var panel;
-    panel = '<div id="first_row" class="row">';
+    panel = '<div id="second_row" class="row">';
     panel += '  <div class="col-md-12">';
     panel += '      <div class="panel panel-filled">';
     panel += '          <div class="panel-heading">';
@@ -712,7 +803,7 @@ function race_rank(){
 
 function race_list(){
     var panel;
-    panel = '<div id="second_row" class="row">';
+    panel = '<div id="third_row" class="row">';
     panel += '  <div class="col-md-12">';
     panel += '      <div class="panel panel-filled">';
     panel += '          <div class="panel-heading">';
@@ -825,101 +916,6 @@ function race_list(){
    
 }
 
-function race_count(){
-    var panel = "";
-    panel += '  <div class="col-md-12">';
-    panel += '      <div id="chart_race_count">';
-    panel += '      </div>';
-    panel += '                </div>';
-    $("#main-content").append(panel);
-
-    $(document).ready(function() {
-        var data = null;
-        var item = "race_count";
-        var url = "ajax/getJSON.php";
-        $.ajax({
-            type: "POST",
-            url: url,
-            dataType: "JSON",
-            async: false,
-            data: { option: item},
-            success: function(res) {
-                data = res;
-            }
-        });
-
-        //Loda fixme, this can use the json from datatable_duel_rank maybe and avoid a query?
-    var chart
-        chart = new Highcharts.Chart({
-            chart: {
-                type: 'bar',
-                renderTo: 'chart_race_count',
-                margin: 0,
-                height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
-            },
-            title: {
-                text: ''
-            },
-            credits: false,
-            xAxis: {
-                labels: {
-                   enabled: false
-                },
-                lineColor: 'transparent',
-                minorTickLength: 0,
-                tickLength: 0,
-            },
-            yAxis: {
-                labels: {
-                    enabled: false
-                },
-                minorTickLength: 0,
-                tickLength: 0,
-                reversedStacks: false,
-                gridLineColor: 'transparent',
-                title: {
-                    enabled: false,
-                }
-            },
-            legend: {
-                enabled: false
-            },
-                labels: {
-                    enabled: false
-                },
-            plotOptions: {
-                series: {
-                    stacking: 'normal'
-                }
-            },         
-            tooltip: {
-              formatter: function() {
-                return this.series.name + ' ('+ this.y +' races)';
-              }
-            },      
-            series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?
-                name: RaceToString(data[0][0]),
-                data: [data[0][1]] //[0][1]
-            }, {
-                name: RaceToString(data[1][0]),
-                data: [data[1][1]]
-            }, {
-                name: RaceToString(data[2][0]),
-                data: [data[2][1]]
-            }, {
-                name: RaceToString(data[3][0]),
-                data: [data[3][1]]
-            }, {
-                name: RaceToString(data[4][0]),
-                data: [data[4][1]]
-            }]
-        });
-    });
-
-    $('.jk-nav li').removeClass("active");
-    $('#menu_race').addClass("active");
-}
-
 /////////////////////////////////////////////////////////////////////
 ///////////////////////////////PLAYER////////////////////////////////
 ///////////////////////////////PLAYER////////////////////////////////
@@ -970,11 +966,12 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
     panel += '  <div class="col-md-6">';
     panel += '                    <div class="panel panel-filled">';
     panel += '                      <div class="panel-heading">';
-    panel += '                          Most Popular Maps';
+    panel += '                          Map stats';
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
-    panel += '                            <p>Favorite maps.</p>';
-    panel += '                            <div id="player_map_charts">';
+    panel += '                            <div id="player_map_charts_most">';
+    panel += '                            </div>';
+    panel += '                            <div id="player_map_charts_least">';
     panel += '                            </div>';
     panel += '                        </div>';
     panel += '                    </div>';
@@ -999,12 +996,15 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
     var chart;
         chart = new Highcharts.Chart({
             chart: {
-                renderTo: 'player_map_charts',
+                renderTo: 'player_map_charts_most',
                 plotBackgroundColor: null,
                 plotBorderWidth: null,
                 plotShadow: false
             },
-            title: null,
+            credits: false,
+            title: {
+                text: 'Most popular map-styles'
+            },
             plotOptions: {
                 pie: {
                     allowPointSelect: true,
@@ -1019,7 +1019,50 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
             series: [{
                 type: 'pie',
                 name: 'Count',
-                data: data
+                data: [
+                      [data[0][0], data[0][2]],
+                      [data[1][0], data[1][2]],
+                      [data[2][0], data[2][2]],
+                      [data[3][0], data[3][2]],
+                      [data[4][0], data[4][2]]
+                ]
+            }]
+        });
+
+
+    var chart2;
+        chart2 = new Highcharts.Chart({
+            chart: {
+                renderTo: 'player_map_charts_least',
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            credits: false,
+            title: {
+                text: 'Most exclusive maps'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Count',
+                data:   [
+                        [data[5][0]+" "+RaceToString(data[5][1]), data[5][2]],
+                        [data[6][0]+" "+RaceToString(data[6][1]), data[6][2]],
+                        [data[7][0]+" "+RaceToString(data[7][1]), data[7][2]],
+                        [data[8][0]+" "+RaceToString(data[8][1]), data[8][2]],
+                        [data[9][0]+" "+RaceToString(data[9][1]), data[9][2]]
+                ]
             }]
         });
 
@@ -1036,7 +1079,6 @@ function player_duel_charts(){//Most popular maps, most popular styles, most exc
     panel += '                          Most Popular Duels';
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
-    panel += '                            <p>Favorite duel types.</p>';
     panel += '                            <div id="player_duel_charts">';
     panel += '                            </div>';
     panel += '                        </div>';
@@ -1067,6 +1109,7 @@ function player_duel_charts(){//Most popular maps, most popular styles, most exc
                 plotBorderWidth: null,
                 plotShadow: false
             },
+            credits: false,
             title: null,
             plotOptions: {
                 pie: {
@@ -1082,7 +1125,13 @@ function player_duel_charts(){//Most popular maps, most popular styles, most exc
             series: [{
                 type: 'pie',
                 name: 'Count',
-                data: data
+                data:   [
+                        [DuelToString(data[0][0]), data[0][1]],
+                        [DuelToString(data[1][0]), data[1][1]],
+                        [DuelToString(data[2][0]), data[2][1]],
+                        [DuelToString(data[3][0]), data[3][1]],
+                        [DuelToString(data[4][0]), data[4][1]]
+                ]
             }]
         });
 

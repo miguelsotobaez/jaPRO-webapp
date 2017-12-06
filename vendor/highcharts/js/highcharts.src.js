@@ -1832,7 +1832,7 @@
         },
 
         credits: {
-            enabled: false,
+            enabled: true,
             text: 'Highcharts.com',
             href: 'http://www.highcharts.com',
             position: {

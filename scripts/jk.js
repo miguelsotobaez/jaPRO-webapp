@@ -100,14 +100,14 @@ $(document).ready(function () {
     }
     else if(page=="duel"){
         duel_title();
+        duel_count();
         duel_rank();
         duel_list();
-        duel_count();
     }else if(page=="race"){
         race_title();
+        race_count();
         race_rank();
         race_list();
-        race_count();
     }else if(page=="maps"){
         maps();
     }else if(page=="servers"){
@@ -455,21 +455,11 @@ function duel_list(){
 
 function duel_count(){
     var panel = "";
-    panel += '<div id="third_row" class="row">';
     panel += '  <div class="col-md-12">';
-    panel += '                    <div class="panel panel-filled">';
-    panel += '                      <div class="panel-heading">';
-    panel += '                          Duel Count';
-    panel += '                      </div>';
-    panel += '                        <div class="panel-body">';
-    panel += '                            <p>Most active duel types.</p>';
-    panel += '                            <div id="chart_duel_count">';
-    panel += '                            </div>';
-    panel += '                        </div>';
-    panel += '                    </div>';
+    panel += '      <div id="chart_duel_count">';
+    panel += '      </div>';
     panel += '                </div>';
-    panel += '            </div>';
-    $("#main-content #second_row").append(panel);
+    $("#main-content").append(panel);
 
     $(document).ready(function() {
         var data = null;
@@ -491,11 +481,14 @@ function duel_count(){
         chart = new Highcharts.Chart({
             chart: {
                 type: 'bar',
-                renderTo: 'chart_duel_count'
+                renderTo: 'chart_duel_count',
+                margin: 0,
+                height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
             },
             title: {
                 text: ''
             },
+            credits: false,
             xAxis: {
                 labels: {
                    enabled: false
@@ -526,7 +519,12 @@ function duel_count(){
                 series: {
                     stacking: 'normal'
                 }
-            },
+            },         
+            tooltip: {
+              formatter: function() {
+                return this.series.name + ' ('+ this.y +' duels)';
+              }
+            },   
             series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?  Also should skip if the item is less than like 5percent?
                 name: DuelToString(data[0][0]),
                 data: [data[0][1]] //[0][1]
@@ -547,8 +545,9 @@ function duel_count(){
     });
 
     $('.jk-nav li').removeClass("active");
-    $('#menu_race').addClass("active");
+    $('#menu_duel').addClass("active");
 }
+
 
 /////////////////////////////////////////////////////////////////////
 ///////////////////////////////RACE//////////////////////////////////
@@ -589,10 +588,9 @@ function race_rank(){
     panel += '  <div class="col-md-12">';
     panel += '      <div class="panel panel-filled">';
     panel += '          <div class="panel-heading">';
-    panel += '              Race Rank';
+    panel += '              Scores';
     panel += '          </div>';
     panel += '          <div class="panel-body">';
-    panel += '              <p>This is the race rank.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_race_rank" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th><label title="Score rank compared to every other score regardless of style.">Rank</label></th><th>Username</th><th>Style</th><th>Score</th><th data-hide="phone,table">Average Score</th><th data-hide="phone,table">Average Percentile</th><th data-hide="phone,table">Average Rank</th><th data-hide="phone,table">Golds</th><th data-hide="phone,table">Silvers</th><th data-hide="phone,table">Bronzes</th><th>Count</th></tr></thead>';
@@ -646,7 +644,7 @@ function race_rank(){
                 { "data": 9 }
             ],
             /*
-             "fnDrawCallback": function ( oSettings ) {
+             "fnDrawCallback": function ( oSettings ) { //fixme
             // Need to redo the counters if filtered or sorted
                 if ( oSettings.bSorted || oSettings.bFiltered )
                 {
@@ -718,10 +716,9 @@ function race_list(){
     panel += '  <div class="col-md-12">';
     panel += '      <div class="panel panel-filled">';
     panel += '          <div class="panel-heading">';
-    panel += '              Race List';
+    panel += '              Records';
     panel += '          </div>';
     panel += '          <div class="panel-body">';
-    panel += '              <p>This is the race list, ordered by date.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_race_list" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th data-hide="phone,table">Topspeed</th><th data-hide="phone,table">Average</th><th>Date</th><th>Time</th></tr></thead>';
@@ -830,17 +827,11 @@ function race_list(){
 
 function race_count(){
     var panel = "";
-    panel += '<div id="third_row" class="row">';
     panel += '  <div class="col-md-12">';
-    panel += '                    <div class="panel panel-filled">';
-    panel += '                        <div class="panel-body">';
-    panel += '                            <div id="chart_race_count">';
-    panel += '                            </div>';
-    panel += '                        </div>';
-    panel += '                    </div>';
+    panel += '      <div id="chart_race_count">';
+    panel += '      </div>';
     panel += '                </div>';
-    panel += '            </div>';
-    $("#main-content #second_row").append(panel);
+    $("#main-content").append(panel);
 
     $(document).ready(function() {
         var data = null;
@@ -863,11 +854,13 @@ function race_count(){
             chart: {
                 type: 'bar',
                 renderTo: 'chart_race_count',
-                margin: 0
+                margin: 0,
+                height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
             },
             title: {
                 text: ''
             },
+            credits: false,
             xAxis: {
                 labels: {
                    enabled: false
@@ -898,7 +891,12 @@ function race_count(){
                 series: {
                     stacking: 'normal'
                 }
-            },            
+            },         
+            tooltip: {
+              formatter: function() {
+                return this.series.name + ' ('+ this.y +' races)';
+              }
+            },      
             series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?
                 name: RaceToString(data[0][0]),
                 data: [data[0][1]] //[0][1]

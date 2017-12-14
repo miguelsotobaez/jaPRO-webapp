@@ -2,7 +2,10 @@
 require_once('../inc/db_connection.inc.php');
 //require_once('../inc/session.inc.php');
 
-$option = $_POST["option"];
+$option = null;
+if (isset($_POST['option'])) {
+	$option = $_POST["option"];
+}
 //$player = $_POST["player"];
 //Sanitize player?
               //if (strlen($player) > 32)
@@ -239,6 +242,9 @@ switch ($option) {
 	break;
 
 	case "player_duel_stats":
+		if (!isset($_POST['player'])) {
+			break;
+		}
 		$username = $_POST["player"];
 		$newArray = null;
 
@@ -263,6 +269,9 @@ switch ($option) {
 	break;
 
 	case "player_race_stats": //Get relative strength of each race style for this player
+		if (!isset($_POST['player'])) {
+			break;
+		}
 		$username = $_POST["player"];
 		$newArray = null;
 
@@ -287,6 +296,9 @@ switch ($option) {
 	break;
 
 	case "player_duel_graph":
+		if (!isset($_POST['player'])) {
+			break;
+		}
 		$username = $_POST["player"];
 		$newArray = null;
 

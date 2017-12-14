@@ -4,7 +4,7 @@ set_time_limit(45); //?
 
 class MyDB extends SQLite3 {
    function __construct() {
-      $this->open(DATABASE_ROUTE, SQLITE3_OPEN_READONLY);
+      $this->open(DATABASE_ROUTE, SQLITE3_OPEN_READWRITE);
    }
 }
 $db = new MyDB();

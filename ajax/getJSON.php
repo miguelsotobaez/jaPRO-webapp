@@ -1,6 +1,5 @@
 <?php
 require_once('../inc/db_connection.inc.php');
-date_default_timezone_set('EST');
 //require_once('../inc/session.inc.php');
 
 $option = $_POST["option"];
@@ -14,6 +13,7 @@ $option = $_POST["option"];
 switch ($option) {
 	case "duel_rank":
 		$newArray = null;
+		//cache this somewhere similiar to race_rank
 
 	    //$query ="SELECT username, type, ROUND(rank,0) AS rank, 100-ROUND(100*TSSUM/count, 0) AS TS, count FROM DuelRanks ORDER BY rank DESC";
 	    //$query = "SELECT winner, type, elo FROM (SELECT winner, type, ROUND(winner_elo,0) AS elo, end_time FROM LocalDuel UNION SELECT loser, type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel ORDER BY end_time ASC) 
@@ -101,8 +101,9 @@ switch ($option) {
 				//From RaceRanks WHERE score > 10 - to cut out the useless crap, if it really is affecting pageload, but then we cant trust distinct username/style(?) to be complete for other dropdowns
 				*/
 
-		//Old query took like 17ms, new one takes like 60. oh well.
+		//Old query took like 17ms, new one takes like 80. oh well.
 
+		//Cache this into something whenever we update - better than having the client cache it since server knows when it needs to be refreshed
 		$query = "SELECT username, style, score, ROUND(CAST(score AS float)/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(ranksum AS float)/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(bronzes, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
 			SELECT A.username, 99 AS style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile from ((
 			SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS float))/entries) AS percentile FROM LocalRun GROUP BY username) AS A
@@ -313,36 +314,5 @@ switch ($option) {
 ob_start('ob_gzhandler'); //Compress json
 echo $json;
 $db->close();
-
-function StyleToDemoString($val){
-	$style="UNKNOWN";
-	if($val==0)
-		$style="siege";
-	else if($val==1)
-		$style="jka";
-	else if($val==2)
-		$style="qw";
-	else if($val==3)
-		$style="cpm";
-	else if($val==4)
-		$style="q3";
-	else if($val==5)
-		$style="pjk";
-	else if($val==6)
-		$style="wsw";
-	else if($val==7)
-		$style="rjq3";
-	else if($val==8)
-		$style="rjcpm";
-	else if($val==9)
-		$style="swoop";
-	else if($val==10)
-		$style="jetpack";
-	else if($val==11)
-		$style="speed";
-	else if($val==12)
-		$style="sp";
-	return $style;
-}
 
 ?>

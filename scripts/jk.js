@@ -484,9 +484,11 @@ function duel_list(){
                 { "data": 1, "render": 
                     function ( data, type, row, meta ) { 
                         return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+
+
                 { "data": 2, "render": 
                     function ( data, type, row, meta ) { 
-                        return DuelToString(data) }},
+                        return (type == 'filter') ? DuelToString(data) : ("<button id='duelfilter'>" + DuelToString(data) + "</button>") }},                       
                 { "data": 3 , sType: "num-duelhp" }, //This does not sort properly - x/y  format, sort by sum(x+y)
                 { "data": 4, "render": 
                     function ( data, type, row, meta ) {
@@ -504,8 +506,15 @@ function duel_list(){
                     function ( data, type, row, meta ) { 
                         return DuelTimeToString(data) }}
             ],
-            initComplete: function () {            
-                this.api().columns([0, 1]).every( function () { //This doesn't activate?
+            initComplete: function () {         
+
+                $('#datatable_duel_list tbody').on( 'click', '#duelfilter', function () {
+                    //alert("hello");         
+
+                    //Filter column
+                });
+
+                this.api().columns([0, 1]).every( function () {
                     var column = this;
                     var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
                         .appendTo( $(column.footer()).empty() )
@@ -518,10 +527,13 @@ function duel_list(){
                                 .draw();
                         } );
                     column.data().unique().sort().each( function ( d, j ) {
+
+                //table.column(4).search(this.value).column(5).search(this.val‌​ue).draw();
+
                         select.append( '<option value="'+d+'">'+d+'</option>' )
                     } );
                 } );
-                this.api().columns([2]).every( function () { //This doesn't activate?
+                this.api().columns([2]).every( function () {
                     var column = this;
                     var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
                         .appendTo( $(column.footer()).empty() )
@@ -540,6 +552,7 @@ function duel_list(){
             }
         });
     });
+
 
     $('.jk-nav li').removeClass("active");
     $('#menu_duel').addClass("active");
@@ -936,14 +949,29 @@ function player_title(){ //Show total number of players, get each playername for
     HTML+='                    <div class="header-title">';
     HTML+='                        <h3>Players</h3>';
     HTML+='                        <small>';
-    HTML+='                            '+player ? player : 'Select the player you want to see.';
+    HTML+='                            '+player ? player : 'Select the player you want to see.' ;
     HTML+='                        </small>';
+
+    HTML+='                        <select id="dropdown"></select>'; //Should be live-searchable 
+
     HTML+='                    </div>';
     HTML+='                </div>';
     HTML+='                <hr>';
     HTML+='            </div>';
     HTML+='        </div>';
     $("#main-content").append(HTML);
+
+    var helpers = { 
+        buildDropdown: function(result, dropdown, emptyMessage) { // Remove current options 
+            dropdown.html(''); // Add the empty option with the empty message 
+            dropdown.append('<option value="">' + emptyMessage + '</option>'); // Check result isnt empty 
+            if(result != '') { // Loop through each of the results and append the option to the dropdown 
+                $.each(result, function(k, v) { 
+                    dropdown.append('<option value="' + v[0] + '">' + htmlEntities(v[0]) + '</option>'); //loda fixme does value need to be htmlentities too?
+                }); 
+            } 
+        } 
+    }
 
     var data = null;
     var item = "player_accounts";
@@ -956,8 +984,10 @@ function player_title(){ //Show total number of players, get each playername for
         data: { option: item },
         success: function(res) {
             data = res;
+            helpers.buildDropdown( data, $('#dropdown'), 'Select an option' ); 
         }
     });
+
 }
 
 function player_map_charts(){//Most popular maps, most popular styles, most exclusive map-styles, total races
@@ -1005,7 +1035,7 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
             },
             credits: false,
             title: {
-                text: 'Most exclusive maps'
+                text: 'Most popular map-styles'
             },
             plotOptions: {
                 pie: {
@@ -1042,7 +1072,7 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
             },
             credits: false,
             title: {
-                text: 'Most popular map-styles'
+                text: 'Most exclusive maps'
             },
             plotOptions: {
                 pie: {
@@ -1116,7 +1146,8 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
     $('#menu_player').addClass("active");
 }
 
-function player_duel_charts(){//Most popular maps, most popular styles, most exclusive map-styles, total races
+//const arrayColumn = (arr, n) => arr.map(x => x[n]);
+function player_duel_charts(){//
     var panel = "";
     panel += '<div id="third_row" class="row">';
     panel += '  <div class="col-md-6">';
@@ -1147,6 +1178,7 @@ function player_duel_charts(){//Most popular maps, most popular styles, most exc
         }
     });
 
+
     var chart;
         chart = new Highcharts.Chart({
             chart: {
@@ -1171,7 +1203,30 @@ function player_duel_charts(){//Most popular maps, most popular styles, most exc
             series: [{
                 type: 'bar',
                 name: 'Time',
-                data: data
+
+                //data: [arrayColumn(data, 0), arrayColumn(data, 1) ]
+
+
+
+                data: [
+                      [DuelToString(data[0][0]), data[0][1]],
+                      [DuelToString(data[1][0]), data[1][1]],
+                      [DuelToString(data[2][0]), data[2][1]],
+                      [DuelToString(data[3][0]), data[3][1]],
+                      [DuelToString(data[4][0]), data[4][1]],
+                      [DuelToString(data[5][0]), data[5][1]],
+                      [DuelToString(data[6][0]), data[6][1]],
+                      [DuelToString(data[7][0]), data[7][1]],
+                      [DuelToString(data[8][0]), data[8][1]],
+                      [DuelToString(data[9][0]), data[9][1]],
+                      [DuelToString(data[10][0]), data[10][1]],
+                      [DuelToString(data[11][0]), data[11][1]],
+                      [DuelToString(data[12][0]), data[12][1]],
+                      [DuelToString(data[13][0]), data[13][1]],
+                      [DuelToString(data[14][0]), data[14][1]],
+                ]
+
+
             }]
         });
 
@@ -1260,8 +1315,9 @@ function player_duel_stats(){//Most popular duels, total number of duels
     panel += '                          Duel Types';
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
-    panel += '                            <p>Favorite duel types.</p>';
     panel += '                            <div id="player_duel_stats">';
+    panel += '                            </div>';
+    panel += '                            <div id="player_duel_graph">';
     panel += '                            </div>';
     panel += '                        </div>';
     panel += '                    </div>';
@@ -1308,6 +1364,55 @@ function player_duel_stats(){//Most popular duels, total number of duels
                 type: 'pie',
                 name: 'Strength',
                 data: data
+            }]
+        });
+
+    var data = null;
+    var item = "player_duel_graph";
+    var url = "ajax/getJSON.php";
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "JSON",
+        async: false,
+        data: { option: item, player: username},
+        success: function(res) {
+            data = res;
+        }
+    });
+
+    for (i=0; i<15; i++) {
+        if (data[i] != undefined) {
+            dataSub.push(data[i][0]);
+
+        }
+
+    }
+
+    var chart;
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'player_duel_graph',
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: null,
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000'
+                    }
+                }
+            },
+            series: [{
+                type: 'line',
+                name: 'Strength',
+                data: dataSub
             }]
         });
 
@@ -1613,3 +1718,7 @@ var sortFunction = function(a, b) {
     if(a > b) return 1;
     return 0;
 };
+
+function htmlEntities(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}

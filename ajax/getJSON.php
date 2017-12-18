@@ -2,33 +2,25 @@
 require_once('../inc/db_connection.inc.php');
 //require_once('../inc/session.inc.php');
 
+//Query caching: have_query_cache=yes, query_cache_type=2, query_cache_size=1mb+
+
+$json = null;
 $option = null;
 if (isset($_POST['option'])) {
 	$option = $_POST["option"];
 }
-//$player = $_POST["player"];
-//Sanitize player?
-              //if (strlen($player) > 32)
-                  //$player = substr($player, 0, 32);
-			//Also htmlentities? or check special characters?
 
-//todo - alias all columns to 1 letter to make json smaller filesize
 switch ($option) {
 	case "duel_rank":
 		$newArray = null;
-		//cache this somewhere similiar to race_rank
-
-	    //$query ="SELECT username, type, ROUND(rank,0) AS rank, 100-ROUND(100*TSSUM/count, 0) AS TS, count FROM DuelRanks ORDER BY rank DESC";
-	    //$query = "SELECT winner, type, elo FROM (SELECT winner, type, ROUND(winner_elo,0) AS elo, end_time FROM LocalDuel UNION SELECT loser, type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel ORDER BY end_time ASC) 
-		//	GROUP BY winner, type ORDER BY elo DESC";
-		$query = "SELECT D1.username, type, elo, 100-ROUND(100*(win_ts + loss_ts)/(win_count+loss_count), 0) AS TS, win_count+loss_count AS count FROM 
-			((SELECT username, type, elo FROM ((SELECT winner AS username, type, ROUND(winner_elo,0) AS elo, end_time FROM LocalDuel 
-			UNION ALL SELECT loser AS username, type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel ORDER BY end_time ASC)) GROUP BY username, type ORDER BY elo DESC) AS D1 
-			INNER JOIN (SELECT winner AS username2, type AS type2, COUNT(*) AS win_count, SUM(odds) AS win_ts FROM LocalDuel GROUP BY username2, type2) AS D2
+		$query = "SELECT SQL_CACHE D1.username, type, elo, 100-ROUND(100*(win_ts + loss_ts)/(win_count+loss_count), 0) AS TS, win_count+loss_count AS count FROM 
+			((SELECT username, type, elo FROM ((SELECT winner AS username, type, ROUND(winner_elo,0) AS elo, end_time FROM Duels 
+			UNION ALL SELECT loser AS username, type, ROUND(loser_elo,0) AS elo, end_time FROM Duels ORDER BY end_time ASC)) AS T GROUP BY username, type ORDER BY elo DESC) AS D1 
+			INNER JOIN (SELECT winner AS username2, type AS type2, COUNT(*) AS win_count, SUM(odds) AS win_ts FROM Duels GROUP BY username2, type2) AS D2
 			ON D1.username = D2.username2 AND D1.type = D2.type2)
-			INNER JOIN (SELECT loser AS username3, type AS type3, COUNT(*) AS loss_count, SUM(1-odds) AS loss_ts FROM LocalDuel GROUP BY username3, type3) AS D3
-			ON D1.username = D3.username3 AND D1.type = D3.type3 ORDER BY elo desc";
-	
+			INNER JOIN (SELECT loser AS username3, type AS type3, COUNT(*) AS loss_count, SUM(1-odds) AS loss_ts FROM Duels GROUP BY username3, type3) AS D3
+			ON D1.username = D3.username3 AND D1.type = D3.type3 ORDER BY elo DESC";
+
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
@@ -41,9 +33,8 @@ switch ($option) {
 
 	case "duel_count": //Loda fixme, we could just do one query maybe and have duel_rank also return the counts and use that?
 		$newArray = null;
-	    $query ="SELECT type, COUNT(*) AS count FROM LocalDuel GROUP BY type ORDER BY count DESC";
+	    $query ="SELECT SQL_CACHE type, COUNT(*) AS count FROM Duels GROUP BY type ORDER BY count DESC";
 
-	
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
@@ -57,7 +48,7 @@ switch ($option) {
 	case "duel_list":
 		$newArray = null;
 	    $query ="SELECT winner, loser, type, (winner_hp || '/' || winner_shield) AS winner_health, ROUND(odds*100,0) AS odds, end_time, duration
-	    		FROM LocalDuel 
+	    		FROM Duels 
 	    		ORDER BY end_time DESC";
 	
 	    $arr = sql2arr($query);
@@ -72,63 +63,28 @@ switch ($option) {
 
 	case "race_rank":
 		$newArray = null;
-		/*
-		$query = "SELECT DISTINCT
-				    username,
-				    99 AS style,
-				    ROUND(SUM(score),0) AS score_sum,
-				    ROUND((SUM(score) / SUM(COUNT)),2) AS avg_score,
-				    CAST((SUM(percentilesum) / SUM(COUNT))*100 AS INT) AS avg_percentile,
-				    ROUND((CAST(SUM(ranksum) AS FLOAT) / SUM(COUNT)),2) AS avg_rank,
-				    SUM(golds) AS golds_sum,
-				    SUM(silvers) AS silvers_sum,
-				    SUM(bronzes) AS bronzes_sum,
-				    SUM(count) AS count_sum
-				FROM RaceRanks
-				GROUP BY username
-				UNION ALL
-				SELECT DISTINCT
-				    username,
-				    style,
-				    ROUND(SUM(score),0) AS SumScore,
-				    ROUND((score / COUNT),2) AS avg_score,
-				    CAST((percentilesum / COUNT)*100 AS INT) AS avg_percentile,
-				    ROUND((CAST(ranksum AS FLOAT) / COUNT),2) AS avg_rank,
-				    golds,
-				    silvers,
-				    bronzes,
-				    COUNT
-				FROM RaceRanks
-				GROUP BY style, username
-				ORDER BY SumScore DESC";
-				//From RaceRanks WHERE score > 10 - to cut out the useless crap, if it really is affecting pageload, but then we cant trust distinct username/style(?) to be complete for other dropdowns
-				*/
-
-		//Old query took like 17ms, new one takes like 80. oh well.
-
-		//Cache this into something whenever we update - better than having the client cache it since server knows when it needs to be refreshed
-		$query = "SELECT username, style, score, ROUND(CAST(score AS float)/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(ranksum AS float)/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(bronzes, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
-			SELECT A.username, 99 AS style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile from ((
-			SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS float))/entries) AS percentile FROM LocalRun GROUP BY username) AS A
-			LEFT JOIN (SELECT username, COUNT(*) AS golds From LocalRun WHERE rank = 1 GROUP BY username) AS G
+		$query = "SELECT SQL_CACHE username, style, CAST(score AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(ranksum AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(bronzes, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
+			SELECT A.username, 99 AS style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile FROM ((
+			SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile FROM Races GROUP BY username) AS A
+			LEFT JOIN (SELECT username, COUNT(*) AS golds From Races WHERE rank = 1 GROUP BY username) AS G
 			ON A.username = G.username
-			LEFT JOIN (SELECT username, COUNT(*) AS silvers From LocalRun WHERE rank = 2 GROUP BY username) AS S
+			LEFT JOIN (SELECT username, COUNT(*) AS silvers From Races WHERE rank = 2 GROUP BY username) AS S
 			ON A.username = S.username
-			LEFT JOIN (SELECT username, COUNT(*) AS bronzes From LocalRun WHERE rank = 3 GROUP BY username) AS B
-			ON A.username = B.username)
+			LEFT JOIN (SELECT username, COUNT(*) AS bronzes From Races WHERE rank = 3 GROUP BY username) AS B
+			ON A.username = B.username) 
 			GROUP BY A.username, A.style
 			UNION ALL
-			SELECT A.username, A.style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile from ((
-			SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS float))/entries) AS percentile FROM LocalRun GROUP BY username, style) AS A
-			LEFT JOIN (SELECT username, style, COUNT(*) AS golds From LocalRun WHERE rank = 1 GROUP BY username, style) AS G
+			SELECT A.username, A.style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile FROM ((
+			SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile FROM Races GROUP BY username, style) AS A
+			LEFT JOIN (SELECT username, style, COUNT(*) AS golds From Races WHERE rank = 1 GROUP BY username, style) AS G
 			ON A.username = G.username AND A.style = G.style
-			LEFT JOIN (SELECT username, style, COUNT(*) AS silvers From LocalRun WHERE rank = 2 GROUP BY username, style) AS S
+			LEFT JOIN (SELECT username, style, COUNT(*) AS silvers From Races WHERE rank = 2 GROUP BY username, style) AS S
 			ON A.username = S.username AND A.style = S.style
-			LEFT JOIN (SELECT username, style, COUNT(*) AS bronzes From LocalRun WHERE rank = 3 GROUP BY username, style) AS B
-			ON A.username = B.username AND A.style = B.style)
-			GROUP BY A.username, A.style)
+			LEFT JOIN (SELECT username, style, COUNT(*) AS bronzes From Races WHERE rank = 3 GROUP BY username, style) AS B
+			ON A.username = B.username AND A.style = B.style) 
+			GROUP BY A.username, A.style) AS T
 			ORDER BY score DESC";
-	
+
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
@@ -142,9 +98,8 @@ switch ($option) {
 
 	case "race_count":
 		$newArray = null;
-	    $query ="SELECT style, COUNT(*) AS count FROM LocalRun GROUP BY style ORDER BY count DESC";
+	    $query ="SELECT SQL_CACHE style, COUNT(*) AS count FROM Races GROUP BY style ORDER BY count DESC";
 
-	
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
@@ -157,83 +112,80 @@ switch ($option) {
 	
 	case "race_list":	
 		$newArray = null;
-		$query = "SELECT rank, username, coursename, style, topspeed, average, end_time, MIN(duration_ms) AS duration_ms FROM LocalRun GROUP BY username, style, coursename ORDER BY end_time DESC";
+		$query = "SELECT rank, username, coursename, style, topspeed, average, end_time, duration_ms FROM Races ORDER BY end_time DESC";
 
-
-		$arr = sql2arr($query);//JSON
+		$arr = sql2arr($query);
 		if($arr) {
 		    foreach ($arr as $key => $value) {
-				//$date = date('y-m-d H:i', $value["end_time"]);
 				$newArray[]=array(0=>$value["rank"],1=>$value["username"],2=>$value["coursename"],3=>$value["style"],4=>$value["topspeed"],5=>$value["average"],6=>$value["end_time"],7=>$value["duration_ms"]);
 		    }
-		}
-		
+		}	
+
 		$json = json_encode($newArray);
 	break;
 
-	case "dashboard":
+	case "dashboard": //Get total counts and last update info
 		$newArray = null;
-		$query = "SELECT 'account' as type, COUNT(*) AS count From LocalAccount
+		$query = "SELECT 'account_count' as type, COUNT(*) AS count From Accounts
 			UNION ALL
-			SELECT 'duel' AS type, COUNT (*) AS count From LocalDuel
+			SELECT 'duel_count' AS type, COUNT (*) AS count From Duels
 			UNION ALL
-			SELECT 'race' AS type, COUNT(*) AS count From LocalRun";
+			SELECT 'race_count' AS type, COUNT(*) AS count From Races
+			UNION ALL
+			SELECT type, last_update FROM Updates";
 
-		$arr = sql2arr($query);//JSON
+		$arr = sql2arr($query);
 		if($arr) {
 		    foreach ($arr as $key => $value) {
 				$newArray[]=array(0=>$value["type"],1=>$value["count"]);
 		    }
-		}
-		
+		}	
+
 		$json = json_encode($newArray);
 	break;
 
 	case "player_accounts":
 		$newArray = null;
-		$query = "SELECT username, lastlogin, created FROM LocalAccount ORDER BY username ASC";
+		$query = "SELECT username, lastlogin, created FROM Accounts ORDER BY username ASC";
 
-		$arr = sql2arr($query);//JSON
+		$arr = sql2arr($query);
 		if($arr) {
 		    foreach ($arr as $key => $value) {
-				//$date = date('y-m-d H:i', $value["end_time"]);
 				$newArray[]=array(0=>$value["username"],1=>$value["lastlogin"],2=>$value["created"]);
 		    }
-		}
-		
+		}	
+
 		$json = json_encode($newArray);
 	break;
 
-	case "player_map_charts": //Get Most popular courses,  most exclusive course-styles
+	case "player_map_charts": //Get Most popular courses,  most exclusive course-styles.  The ordering isn't reliable like it is in sqlite?
 		$newArray = null;
-		$query = "SELECT coursename, -1 AS style, count FROM (SELECT coursename, COUNT(*) as count 
-				FROM LocalRun GROUP BY coursename ORDER BY count DESC LIMIT 5)
+		$query = "SELECT SQL_CACHE coursename, -1 AS style, count FROM (SELECT coursename, COUNT(*) as count 
+				FROM Races GROUP BY coursename ORDER BY count, coursename DESC LIMIT 5) AS T
 			UNION ALL
 			SELECT coursename, style, count FROM (SELECT coursename, style, COUNT(*) as count 
-				FROM LocalRun GROUP BY coursename, style ORDER BY count ASC LIMIT 5)
+				FROM Races GROUP BY coursename, style ORDER BY count, coursename, end_time ASC LIMIT 5) AS T
 			UNION ALL
-			SELECT -1 AS coursename, style, CAST(AVG(duration_ms) AS INT) FROM LocalRun GROUP BY style
+			SELECT -1 AS coursename, style, CAST(AVG(duration_ms) AS INT) FROM Races GROUP BY style
 			ORDER BY count ASC";
 
-		$arr = sql2arr($query);//JSON
+		$arr = sql2arr($query);
 		if($arr) {
 		    foreach ($arr as $key => $value) {
-				//$date = date('y-m-d H:i', $value["end_time"]);
 				$newArray[]=array(0=>$value["coursename"],1=>$value["style"],2=>$value["count"]);
 		    }
-		}
-		
+		}	
+
 		$json = json_encode($newArray);
 	break;
 
 	case "player_duel_charts": //IDK what this should be
 		$newArray = null;
-		$query = "SELECT type, CAST(AVG(duration)/1000 AS INT) as duration From LocalDuel WHERE duration != 0 GROUP BY type ORDER BY duration ASC";
+		$query = "SELECT SQL_CACHE type, CAST(AVG(duration)/1000 AS INT) as duration From Duels WHERE duration != 0 GROUP BY type ORDER BY duration ASC";
 
-		$arr = sql2arr($query);//JSON
+		$arr = sql2arr($query);
 		if($arr) {
 		    foreach ($arr as $key => $value) {
-				//$date = date('y-m-d H:i', $value["end_time"]);
 				$newArray[]=array(0=>$value["type"],1=>$value["duration"]);
 		    }
 		}
@@ -247,13 +199,12 @@ switch ($option) {
 		}
 		$username = $_POST["player"];
 		$newArray = null;
-
-		$stmt = $db->prepare("SELECT type, elo from (SELECT type, ROUND(winner_elo,0) AS elo, end_time FROM LocalDuel WHERE winner = :username GROUP BY type
+		$stmt = $db->prepare("SELECT SQL_CACHE type, elo FROM (SELECT type, ROUND(winner_elo,0) AS elo, end_time FROM Duels WHERE winner = ? GROUP BY type
 				UNION
-				SELECT type, ROUND(loser_elo,0) AS elo, end_time FROM LocalDuel WHERE loser = :username GROUP BY type) GROUP BY type ORDER BY elo DESC LIMIT 5");
-		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
+				SELECT type, ROUND(loser_elo,0) AS elo, end_time FROM Duels WHERE loser = ? GROUP BY type) AS T GROUP BY type ORDER BY elo DESC LIMIT 5");
+		$stmt->bind_param('ss', $username, $username);
 		$result = $stmt->execute();
-		$exists = sql2arr2($result);
+		$exists = preparedsql2arr($result);
 		$result->finalize();
 
 	    if($exists){
@@ -272,20 +223,15 @@ switch ($option) {
 		if (!isset($_POST['player'])) {
 			break;
 		}
-		$username = $_POST["player"];
+		$username = $_POST["player"]; //accept either GET or POST 
 		$newArray = null;
-
-	   	//$stmt = $db->prepare("SELECT x.style AS style, ROUND(x.score/y.avg_score, 0) AS diff FROM (SELECT style, score from RaceRanks WHERE username=:username) as x, 
-	    	//(SELECT style, AVG(score) AS avg_score FROM RaceRanks GROUP BY style) as y WHERE x.style = y.style ORDER BY diff DESC LIMIT 5");
-
-	   	$stmt = $db->prepare("SELECT x.style AS style, ROUND(x.score/y.avg_score, 0) AS diff FROM (SELECT style, SUM(entries/rank) AS score from LocalRun WHERE username=:username group by style) as x, 
-	    	(SELECT style, AVG(entries/rank) AS avg_score FROM LocalRun GROUP BY style) as y WHERE x.style = y.style ORDER BY diff DESC LIMIT 5");
-
-		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
+	   	$stmt = $db->prepare("SELECT SQL_CACHE x.style AS style, ROUND(x.score/y.avg_score, 0) AS diff FROM (SELECT style, SUM(entries/rank) AS score from Races WHERE username=? group by style) as x, 
+	    	(SELECT style, AVG(entries/rank) AS avg_score FROM Races GROUP BY style) as y WHERE x.style = y.style ORDER BY diff DESC LIMIT 5");
+		$stmt->bind_param('s', $username);
 		$result = $stmt->execute();
-		$exists = sql2arr2($result);
+		$exists = preparedsql2arr($result);
 		$result->finalize();
-	
+
 	    if($exists){
 		    foreach ($exists as $key => $value) {
 		    	$newArray[]=array(0=>$value["style"],1=>$value["diff"]);
@@ -295,21 +241,19 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
-	case "player_duel_graph":
+	case "player_duel_graph": //Should select type, and let client filter that.. should apply smoothing? 
 		if (!isset($_POST['player'])) {
 			break;
 		}
 		$username = $_POST["player"];
 		$newArray = null;
-
-		//Should select type, and let client filter that.. should apply smoothing? 
-		$stmt = $db->prepare("SELECT end_time, type, CAST(winner_elo AS INT) AS elo FROM LocalDuel WHERE winner = :username 
+		$stmt = $db->prepare("SELECT end_time, type, CAST(winner_elo AS INT) AS elo FROM Duels WHERE winner = ? 
 			UNION
-			select end_time, type, CAST(loser_elo AS INT) AS elo FROM LocalDuel WHERE loser = :username 
+			SELECT end_time, type, CAST(loser_elo AS INT) AS elo FROM Duels WHERE loser = :username 
 			ORDER BY end_time ASC");
-		$stmt->bindValue(":username", $username, SQLITE3_TEXT);
+		$stmt->bind_param('s', $username);
 		$result = $stmt->execute();
-		$exists = sql2arr2($result);
+		$exists = preparedsql2arr($result);
 		$result->finalize();
 	
 	    if($exists){
@@ -326,5 +270,39 @@ switch ($option) {
 ob_start('ob_gzhandler'); //Compress json
 echo $json;
 $db->close();
+
+function preparedsql2arr($result){ //For prepared statements that needed to be bound
+	if ($result) {
+		while ($row = $result->fetch_assoc()) {
+			$arrayResult[]=$row;
+		}
+		if ($arrayResult) {
+      		return $arrayResult;
+    	} else {
+      		return false;
+    	}
+  	}
+}
+
+function sql2arr($query){
+	global $db;
+	$arrayResult = null;
+  
+	//$starttime = microtime(true);
+	$result = $db->query($query); //Show error?
+	//$endtime = microtime(true);
+	//echo "query took " . ($endtime - $starttime) * 1000;
+
+	if ($result) {
+		while ($row = $result->fetch_assoc()) {
+			$arrayResult[]=$row;
+		}
+		if ($arrayResult) {
+			return $arrayResult;
+		} else {
+			return false;
+		}
+	}
+}
 
 ?>

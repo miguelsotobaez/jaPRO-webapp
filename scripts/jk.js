@@ -3,7 +3,6 @@
  *
  */
 
-
 $(document).ready(function () {
     if(page=="home"){
         home();
@@ -195,12 +194,31 @@ function duel_title(){
     HTML+='                        <small>';
     HTML+='                            Select the types of duels you want to see.';
     HTML+='                        </small>';
+
+    HTML+='                        <button id="update_duels">Update</button>'; //Get dashboard getJSON info to show last update time 
+
     HTML+='                    </div>';
     HTML+='                </div>';
     HTML+='                <hr>';
     HTML+='            </div>';
     HTML+='        </div>';
     $("#main-content").append(HTML);
+
+    $("#update_duels").click(function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: ajaxURL,
+            data: { option: "duels" },
+            success: function(result) {
+                //alert('ok');
+            },
+            error: function(result) {
+                //alert('error');
+            }
+        });
+    });
+
 }
 
 function duel_count(){
@@ -213,14 +231,12 @@ function duel_count(){
 
     $(document).ready(function() {
         var data = null;
-        var item = "duel_count";
-        var url = "ajax/getJSON.php";
         $.ajax({
             type: "POST",
-            url: url,
+            url: "ajax/getJSON.php",
             dataType: "JSON",
             async: false,
-            data: { option: item},
+            data: { option: "duel_count"},
             success: function(res) {
                 data = res;
             }
@@ -319,14 +335,12 @@ function duel_rank(){
     $("#main-content").append(panel);
 
     $(document).ready(function() {
-        var item = "duel_rank";
-        var url = "ajax/getJSON.php";
         $.ajax({
             type: "POST",
-            url: url,
+            url: "ajax/getJSON.php",
             dataType: "JSON",
             async: false,
-            data: { option: item },
+            data: { option: "duel_rank" },
             success: function(res) {
                 data = res;
             }
@@ -458,14 +472,12 @@ function duel_list(){
 
     $(document).ready(function() {
         var data = null;
-        var item = "duel_list";
-        var url = "ajax/getJSON.php";
         $.ajax({
             type: "POST",
-            url: url,
+            url: "ajax/getJSON.php",
             dataType: "JSON",
             async: false,
-            data: { option: item },
+            data: { option: "duel_list" },
             success: function(res) {
                 data = res;
             }
@@ -582,12 +594,32 @@ function race_title(){
     HTML+='                        <small>';
     HTML+='                            Now you can see your race stats.';
     HTML+='                        </small>';
+
+    HTML+='                        <button id="update_races">Update</button>';
+
     HTML+='                    </div>';
     HTML+='                </div>';
     HTML+='                <hr>';
     HTML+='            </div>';
     HTML+='        </div>';
     $("#main-content").append(HTML);
+
+    //Update button
+    $("#update_races").click(function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "ajax/updateDB.php",
+            data: { option: "races" },
+            success: function(result) {
+                //alert('ok');
+            },
+            error: function(result) {
+                //alert('error');
+            }
+        });
+    });
+
 }
 
 function race_count(){
@@ -600,16 +632,14 @@ function race_count(){
      panel += '                </div>';
     $("#main-content").append(panel);
 
-    //$(document).ready(function() {
+    $(document).ready(function() {
         var data = null;
-        var item = "race_count";
-        var url = "ajax/getJSON.php";
         $.ajax({
             type: "POST",
-            url: url,
+            url: "ajax/getJSON.php",
             dataType: "JSON",
             async: false,
-            data: { option: item},
+            data: { option: "race_count"},
             success: function(res) {
                 data = res;
             }
@@ -679,7 +709,7 @@ function race_count(){
                 data: [data[4][1]]
             }]
         });
-    //});
+    });
 
     $('.jk-nav li').removeClass("active");
     $('#menu_race').addClass("active");
@@ -708,14 +738,12 @@ function race_rank(){
 
     $(document).ready(function() {
         var data = null;
-        var item = "race_rank";
-        var url = "ajax/getJSON.php";
         $.ajax({
             type: "POST",
-            url: url,
+            url: "ajax/getJSON.php",
             dataType: "JSON",
             async: false,
-            data: { option: item },
+            data: { option: "race_rank" },
             success: function(res) {
                 data = res;
                 //RaceRankData = data
@@ -836,18 +864,16 @@ function race_list(){
 
     $(document).ready(function() {
         var data = null;
-        var item = "race_list";
-        var url = "ajax/getJSON.php";
 
         /*if(localStorage.getItem("dataCache")) { //We also have to check if its up to date? hmm.
             data = JSON.parse(localStorage.getItem("dataCache"));
         } else*/ {
             $.ajax({
                 type: "POST",
-                url: url,
+                url: "ajax/getJSON.php",
                 dataType: "JSON",
                 async: false,
-                data: { option: item },
+                data: { option: "race_list" },
                 success: function(res) {//JSON
                     data = res;
                     //localStorage.setItem("dataCache", JSON.stringify(res));
@@ -879,8 +905,8 @@ function race_list(){
                 { "data": 5 },
                 { "data": 6, "render": 
                     function ( data, type, row, meta ) { 
-                        var date = new Date(data*1000);
-                        return '<a href="../races/'+encodeURIComponent(row[1])+'/'+encodeURIComponent(row[1])+'-'+encodeURIComponent(row[2].replace(" ", ""))+'-'
+                        var date = new Date(data*1000); //fixme the IP should be a global variable defined somewhere?
+                        return '<a href="http://162.248.89.208/races/'+encodeURIComponent(row[1])+'/'+encodeURIComponent(row[1])+'-'+encodeURIComponent(row[2].replace(" ", ""))+'-'
                             +RaceToString(row[3]).toLowerCase()+'.dm_26">'+(date.getYear()-100) + '-' + ('0'+(date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + ' ' 
                             + ('0'+(date.getHours()+1)).slice(-2) + ':' + ('0'+(date.getMinutes()+1)).slice(-2) + '<a>' }},
                 { "data": 7, "sType": "num-durhtml", "className": "duration_ms", "render":
@@ -974,14 +1000,12 @@ function player_title(){ //Show total number of players, get each playername for
     }
 
     var data = null;
-    var item = "player_accounts";
-    var url = "ajax/getJSON.php";
     $.ajax({
         type: "POST",
-        url: url,
+        url: "ajax/getJSON.php",
         dataType: "JSON",
         async: false,
-        data: { option: item },
+        data: { option: "player_accounts" },
         success: function(res) {
             data = res;
             helpers.buildDropdown( data, $('#dropdown'), 'Select an option' ); 
@@ -1012,14 +1036,12 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
     $("#main-content").append(panel);
 
     var data = null;
-    var item = "player_map_charts";
-    var url = "ajax/getJSON.php";
     $.ajax({
         type: "POST",
-        url: url,
+        url: "ajax/getJSON.php",
         dataType: "JSON",
         async: false,
-        data: { option: item },
+        data: { option: "player_map_charts" },
         success: function(res) {
             data = res;
         }
@@ -1165,19 +1187,16 @@ function player_duel_charts(){//
     $("#main-content").append(panel);
 
     var data = null;
-    var item = "player_duel_charts";
-    var url = "ajax/getJSON.php";
     $.ajax({
         type: "POST",
-        url: url,
+        url: "ajax/getJSON.php",
         dataType: "JSON",
         async: false,
-        data: { option: item },
+        data: { option: "player_duel_charts" },
         success: function(res) {
             data = res;
         }
     });
-
 
     var chart;
         chart = new Highcharts.Chart({
@@ -1260,16 +1279,13 @@ function player_race_stats(){//Most popular duels, total number of duels
     panel += '            </div>';
     $("#main-content").append(panel);
 
-    var username = player;
     var data = null;
-    var item = "player_race_stats";
-    var url = "ajax/getJSON.php";
     $.ajax({
         type: "POST",
-        url: url,
+        url: "ajax/getJSON.php",
         dataType: "JSON",
         async: false,
-        data: { option: item, player: username},
+        data: { option: "player_race_stats", player: player},
         success: function(res) {
             data = res;
         }
@@ -1325,16 +1341,14 @@ function player_duel_stats(){//Most popular duels, total number of duels
     panel += '            </div>';
     $("#main-content").append(panel);
 
-    var username = player;
+
     var data = null;
-    var item = "player_duel_stats";
-    var url = "ajax/getJSON.php";
     $.ajax({
         type: "POST",
-        url: url,
+        url: "ajax/getJSON.php",
         dataType: "JSON",
         async: false,
-        data: { option: item, player: username},
+        data: { option: "player_duel_stats", player: player},
         success: function(res) {
             data = res;
         }
@@ -1368,14 +1382,12 @@ function player_duel_stats(){//Most popular duels, total number of duels
         });
 
     var data = null;
-    var item = "player_duel_graph";
-    var url = "ajax/getJSON.php";
     $.ajax({
         type: "POST",
-        url: url,
+        url: "ajax/getJSON.php",
         dataType: "JSON",
         async: false,
-        data: { option: item, player: username},
+        data: { option: "player_duel_graph", player: player},
         success: function(res) {
             data = res;
         }
@@ -1438,16 +1450,13 @@ function player_race_chart(){ //This should be a stacked horizontal bar graph li
     panel += '            </div>';
     $("#main-content").append(panel);
 
-    var username = player;
     var data = null;
-    var item = "player_race_chart";
-    var url = "ajax/getJSON.php";
     $.ajax({
         type: "POST",
-        url: url,
+        url: "ajax/getJSON.php",
         dataType: "JSON",
         async: false,
-        data: { option: item, player: username},
+        data: { option: "player_race_chart", player: player},
         success: function(res) {
             data = res;
         }
@@ -1502,16 +1511,13 @@ function player_duel_graph(){
     panel += '            </div>';
     $("#main-content").append(panel);
 
-    var username = player;
     var data = null;
-    var item = "player_duel_graph";
-    var url = "ajax/getJSON.php";
     $.ajax({
         type: "POST",
-        url: url,
+        url: "ajax/getJSON.php",
         dataType: "JSON",
         async: false,
-        data: { option: item, player: username},
+        data: { option: "player_duel_graph", player: player},
         success: function(res) {
             data = res;
         }

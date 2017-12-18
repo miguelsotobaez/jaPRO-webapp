@@ -30,18 +30,22 @@ switch ($option) {
 		//$last_update = 1512099645;
 
 		$data = GetStats("races", $last_update);
-		$values = "";
-		if ($data) {
-			foreach ($data as $value) {
-				$values .= "('".$value[0]."', '".$value[1]."', '".$value[2]."', '".$value[3]."', '".$value[4]."', '".$value[5]."', '".$value[6]."', '".$value[7]."', '".$value[8]."', '".$value[9]."'),";
-			}
-		}
-		InsertStats("Races(username, coursename, style, duration_ms, topspeed, average, end_time, rank, entries, last_update)", $values);
 
-		if ($data)	{//Index rank, this speeds up gold/silver/bronze query a bit //Fixme make sure no results means this doesnt go through
+		if ($data) {
 			if (!$db->query("DROP INDEX IF EXISTS RaceRankIndex on japro_web.Races;")) {
 				echo $db->error;
 			}
+		}
+
+		$values = "";
+		if ($data) {
+			foreach ($data as $value) {
+				$values .= "('".$value[0]."', '".$value[1]."', '".$value[2]."', '".$value[3]."', '".$value[4]."', '".$value[5]."', '".$value[6]."', '".$value[7]."', '".$value[8]."'),";
+			}
+		}
+		InsertStats("REPLACE INTO Races(username, coursename, style, duration_ms, topspeed, average, end_time, rank, entries)", $values);
+
+		if ($data)	{//Index rank, this speeds up gold/silver/bronze query a bit //Fixme make sure no results means this doesnt go through
 			if (!$db->query("CREATE INDEX IF NOT EXISTS RaceRankIndex ON Races (rank)")) {
 				echo $db->error;
 			}
@@ -55,12 +59,12 @@ switch ($option) {
 				$values .= "('".$value[0]."', '".$value[1]."', '".$value[2]."', '".$value[3]."', '".$value[4]."', '".$value[5]."', '".$value[6]."', '".$value[7]."'),";
 			}
 		}
-		InsertStats("Accounts(username, kills, deaths, suicides, captures, returns, lastlogin, created)", $values);
+		InsertStats("REPLACE INTO Accounts(username, kills, deaths, suicides, captures, returns, lastlogin, created)", $values);
 
 		//Make sure we dont have any duplicates (this is needed because we get rows that have been recently affected even though they have not been recently completed) //fixme - should also sort by last_update 
-		if (!$db->query("DELETE FROM Races WHERE id NOT IN (SELECT id FROM (SELECT id, coursename, username, style FROM Races ORDER BY duration_ms DESC, last_update ASC) AS T GROUP BY T.username, T.coursename, T.style)")) {
-			echo $db->error;
-		}
+		//if (!$db->query("DELETE FROM Races WHERE id NOT IN (SELECT id FROM (SELECT id, coursename, username, style FROM Races ORDER BY duration_ms DESC, last_update ASC) AS T GROUP BY T.username, T.coursename, T.style)")) {
+		//	echo $db->error;
+		//}
 
 		if ($stmt = $db->prepare("UPDATE Updates SET last_update = ? WHERE type = 'races' OR type = 'accounts'")) {
 			$stmt->bind_param('i', $time);
@@ -84,7 +88,7 @@ switch ($option) {
 				$values .= "('".$value[0]."', '".$value[1]."', '".$value[2]."', '".$value[3]."', '".$value[4]."', '".$value[5]."', '".$value[6]."', '".$value[7]."', '".$value[8]."', '".$value[9]."'),";
 			}
 		}
-		InsertStats("Duels(winner, loser, type, duration, winner_hp, winner_shield, end_time, winner_elo, loser_elo, odds)", $values);
+		InsertStats("INSERT INTO Duels(winner, loser, type, duration, winner_hp, winner_shield, end_time, winner_elo, loser_elo, odds)", $values);
 
 		$last_update = $db->query("SELECT last_update FROM Updates WHERE type = 'accounts'")->fetch_object()->last_update;  
 		$data = GetStats("accounts", $last_update);
@@ -94,7 +98,7 @@ switch ($option) {
 				$values .= "('".$value[0]."', '".$value[1]."', '".$value[2]."', '".$value[3]."', '".$value[4]."', '".$value[5]."', '".$value[6]."', '".$value[7]."'),";
 			}
 		}
-		InsertStats("Accounts(username, kills, deaths, suicides, captures, returns, lastlogin, created)", $values);
+		InsertStats("REPLACE INTO Accounts(username, kills, deaths, suicides, captures, returns, lastlogin, created)", $values);
 		//No need for cleanup, but it would just be deleting actual duplicate entries
 
 		if ($stmt = $db->prepare("UPDATE Updates SET last_update = ? WHERE type = 'duels' OR type = 'accounts'")) {
@@ -120,7 +124,7 @@ switch ($option) {
 				$values .= "('".$value[0]."', '".$value[1]."', '".$value[2]."', '".$value[3]."', '".$value[4]."', '".$value[5]."', '".$value[6]."', '".$value[7]."'),";
 			}
 		}
-		InsertStats("Accounts(username, kills, deaths, suicides, captures, returns, lastlogin, created)", $values);
+		InsertStats("REPLACE INTO Accounts(username, kills, deaths, suicides, captures, returns, lastlogin, created)", $values);
 
 
 		//$last_update = $db->query("SELECT last_update FROM Updates WHERE type = 'accounts'")->fetch_object()->last_update;  
@@ -161,14 +165,15 @@ function GetStats($type, $last_update) {
 	return json_decode($json);
 } 
 
-function InsertStats($columns, $values) {
+function InsertStats($query, $values) {
 	global $db;
 	if(!empty($values)) {
 		$values = substr($values, 0, -1); //Remove trailing comma
-		if (!$db->query("INSERT INTO {$columns} VALUES {$values}")) { //Prepare this?
+		if (!$db->query("{$query} VALUES {$values}")) { //Prepare this?
 			echo $db->error;
 		}
 	}
 }
+
 
 ?>

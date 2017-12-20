@@ -315,7 +315,7 @@ function duel_rank(){
     panel += '  <div class="col-md-12">';
     panel += '      <div class="panel panel-filled">';
     panel += '          <div class="panel-heading">';
-    panel += '              Scores';
+    panel += '              Ranks';
     panel += '          </div>';
     panel += '          <div class="panel-body">';
     panel += '              <div class="table-responsive">';
@@ -1607,8 +1607,8 @@ function maps(){
 function servers(){
         HTML='<div class="row">';
         HTML+='<div class="col-md-4">';
-        HTML+='  <h2>..a</h2>';
-        HTML+='  <p>..b</p>';
+        HTML+='  <h2>.ups playja.pro</h2>';
+        HTML+='  <p>/connect s.playja.pro</p>';
         HTML+='</div>';
         HTML+='</div>';
         $("#main-content").html(HTML);

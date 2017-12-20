@@ -1549,10 +1549,6 @@ function player_duel_graph(){
     $('#menu_player').addClass("active");
 }
 
-
-
-
-
 /////////////////////////////////////////////////////////////////////
 ///////////////////////////////RACE//////////////////////////////////
 ///////////////////////////////RACE//////////////////////////////////
@@ -1562,44 +1558,49 @@ function player_duel_graph(){
 function maps(){
         HTML='<div class="row">';
         HTML+='<div class="col-md-4">';
-        HTML+='  <h2>The Academy v2</h2>';
-        HTML+='  <p>A map recomended for duels</p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/the_academy_v2.pk3" role="button">Download</a></p>';
-        HTML+='</div>';
-        HTML+='<div class="col-md-4">';
-        HTML+='  <h2>Race Pack 1</h2>';
-        HTML+='  <p>Map for race </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapRacepack1.pk3" role="button">Download</a></p>';
-        HTML+='</div>';
-        HTML+='<div class="col-md-4">';
-        HTML+='  <h2>Race Pack 2</h2>';
-        HTML+='  <p>Map for race </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapRacepack2.pk3" role="button">Download</a></p>';
-        HTML+='</div>';
-        HTML+='<div class="col-md-4">';
-        HTML+='  <h2>Race Pack 3</h2>';
-        HTML+='  <p>Map for race </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapRacepack3.pk3" role="button">Download</a></p>';
-        HTML+='</div>';
-        HTML+='<div class="col-md-4">';
-        HTML+='  <h2>Race Pack 4</h2>';
-        HTML+='  <p>Map for race </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapRacepack4.pk3" role="button">Download</a></p>';
+        HTML+='  <h2>Trick Arena</h2>';
+        HTML+='  <p>Map for race</p>';
+        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/z780uk203zma9h7/mapTrickArena.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Arena</h2>';
-        HTML+='  <p>Map for race </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapRaceArena.pk3" role="button">Download</a></p>';
+        HTML+='  <p>Map for race</p>';
+        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/fu6pbb8jvfvu2hm/mapRaceArena.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='</div>';
+        HTML+='<div class="col-md-4">';
+        HTML+='  <h2>Race Pack 1</h2>';
+        HTML+='  <p>Map for race</p>';
+        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/84if2dkpuhr6572/mapRacepack1.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='</div>';
+        HTML+='<div class="col-md-4">';
+        HTML+='  <h2>Race Pack 2</h2>';
+        HTML+='  <p>Map for race</p>';
+        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/4crbnrgqr248f81/mapRacepack2.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='</div>';
+        HTML+='<div class="col-md-4">';
+        HTML+='  <h2>Race Pack 3</h2>';
+        HTML+='  <p>Map for race</p>';
+        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/kggwqzdxnzoekqz/mapRacepack3.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='</div>';
+        HTML+='<div class="col-md-4">';
+        HTML+='  <h2>Race Pack 4</h2>';
+        HTML+='  <p>Map for race</p>';
+        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/at3n9gz4tvo6jia/mapRacePack4.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='</div>';
+        HTML+='<div class="col-md-4">';
+        HTML+='  <h2>Race Pack 5</h2>';
+        HTML+='  <p>Map for race</p>';
+        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/esblp84azv4vwh0/mapRacepack5_beta.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Tritoch Pack</h2>';
-        HTML+='  <p>Map for race </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapTritoch_pack.pk3" role="button">Download</a></p>';
+        HTML+='  <p>CTF map pack</p>';
+        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/bwescubuoh4u53l/mapTritoch_pack.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>JK2 MP Maps</h2>';
-        HTML+='  <p>JK Multiplayer map pack </p>';
-        HTML+='  <p><a class="btn btn-default" href="maps/mapJK2MultiplayerMaps.pk3" role="button">Download</a></p>';
+        HTML+='  <p>JK Multiplayer map pack</p>';
+        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/x4vl8siviy0d57t/mapJK2MultiplayerMaps.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='</div>';
         $("#main-content").html(HTML);

@@ -47,7 +47,7 @@ switch ($option) {
 
 	case "duel_list":
 		$newArray = null;
-	    $query ="SELECT winner, loser, type, (winner_hp || '/' || winner_shield) AS winner_health, ROUND(odds*100,0) AS odds, end_time, duration
+	    $query ="SELECT winner, loser, type, CONCAT(winner_hp, '/', winner_shield) AS winner_health, ROUND(odds*100,0) AS odds, end_time, duration
 	    		FROM Duels 
 	    		ORDER BY end_time DESC";
 	

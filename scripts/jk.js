@@ -161,13 +161,10 @@ $(document).ready(function () {
 //////////////////////////////////////////////////////////////////////////
 
 function home(){
-    var p1 = '<h1>Welcome to jaPRO Mod!</h1><p>It is a mod started by loda from modbase put together by raz0r and other jacoders with the security fixes. There are alot of features and new ideas taken from popular mods.</p>';
-    var p2 = '<h4>What does jaPRO do for me?</h4><p>A better sabering environment from base, ranking system, lag compensation either using guns or force, tweaking current weapons for different effects, non abusive admin commands from JA+, voting system, 2 admin levels fullAdmin or junior. From FFA, TFFA and CTF gamemodes there are lots of things to toggle to get the server with no force or with force how you want to run it. Better client smoothing when you have the client installed in the japro directory.</p>';
-    var p3 = '<h4>Why should I even bother using jaPRO?</h4><p>Those who maybe looking for another option other than running JA+ or any other mod which is old and can be crashed, DoS attacked or exploited.</p>';
-    var p4 = '<p><a class="btn btn-default btn-lg" href="https://github.com/videoP/jaPRO/raw/master/japro3.pk3" role="button">Download jaPRO Client</a> </p>';
-    var webmtest = '<p><video width="800" height="800" loop autoplay><source src="output.webm" type="video/mp4">Your browser does not support the video tag.</video></p>';
-    var webmtest2 = '<p><video width="800" height="800" loop autoplay><source src="output2.webm" type="video/mp4">Your browser does not support the video tag.</video></p>';
-    $("#main-content").html('<div class="container">'+p1+' <br> '+p2+' '+p3+' '+p4+' '+webmtest+' '+webmtest2+'</div>');
+    var p1 = '<h1>Welcome to jaPRO Mod!</h1><p>It is a mod started by loda based on OpenJK.</p>';
+    var p2 = '<h4>What does jaPRO do for me?</h4><p><ul><li>Player accounts and stat database</li><li>Improved netcode with lag compensation</li><li>Multiple duel types</li><li>Full featured race-mode</li><li>Highscores and Elo</li><li>Improved weapon balancing and new weapon abilities</li><li>Improved full force balancing and features</li><li>Skill based grapple hook</li><li>New style of jetpack</li><li>Physics based flag-throw</li><li>Advanced bot AI</li><li>Instant update server settings (no longer requiring a map restart)</li><li>Lots of JK2 gameplay options</li><li>Improved vote system</li><li>Simple admin system with low potential for abuse</li><li>Ability to configure every setting back to basejk gameplay</li></ul></p>';
+    var p3 = '<p><a class="btn btn-default btn-lg" href="https://github.com/videoP/jaPRO/raw/master/japro3.pk3" role="button">Download jaPRO Client</a> </p>';
+    $("#main-content").html('<div class="container">'+p1+' <br> '+p2+' '+p3+'</div>');
     $('.jk-nav li').removeClass("active");
     $('#menu_home').addClass("active");
 }
@@ -192,7 +189,7 @@ function duel_title(){
     HTML+='                    <div class="header-title">';
     HTML+='                        <h3>Duels</h3>';
     HTML+='                        <small>';
-    HTML+='                            Select the types of duels you want to see.';
+    HTML+='                            Duel stats.';
     HTML+='                        </small>';
 
     HTML+='                        <button id="update_duels">Update</button>'; //Get dashboard getJSON info to show last update time 
@@ -208,7 +205,7 @@ function duel_title(){
         e.preventDefault();
         $.ajax({
             type: "POST",
-            url: ajaxURL,
+            url: "ajax/updateDB.php",
             data: { option: "duels" },
             success: function(result) {
                 //alert('ok');
@@ -318,10 +315,9 @@ function duel_rank(){
     panel += '  <div class="col-md-12">';
     panel += '      <div class="panel panel-filled">';
     panel += '          <div class="panel-heading">';
-    panel += '              Saber Rank List';
+    panel += '              Scores';
     panel += '          </div>';
     panel += '          <div class="panel-body">';
-    panel += '              <p>This is the saber rank list, ordered by ELO.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_duel_rank" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th><label title="Elo rank compared to every other elo regardless of type.">Rank</label></th><th>Player</th><th>Type</th><th>Elo</th><th data-hide="phone,table"><label title="Average strength of opponent. A lower value means this player faces easier opponents.">TS</label></th><th>Count</th></tr></thead>';
@@ -454,10 +450,9 @@ function duel_list(){
     panel += '  <div class="col-md-12">';
     panel += '      <div class="panel panel-filled">';
     panel += '          <div class="panel-heading">';
-    panel += '              Recent duels';
+    panel += '              Duels';
     panel += '          </div>';
     panel += '          <div class="panel-body">';
-    panel += '              <p>Here you can see the registri of all saber duels in japro server.</p>';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_duel_list" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Winner</th><th>Loser</th><th>Type</th><th data-hide="phone,table">Winner Health</th><th>Odds</th><th>Date</th><th data-hide="phone,table">Duration</th></tr></thead>';
@@ -592,7 +587,7 @@ function race_title(){
     HTML+='                    <div class="header-title">';
     HTML+='                        <h3>Race</h3>';
     HTML+='                        <small>';
-    HTML+='                            Now you can see your race stats.';
+    HTML+='                            Race stats.';
     HTML+='                        </small>';
 
     HTML+='                        <button id="update_races">Update</button>';

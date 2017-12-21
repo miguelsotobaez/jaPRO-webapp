@@ -720,6 +720,9 @@ function race_rank(){
     panel += '              Scores';
     panel += '          </div>';
     panel += '          <div class="panel-body">';
+
+    panel +='                        <button id="race_rank_all">All</button><button id="race_rank_90">Last 3 months</button>'; //Get dashboard getJSON info to show last update time 
+
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_race_rank" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th><label title="Score rank compared to every other score regardless of style.">Rank</label></th><th>Username</th><th>Style</th><th>Score</th><th data-hide="phone,table">Average Score</th><th data-hide="phone,table">Average Percentile</th><th data-hide="phone,table">Average Rank</th><th data-hide="phone,table">Golds</th><th data-hide="phone,table">Silvers</th><th data-hide="phone,table">Bronzes</th><th>Count</th></tr></thead>';
@@ -733,21 +736,19 @@ function race_rank(){
 
     $(document).ready(function() {
         var data = null;
-        var start_time = "0"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
-        var end_time = "0"; //0 for all. If set it specifies end filter.
         $.ajax({
             type: "POST",
             url: "ajax/getJSON.php",
             dataType: "JSON",
             async: false,
-            data: { option: "race_rank", start_time: start_time, end_time: end_time },
+            data: { option: "race_rank", start_time: "0", end_time: "0" },
             success: function(res) {
                 data = res;
                 //RaceRankData = data
             }
         });
 
-        $('#datatable_race_rank').DataTable( {
+        var rank_table = $('#datatable_race_rank').DataTable( {
             "order": [[ 3, "desc" ]],
             "bLengthChange": false,
             "deferRender": true,
@@ -832,6 +833,53 @@ function race_rank(){
                 this.api().draw();
             }
         });
+
+
+
+
+    $("#race_rank_all").click(function(e) { //idk
+        var start_time = "0"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
+        var end_time = "0"; //0 for all. If set it specifies end filter.
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "ajax/getJSON.php",
+            dataType: "JSON",
+            async: false,
+            data: { option: "race_rank", start_time: start_time, end_time: end_time },
+            success: function(res) {
+                data = res;
+                rank_table.ajax.reload();
+                //Redraw data table?? //fixme
+            }
+        });
+    });
+
+    $("#race_rank_90").click(function(e) {
+        var start_time = "-90"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
+        var end_time = "0"; //0 for all. If set it specifies end filter.
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "ajax/getJSON.php",
+            dataType: "JSON",
+            async: false,
+            data: { option: "race_rank", start_time: start_time, end_time: end_time },
+            success: function(res) {
+                data = res;
+                rank_table.ajax.reload();
+                //Redraw data table?? //fixme
+            }
+        });
+    });
+
+
+
+
+
+
+
+        //table;
     });
 
     $('.jk-nav li').removeClass("active");

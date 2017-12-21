@@ -109,32 +109,7 @@ switch ($option) {
 			$arr = preparedsql2arr($result);
 			$result->finalize();
 		}
-		else if ($start_time == 0 && $end_time == $last_time) { //No filter
-			$query = "SELECT SQL_CACHE username, style, CAST(score AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(ranksum AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(bronzes, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
-				SELECT A.username, 99 AS style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile FROM ((
-				SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile FROM Races GROUP BY username) AS A
-				LEFT JOIN (SELECT username, COUNT(*) AS golds From Races WHERE rank = 1 GROUP BY username) AS G
-				ON A.username = G.username
-				LEFT JOIN (SELECT username, COUNT(*) AS silvers From Races WHERE rank = 2 GROUP BY username) AS S
-				ON A.username = S.username
-				LEFT JOIN (SELECT username, COUNT(*) AS bronzes From Races WHERE rank = 3 GROUP BY username) AS B
-				ON A.username = B.username) 
-				GROUP BY A.username, A.style
-				UNION ALL
-				SELECT A.username, A.style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile FROM ((
-				SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile FROM Races GROUP BY username, style) AS A
-				LEFT JOIN (SELECT username, style, COUNT(*) AS golds From Races WHERE rank = 1 GROUP BY username, style) AS G
-				ON A.username = G.username AND A.style = G.style
-				LEFT JOIN (SELECT username, style, COUNT(*) AS silvers From Races WHERE rank = 2 GROUP BY username, style) AS S
-				ON A.username = S.username AND A.style = S.style
-				LEFT JOIN (SELECT username, style, COUNT(*) AS bronzes From Races WHERE rank = 3 GROUP BY username, style) AS B
-				ON A.username = B.username AND A.style = B.style) 
-				GROUP BY A.username, A.style) AS T
-				ORDER BY score DESC";
-
-			$arr = sql2arr($query);
-		}
-		else if ($start_time < 0 && $end_time == $last_time) { //Preset filter so we can use sql cache
+		else if ($start_time <= 0 && $end_time == $last_time) { //Preset filter so we can use sql cache
 			$start_time = strtotime('today'); //Get time at midnight today so we can cache daily
 			if ($start_time == -365)
 				$start_time -= 60*60*24*365;
@@ -142,9 +117,10 @@ switch ($option) {
 				$start_time -= 60*60*24*90; //Minus 90 days
 			else if ($start_time == -7)
 				$start_time -= 60*60*24*7;
-			else break;
+			else 
+				$start_time = 0;
 
-			if ($start_time <= 0 || $start_time > $last_time)
+			if ($start_time < 0 || $start_time > $last_time)
 				break;
 
 			$query = "SELECT SQL_CACHE username, style, CAST(score AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(ranksum AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(bronzes, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (

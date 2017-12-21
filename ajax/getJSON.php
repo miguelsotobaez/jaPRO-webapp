@@ -134,9 +134,16 @@ switch ($option) {
 
 			$arr = sql2arr($query);
 		}
-		else if ($start_time == -90 && $end_time == $last_time) { //Last 3 months preset
-			$start_time = strtotime('today');
-			$start_time -= 7890000; //Minus 3 months
+		else if ($start_time < 0 && $end_time == $last_time) { //Preset filter so we can use sql cache
+			$start_time = strtotime('today'); //Get time at midnight today so we can cache daily
+			if ($start_time == -365)
+				$start_time -= 60*60*24*365;
+			else if ($start_time == -90)
+				$start_time -= 60*60*24*90; //Minus 90 days
+			else if ($start_time == -7)
+				$start_time -= 60*60*24*7;
+			else break;
+
 			if ($start_time <= 0 || $start_time > $last_time)
 				break;
 

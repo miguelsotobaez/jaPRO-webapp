@@ -733,12 +733,14 @@ function race_rank(){
 
     $(document).ready(function() {
         var data = null;
+        var start_time = "0"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
+        var end_time = "0"; //0 for all. If set it specifies end filter.
         $.ajax({
             type: "POST",
             url: "ajax/getJSON.php",
             dataType: "JSON",
             async: false,
-            data: { option: "race_rank" },
+            data: { option: "race_rank", start_time: start_time, end_time: end_time },
             success: function(res) {
                 data = res;
                 //RaceRankData = data
@@ -968,7 +970,7 @@ function player_title(){ //Show total number of players, get each playername for
     HTML+='                        <i class="pe page-header-icon pe-7s-shield"></i>';
     HTML+='                    </div>';
     HTML+='                    <div class="header-title">';
-    HTML+='                        <h3>Players</h3>';
+    HTML+='                        <h3>Players (WIP)</h3>';
     HTML+='                        <small>';
     HTML+='                            '+player ? player : 'Select the player you want to see.' ;
     HTML+='                        </small>';

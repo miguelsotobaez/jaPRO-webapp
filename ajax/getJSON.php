@@ -13,7 +13,7 @@ if (isset($_POST['option'])) {
 switch ($option) {
 	case "duel_rank":
 		$newArray = null;
-		$query = "SELECT SQL_CACHE D1.username, type, elo, 100-ROUND(100*(win_ts + loss_ts)/(win_count+loss_count), 0) AS TS, win_count+loss_count AS count FROM 
+		$query = "SELECT SQL_CACHE D1.username, type, elo, ROUND(100*(win_ts + loss_ts)/(win_count+loss_count), 0) AS TS, win_count+loss_count AS count FROM 
 			((SELECT username, type, elo FROM ((SELECT winner AS username, type, ROUND(winner_elo,0) AS elo, end_time FROM Duels 
 			UNION ALL SELECT loser AS username, type, ROUND(loser_elo,0) AS elo, end_time FROM Duels ORDER BY end_time DESC)) AS T GROUP BY username, type ORDER BY elo DESC) AS D1 
 			INNER JOIN (SELECT winner AS username2, type AS type2, COUNT(*) AS win_count, SUM(odds) AS win_ts FROM Duels GROUP BY username2, type2) AS D2
@@ -62,30 +62,112 @@ switch ($option) {
 	break;
 
 	case "race_rank":
+		$last_time = 2147483647;
 		$newArray = null;
-		$query = "SELECT SQL_CACHE username, style, CAST(score AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(ranksum AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(bronzes, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
-			SELECT A.username, 99 AS style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile FROM ((
-			SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile FROM Races GROUP BY username) AS A
-			LEFT JOIN (SELECT username, COUNT(*) AS golds From Races WHERE rank = 1 GROUP BY username) AS G
-			ON A.username = G.username
-			LEFT JOIN (SELECT username, COUNT(*) AS silvers From Races WHERE rank = 2 GROUP BY username) AS S
-			ON A.username = S.username
-			LEFT JOIN (SELECT username, COUNT(*) AS bronzes From Races WHERE rank = 3 GROUP BY username) AS B
-			ON A.username = B.username) 
-			GROUP BY A.username, A.style
-			UNION ALL
-			SELECT A.username, A.style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile FROM ((
-			SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile FROM Races GROUP BY username, style) AS A
-			LEFT JOIN (SELECT username, style, COUNT(*) AS golds From Races WHERE rank = 1 GROUP BY username, style) AS G
-			ON A.username = G.username AND A.style = G.style
-			LEFT JOIN (SELECT username, style, COUNT(*) AS silvers From Races WHERE rank = 2 GROUP BY username, style) AS S
-			ON A.username = S.username AND A.style = S.style
-			LEFT JOIN (SELECT username, style, COUNT(*) AS bronzes From Races WHERE rank = 3 GROUP BY username, style) AS B
-			ON A.username = B.username AND A.style = B.style) 
-			GROUP BY A.username, A.style) AS T
-			ORDER BY score DESC";
 
-	    $arr = sql2arr($query);
+		if (isset($_POST['start_time']))
+			$start_time = $_POST["start_time"];
+		else
+			$start_time = 0;
+		if (isset($_POST['end_time']))
+			$end_time = $_POST["end_time"];
+		else
+			$end_time = $last_time;
+
+		if ($end_time > $last_time)
+			$end_time = $last_time;
+		if ($end_time <= 0)
+			$end_time = $last_time;
+		if ($start_time > $last_time)
+			$start_time = $last_time;
+
+		if ($start_time > 0 || ($end_time < $last_time)) { //Custom filter
+			$stmt = $db->prepare("SELECT username, style, CAST(score AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(ranksum AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(bronzes, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
+				SELECT A.username, 99 AS style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile FROM ((
+				SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile FROM Races WHERE end_time > ? AND end_time < ? GROUP BY username) AS A
+				LEFT JOIN (SELECT username, COUNT(*) AS golds From Races WHERE rank = 1 AND end_time > ? AND end_time < ? GROUP BY username) AS G
+				ON A.username = G.username
+				LEFT JOIN (SELECT username, COUNT(*) AS silvers From Races WHERE rank = 2 AND end_time > ? AND end_time < ? GROUP BY username) AS S
+				ON A.username = S.username
+				LEFT JOIN (SELECT username, COUNT(*) AS bronzes From Races WHERE rank = 3 AND end_time > ? AND end_time < ? GROUP BY username) AS B
+				ON A.username = B.username) 
+				GROUP BY A.username, A.style
+				UNION ALL
+				SELECT A.username, A.style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile FROM ((
+				SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile FROM Races WHERE end_time > ? AND end_time < ? GROUP BY username, style) AS A
+				LEFT JOIN (SELECT username, style, COUNT(*) AS golds From Races WHERE rank = 1 AND end_time > ? AND end_time < ? GROUP BY username, style) AS G
+				ON A.username = G.username AND A.style = G.style
+				LEFT JOIN (SELECT username, style, COUNT(*) AS silvers From Races WHERE rank = 2 AND end_time > ? AND end_time < ? GROUP BY username, style) AS S
+				ON A.username = S.username AND A.style = S.style
+				LEFT JOIN (SELECT username, style, COUNT(*) AS bronzes From Races WHERE rank = 3 AND end_time > ? AND end_time < ? GROUP BY username, style) AS B
+				ON A.username = B.username AND A.style = B.style) 
+				GROUP BY A.username, A.style) AS T
+				ORDER BY score DESC");
+
+			$stmt->bind_param('iiiiiiiiiiiiiiii', $start_time, $end_time, $start_time, $end_time, $start_time, $end_time, $start_time, $end_time, $start_time, $end_time, $start_time, $end_time, $start_time, $end_time, $start_time, $end_time);
+			$result = $stmt->execute();
+			$arr = preparedsql2arr($result);
+			$result->finalize();
+		}
+		else if ($start_time == 0 && $end_time == $last_time) { //No filter
+			$query = "SELECT SQL_CACHE username, style, CAST(score AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(ranksum AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(bronzes, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
+				SELECT A.username, 99 AS style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile FROM ((
+				SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile FROM Races GROUP BY username) AS A
+				LEFT JOIN (SELECT username, COUNT(*) AS golds From Races WHERE rank = 1 GROUP BY username) AS G
+				ON A.username = G.username
+				LEFT JOIN (SELECT username, COUNT(*) AS silvers From Races WHERE rank = 2 GROUP BY username) AS S
+				ON A.username = S.username
+				LEFT JOIN (SELECT username, COUNT(*) AS bronzes From Races WHERE rank = 3 GROUP BY username) AS B
+				ON A.username = B.username) 
+				GROUP BY A.username, A.style
+				UNION ALL
+				SELECT A.username, A.style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile FROM ((
+				SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile FROM Races GROUP BY username, style) AS A
+				LEFT JOIN (SELECT username, style, COUNT(*) AS golds From Races WHERE rank = 1 GROUP BY username, style) AS G
+				ON A.username = G.username AND A.style = G.style
+				LEFT JOIN (SELECT username, style, COUNT(*) AS silvers From Races WHERE rank = 2 GROUP BY username, style) AS S
+				ON A.username = S.username AND A.style = S.style
+				LEFT JOIN (SELECT username, style, COUNT(*) AS bronzes From Races WHERE rank = 3 GROUP BY username, style) AS B
+				ON A.username = B.username AND A.style = B.style) 
+				GROUP BY A.username, A.style) AS T
+				ORDER BY score DESC";
+
+			$arr = sql2arr($query);
+		}
+		else if ($start_time == -90 && $end_time == $last_time) { //Last 3 months preset
+			$start_time = strtotime('today');
+			$start_time -= 7890000; //Minus 3 months
+			if ($start_time <= 0 || $start_time > $last_time)
+				break;
+
+			$query = "SELECT SQL_CACHE username, style, CAST(score AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(ranksum AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(bronzes, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
+				SELECT A.username, 99 AS style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile FROM ((
+				SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile FROM Races WHERE end_time > {$start_time} GROUP BY username) AS A
+				LEFT JOIN (SELECT username, COUNT(*) AS golds From Races WHERE rank = 1 AND end_time > {$start_time} GROUP BY username) AS G
+				ON A.username = G.username
+				LEFT JOIN (SELECT username, COUNT(*) AS silvers From Races WHERE rank = 2 AND end_time > {$start_time} GROUP BY username) AS S
+				ON A.username = S.username
+				LEFT JOIN (SELECT username, COUNT(*) AS bronzes From Races WHERE rank = 3 AND end_time > {$start_time} GROUP BY username) AS B
+				ON A.username = B.username) 
+				GROUP BY A.username, A.style
+				UNION ALL
+				SELECT A.username, A.style, G.golds, S.silvers, B.bronzes, rank AS ranksum, count, score, percentile FROM ((
+				SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile FROM Races WHERE end_time > {$start_time} GROUP BY username, style) AS A
+				LEFT JOIN (SELECT username, style, COUNT(*) AS golds From Races WHERE rank = 1 AND end_time > {$start_time} GROUP BY username, style) AS G
+				ON A.username = G.username AND A.style = G.style
+				LEFT JOIN (SELECT username, style, COUNT(*) AS silvers From Races WHERE rank = 2 AND end_time > {$start_time} GROUP BY username, style) AS S
+				ON A.username = S.username AND A.style = S.style
+				LEFT JOIN (SELECT username, style, COUNT(*) AS bronzes From Races WHERE rank = 3 AND end_time > {$start_time} GROUP BY username, style) AS B
+				ON A.username = B.username AND A.style = B.style) 
+				GROUP BY A.username, A.style) AS T
+				ORDER BY score DESC";
+
+			$arr = sql2arr($query);
+		}
+		else {
+			$arr = null;
+		}
+
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 		    	$newArray[]=array(0=>$value["username"],1=>$value["style"],2=>$value["score"],3=>$value["avg_score"],4=>$value["avg_percentile"],5=>$value["avg_rank"],6=>$value["golds"],7=>$value["silvers"],
@@ -204,12 +286,12 @@ switch ($option) {
 				SELECT type, ROUND(loser_elo,0) AS elo, end_time FROM Duels WHERE loser = ? GROUP BY type) AS T GROUP BY type ORDER BY elo DESC LIMIT 5");
 		$stmt->bind_param('ss', $username, $username);
 		$result = $stmt->execute();
-		$exists = preparedsql2arr($result);
+		$arr = preparedsql2arr($result);
 		$result->finalize();
 
-	    if($exists){
-			$min = min(array_column($exists, 'elo'));
-		    foreach ($exists as $key => $value) {
+	    if($arr){
+			$min = min(array_column($arr, 'elo'));
+		    foreach ($arr as $key => $value) {
 		    	$type = $value["type"];
 		    	$strength = $value["elo"] - $min + 100; //Subtract smallest element..
 		    	$newArray[]=array(0=>$type,1=>$strength);
@@ -229,11 +311,11 @@ switch ($option) {
 	    	(SELECT style, AVG(entries/rank) AS avg_score FROM Races GROUP BY style) as y WHERE x.style = y.style ORDER BY diff DESC LIMIT 5");
 		$stmt->bind_param('s', $username);
 		$result = $stmt->execute();
-		$exists = preparedsql2arr($result);
+		$arr = preparedsql2arr($result);
 		$result->finalize();
 
-	    if($exists){
-		    foreach ($exists as $key => $value) {
+	    if($arr){
+		    foreach ($arr as $key => $value) {
 		    	$newArray[]=array(0=>$value["style"],1=>$value["diff"]);
 		    }
 	    }
@@ -253,11 +335,11 @@ switch ($option) {
 			ORDER BY end_time ASC");
 		$stmt->bind_param('s', $username);
 		$result = $stmt->execute();
-		$exists = preparedsql2arr($result);
+		$arr = preparedsql2arr($result);
 		$result->finalize();
 	
-	    if($exists){
-		    foreach ($exists as $key => $value) {
+	    if($arr){
+		    foreach ($arr as $key => $value) {
 		    	$newArray[]=array(0=>$value["end_time"],1=>$value["elo"]);
 		    }
 	    }

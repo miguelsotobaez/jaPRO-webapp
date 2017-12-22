@@ -907,8 +907,8 @@ function race_list(){
     panel += '</div>';
     $("#main-content").append(panel);
 
-    //background = '<style type="text/css"> .row { background-image: url("../images/levelshots/srr2k5.jpg"); background-size: cover; opacity: 1; background-repeat: no-repeat; } </style>';
-    //$("#main-content").append(background);
+    var background = '<style type="text/css"> .row { background-size: cover; opacity: 1; background-repeat: no-repeat; } </style>'; //improve this
+    $("#main-content").append(background);
 
     $(document).ready(function() {
         var data = null;
@@ -988,8 +988,18 @@ function race_list(){
                                 $(this).val()
                             );
                             //Update background image
-                           	backgroundImage = "../images/levelshots/" + htmlEntities($(this).val()) + ".jpg";  //not htmlEntities-- replace space with %20 and get rid of ()'s
-                            //alert(backgroundImage);
+                            /*
+                            if ($(this).val() == "") {
+                            	alert("hi");
+                            	document.getElementById("third_row").style.backgroundImage = null;
+                            }
+                            else 
+                            	*/
+                            {
+	                           	var mapname = encodeURIComponent($(this).val());
+	                           	mapname = mapname.replace(/%2F/gi, "/"); //Hmm
+	                            document.getElementById("third_row").style.backgroundImage = 'url("../images/levelshots/'+mapname+'.jpg")';
+                        	}
 
                             column
                                 .search( val ? '^'+val+'$' : '', true, false )

@@ -907,6 +907,9 @@ function race_list(){
     panel += '</div>';
     $("#main-content").append(panel);
 
+    //background = '<style type="text/css"> .row { background-image: url("../images/levelshots/srr2k5.jpg"); background-size: cover; opacity: 1; background-repeat: no-repeat; } </style>';
+    //$("#main-content").append(background);
+
     $(document).ready(function() {
         var data = null;
 
@@ -959,7 +962,7 @@ function race_list(){
                         return '<td style="text-align: right;">'+RaceTimeToString(data)+'</td>' }} //Why doesnt this work..
             ],  
             initComplete: function () {     
-                this.api().columns([1, 2]).every( function () {
+				this.api().columns([1]).every( function () {
                     var column = this;
                     var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
                         .appendTo( $(column.footer()).empty() )
@@ -967,6 +970,27 @@ function race_list(){
                             var val = $.fn.dataTable.util.escapeRegex(
                                 $(this).val()
                             );
+                            alert (val);
+                            column
+                                .search( val ? '^'+val+'$' : '', true, false )
+                                .draw();
+                        } );
+                    column.data().unique().sort().each( function ( d, j ) {
+                        select.append( '<option value="'+d+'">'+d+'</option>' )
+                    } );
+                } );
+                this.api().columns([2]).every( function () {
+                    var column = this;
+                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                        .appendTo( $(column.footer()).empty() )
+                        .on( 'change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+                            //Update background image
+                           	backgroundImage = "../images/levelshots/" + htmlEntities($(this).val()) + ".jpg";  //not htmlEntities-- replace space with %20 and get rid of ()'s
+                            //alert(backgroundImage);
+
                             column
                                 .search( val ? '^'+val+'$' : '', true, false )
                                 .draw();

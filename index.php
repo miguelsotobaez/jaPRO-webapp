@@ -48,7 +48,7 @@ require_once('inc/page.inc.php');
                 <li class="nav-info">
                     <i class="pe pe-7s-shield text-accent"></i>
                     <div class="m-t-xs">
-                        <span class="c-white">JK</span> stats theme with Dark UI style for monitoring stats from japro servers. Thanks to Loda and his team to work on this awesome mod.
+                        <span class="c-white">JK</span> stats theme with Dark UI style for monitoring stats from japro servers.
                     </div>
                 </li>
             </ul>

@@ -174,20 +174,24 @@ function dashboard(page) {
             data: { option: "dashboard"},
             success: function(res) {
                 data = res;
-               	var time = parseInt(Date.now() / 1000);
+               	var time = parseInt(Date.now()/1000);
 	            if (page=="duel") 
 	            {
 	            	lastUpdate = data[5][1];
-	            	if (time - lastUpdate < 30)
-	            		document.getElementById("update_duels").innerHTML = 'Update (Up to date)'; //Gray out the button too?
+	            	if (time - lastUpdate < 61) {
+	            		document.getElementById("update_duels").innerHTML = 'Up to date'; //Gray out the button too?
+	            		document.getElementById("update_duels").setAttribute('disabled','disabled');
+	            	}
 	            	else
 						document.getElementById("update_duels").innerHTML = 'Update (last updated '+timeSince(time - lastUpdate)+ ')';
 	        	}
 	        	else if (page=="race") 
 	            {
 	            	lastUpdate = data[4][1];
-	            	if (time - lastUpdate < 30)
-	            		document.getElementById("update_races").innerHTML = 'Update (Up to date)'; //Gray out the button too?
+	            	if (time - lastUpdate < 61) {
+	            		document.getElementById("update_races").innerHTML = 'Up to date'; //Gray out the button too?
+	            		document.getElementById("update_races").setAttribute('disabled','disabled');
+	            	}
 	            	else
 						document.getElementById("update_races").innerHTML = 'Update (last updated '+timeSince(time - lastUpdate)+ ')';
 	        	}
@@ -231,7 +235,7 @@ function duel_title(){
     HTML+='                            Duel stats.';
     HTML+='                        </small>';
 
-    HTML+='                        <button id="update_duels">Update</button>'; //Get dashboard getJSON info to show last update time 
+    HTML+='                        <button id="update_duels"></button>'; //Get dashboard getJSON info to show last update time 
 
     HTML+='                    </div>';
     HTML+='                </div>';
@@ -629,7 +633,7 @@ function race_title(){
     HTML+='                            Race stats.';
     HTML+='                        </small>';
 
-    HTML+='                        <button id="update_races">Update</button>';
+    HTML+='                        <button id="update_races"></button>';
 
     HTML+='                    </div>';
     HTML+='                </div>';

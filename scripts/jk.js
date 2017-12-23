@@ -4,6 +4,8 @@
  */
 
 $(document).ready(function () {
+	dashboard(page);
+
     if(page=="home"){
         home();
     }else if(page=="player"){
@@ -159,6 +161,43 @@ $(document).ready(function () {
 //////////////////////////////////HOME////////////////////////////////////
 //////////////////////////////////HOME////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
+
+function dashboard(page) {
+
+    $(document).ready(function() {
+        var data = null;
+        $.ajax({
+            type: "POST",
+            url: "ajax/getJSON.php",
+            dataType: "JSON",
+            async: false,
+            data: { option: "dashboard"},
+            success: function(res) {
+                data = res;
+               	var time = parseInt(Date.now() / 1000);
+	            if (page=="duel") 
+	            {
+	            	lastUpdate = data[5][1];
+	            	if (time - lastUpdate < 30)
+	            		document.getElementById("update_duels").innerHTML = 'Update (Up to date)'; //Gray out the button too?
+	            	else
+						document.getElementById("update_duels").innerHTML = 'Update (last updated '+timeSince(time - lastUpdate)+ ')';
+	        	}
+	        	else if (page=="race") 
+	            {
+	            	lastUpdate = data[4][1];
+	            	if (time - lastUpdate < 30)
+	            		document.getElementById("update_races").innerHTML = 'Update (Up to date)'; //Gray out the button too?
+	            	else
+						document.getElementById("update_races").innerHTML = 'Update (last updated '+timeSince(time - lastUpdate)+ ')';
+	        	}
+
+            }
+        });
+
+    });
+
+}
 
 function home(){
     var p1 = '<h1>Welcome to jaPRO Mod!</h1><p>It is a mod started by loda based on OpenJK.</p>';
@@ -1808,4 +1847,30 @@ var sortFunction = function(a, b) {
 
 function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function timeSince(seconds) {
+
+  var interval = Math.floor(seconds / 31536000);
+
+  if (interval > 1) {
+    return interval + " years";
+  }
+  interval = Math.floor(seconds / 2592000);
+  if (interval > 1) {
+    return interval + " months";
+  }
+  interval = Math.floor(seconds / 86400);
+  if (interval > 1) {
+    return interval + " days";
+  }
+  interval = Math.floor(seconds / 3600);
+  if (interval > 1) {
+    return interval + " hours";
+  }
+  interval = Math.floor(seconds / 60);
+  if (interval > 1) {
+    return interval + " minutes";
+  }
+  return Math.floor(seconds) + " seconds";
 }

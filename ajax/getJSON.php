@@ -159,13 +159,13 @@ switch ($option) {
 
 	case "dashboard": //Get total counts and last update info
 		$newArray = null;
-		$query = "SELECT 'account_count' as type, COUNT(*) AS count From Accounts
+		$query = "SELECT 'account_count' as type, COUNT(*) AS count FROM Accounts
 			UNION ALL
-			SELECT 'duel_count' AS type, COUNT (*) AS count From Duels
+			SELECT 'duel_count' AS type, COUNT(*) AS count FROM Duels
 			UNION ALL
-			SELECT 'race_count' AS type, COUNT(*) AS count From Races
+			SELECT 'race_count' AS type, COUNT(*) AS count FROM Races
 			UNION ALL
-			SELECT type, last_update FROM Updates";
+			SELECT type, last_update AS count FROM Updates";
 
 		$arr = sql2arr($query);
 		if($arr) {

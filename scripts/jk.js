@@ -288,19 +288,19 @@ function duel_count(){
             },   
             series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?  Also should skip if the item is less than like 5percent?
                 name: DuelToString(data[0][0]),
-                data: [data[0][1]] //[0][1]
+                data: [Number(data[0][1])]
             }, {
                 name: DuelToString(data[1][0]),
-                data: [data[1][1]]
+                data: [Number(data[1][1])]
             }, {
                 name: DuelToString(data[2][0]),
-                data: [data[2][1]]
+                data: [Number(data[2][1])]
             }, {
                 name: DuelToString(data[3][0]),
-                data: [data[3][1]]
+                data: [Number(data[3][1])]
             }, {
                 name: DuelToString(data[4][0]),
-                data: [data[4][1]]
+                data: [Number(data[4][1])]
             }]
         });
     });
@@ -575,7 +575,7 @@ function duel_list(){
 
 function race_title(){
     var HTML;
-    HTML='<div class="row">';
+    HTML= '<div class="row">';
     HTML+='            <div class="col-lg-12">';
     HTML+='                <div class="view-header">';
     HTML+='                    <div class="pull-right text-right" style="line-height: 14px">';
@@ -618,13 +618,13 @@ function race_title(){
 }
 
 function race_count(){
-    var panel = "";
+    var panel;
     panel = '<div id="first_row" class="row">';
     panel += '  <div class="col-md-12">';
     panel += '      <div id="chart_race_count">';
     panel += '      </div>';
     panel += '                </div>';
-     panel += '                </div>';
+    panel += '                </div>';
     $("#main-content").append(panel);
 
     $(document).ready(function() {
@@ -641,8 +641,7 @@ function race_count(){
         });
 
         //Loda fixme, this can use the json from datatable_duel_rank maybe and avoid a query?
-    var chart
-        chart = new Highcharts.Chart({
+        var chart = new Highcharts.Chart({
             chart: {
                 type: 'bar',
                 renderTo: 'chart_race_count',
@@ -674,9 +673,9 @@ function race_count(){
             legend: {
                 enabled: false
             },
-                labels: {
+            labels: {
                     enabled: false
-                },
+            },
             plotOptions: {
                 series: {
                     stacking: 'normal'
@@ -689,22 +688,24 @@ function race_count(){
             },      
             series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?
                 name: RaceToString(data[0][0]),
-                data: [data[0][1]] //[0][1]
+                data: [Number(data[0][1])]
             }, {
                 name: RaceToString(data[1][0]),
-                data: [data[1][1]]
+                data: [Number(data[1][1])]
             }, {
                 name: RaceToString(data[2][0]),
-                data: [data[2][1]]
+                data: [Number(data[2][1])]
             }, {
                 name: RaceToString(data[3][0]),
-                data: [data[3][1]]
+                data: [Number(data[3][1])]
             }, {
                 name: RaceToString(data[4][0]),
-                data: [data[4][1]]
+                data: [Number(data[4][1])]
             }]
         });
+
     });
+
 
     $('.jk-nav li').removeClass("active");
     $('#menu_race').addClass("active");
@@ -1421,7 +1422,7 @@ function player_duel_stats(){//Most popular duels, total number of duels
     $("#main-content").append(panel);
 
 
-    var data = null;
+    var data1 = null;
     $.ajax({
         type: "POST",
         url: "ajax/getJSON.php",
@@ -1429,11 +1430,11 @@ function player_duel_stats(){//Most popular duels, total number of duels
         async: false,
         data: { option: "player_duel_stats", player: player},
         success: function(res) {
-            data = res;
+            data1 = res;
         }
     });
 
-    var chart;
+    var chart1;
         chart = new Highcharts.Chart({
             chart: {
                 renderTo: 'player_duel_stats',
@@ -1456,11 +1457,11 @@ function player_duel_stats(){//Most popular duels, total number of duels
             series: [{
                 type: 'pie',
                 name: 'Strength',
-                data: data
+                data: data1
             }]
         });
 
-    var data = null;
+    var data2 = null;
     $.ajax({
         type: "POST",
         url: "ajax/getJSON.php",
@@ -1468,19 +1469,19 @@ function player_duel_stats(){//Most popular duels, total number of duels
         async: false,
         data: { option: "player_duel_graph", player: player},
         success: function(res) {
-            data = res;
+            data2 = res;
         }
     });
 
+    var dataSub;
     for (i=0; i<15; i++) {
-        if (data[i] != undefined) {
-            dataSub.push(data[i][0]);
+        if (data2[i] != undefined) {
+            dataSub.push(data2[i][0]);
 
         }
-
     }
 
-    var chart;
+    var chart2;
         chart = new Highcharts.Chart({
             chart: {
                 renderTo: 'player_duel_graph',

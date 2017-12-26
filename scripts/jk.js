@@ -163,7 +163,6 @@ $(document).ready(function () {
 //////////////////////////////////////////////////////////////////////////
 
 function dashboard(page) {
-
     $(document).ready(function() {
         var data = null;
         $.ajax({
@@ -175,31 +174,36 @@ function dashboard(page) {
             success: function(res) {
                 data = res;
                	var time = parseInt(Date.now()/1000);
-	            if (page=="duel") 
-	            {
-	            	lastUpdate = data[5][1];
-	            	if (time - lastUpdate < 61) {
-	            		document.getElementById("update_duels").innerHTML = 'Up to date'; //Gray out the button too?
-	            		document.getElementById("update_duels").setAttribute('disabled','disabled');
-	            	}
-	            	else
-						document.getElementById("update_duels").innerHTML = 'Update (last updated '+timeSince(time - lastUpdate)+ ')';
+	            if (page=="duel") {
+	            	buttonUpdate("update_duels", time - data[5][1]);
 	        	}
-	        	else if (page=="race") 
-	            {
-	            	lastUpdate = data[4][1];
-	            	if (time - lastUpdate < 61) {
-	            		document.getElementById("update_races").innerHTML = 'Up to date'; //Gray out the button too?
-	            		document.getElementById("update_races").setAttribute('disabled','disabled');
-	            	}
-	            	else
-						document.getElementById("update_races").innerHTML = 'Update (last updated '+timeSince(time - lastUpdate)+ ')';
+	        	else if (page=="race") {
+	            	buttonUpdate("update_races", time - data[4][1]);
 	        	}
-
+				else if (page=="player") {
+	            	buttonUpdate("update_player", time - data[3][1]);
+	        	}
             }
         });
 
     });
+}
+
+function buttonUpdate(button, since) {
+	if (since < 61) { //60+ seconds
+		document.getElementById(button).innerHTML = 'Up to date'; //Gray out the button too?
+		document.getElementById(button).setAttribute('disabled','disabled');
+	}
+	else if (since > 60*60*24) {//older than 24 hours, auto update
+		document.getElementById(button).click();
+		document.getElementById(button).innerHTML = 'Up to date'; //Gray out the button too?
+		document.getElementById(button).setAttribute('disabled','disabled');
+	}
+	else
+		document.getElementById(button).innerHTML = 'Updated '+timeSince(since)+ ' ago';
+
+
+
 
 }
 
@@ -230,13 +234,7 @@ function duel_title(){
     HTML+='                        <i class="pe page-header-icon pe-7s-shield"></i>';
     HTML+='                    </div>';
     HTML+='                    <div class="header-title">';
-    HTML+='                        <h3>Duels</h3>';
-    HTML+='                        <small>';
-    HTML+='                            Duel stats.';
-    HTML+='                        </small>';
-
-    HTML+='                        <button id="update_duels"></button>'; //Get dashboard getJSON info to show last update time 
-
+    HTML+='                        <h3>Duels <button class="btn btn-warning" id="update_duels">Update</button></h3>';
     HTML+='                    </div>';
     HTML+='                </div>';
     HTML+='                <hr>';
@@ -251,6 +249,7 @@ function duel_title(){
             url: "ajax/updateDB.php",
             data: { option: "duels" },
             success: function(result) {
+            	location.reload();  //this is bad! it should just redraw the table..
                 //alert('ok');
             },
             error: function(result) {
@@ -628,13 +627,7 @@ function race_title(){
     HTML+='                        <i class="pe page-header-icon pe-7s-shield"></i>';
     HTML+='                    </div>';
     HTML+='                    <div class="header-title">';
-    HTML+='                        <h3>Race</h3>';
-    HTML+='                        <small>';
-    HTML+='                            Race stats.';
-    HTML+='                        </small>';
-
-    HTML+='                        <button id="update_races"></button>';
-
+    HTML+='                        <h3>Race <button class="btn btn-warning" id="update_races">Update</button></h3>';
     HTML+='                    </div>';
     HTML+='                </div>';
     HTML+='                <hr>';
@@ -650,6 +643,7 @@ function race_title(){
             url: "ajax/updateDB.php",
             data: { option: "races" },
             success: function(result) {
+            	location.reload();  //this is bad! it should just redraw the table..
                 //alert('ok');
             },
             error: function(result) {
@@ -754,6 +748,7 @@ function race_count(){
     $('#menu_race').addClass("active");
 }
 
+var rank_table = "";
 //var RaceRankData;
 function race_rank(){
     var panel;
@@ -765,7 +760,7 @@ function race_rank(){
     panel += '          </div>';
     panel += '          <div class="panel-body">';
 
-    panel +='                        <button id="race_rank_all">All</button><button id="race_rank_90">Last 3 months</button>'; //Get dashboard getJSON info to show last update time 
+    panel +='                        <button class="btn btn-warning" id="race_rank_all">All</button> <button class="btn btn-warning" id="race_rank_90">Last 3 months</button>'; //Get dashboard getJSON info to show last update time 
 
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_race_rank" width="100%" class="table table-striped table-hover">';
@@ -792,7 +787,7 @@ function race_rank(){
             }
         });
 
-        var rank_table = $('#datatable_race_rank').DataTable( {
+        rank_table = $('#datatable_race_rank').DataTable( {
             "order": [[ 3, "desc" ]],
             "bLengthChange": false,
             "deferRender": true,
@@ -881,41 +876,43 @@ function race_rank(){
 
 
 
-    $("#race_rank_all").click(function(e) { //idk
-        var start_time = "0"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
-        var end_time = "0"; //0 for all. If set it specifies end filter.
-        e.preventDefault();
-        $.ajax({
-            type: "POST",
-            url: "ajax/getJSON.php",
-            dataType: "JSON",
-            async: false,
-            data: { option: "race_rank", start_time: start_time, end_time: end_time },
-            success: function(res) {
-                data = res;
-                rank_table.ajax.reload();
-                //Redraw data table?? //fixme
-            }
-        });
-    });
+	    $("#race_rank_all").click(function(e) { //idk
+	        var start_time = "0"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
+	        var end_time = "0"; //0 for all. If set it specifies end filter.
+	        e.preventDefault();
+	        $.ajax({
+	            type: "POST",
+	            url: "ajax/getJSON.php",
+	            dataType: "JSON",
+	            async: false,
+	            data: { option: "race_rank", start_time: start_time, end_time: end_time },
+	            success: function(res) {
+	                data = res;
+	                console.log(rank_table);
+	                rank_table.ajax.reload();
+	                //Redraw data table?? //fixme
+	            }
+	        });
+	    });
 
-    $("#race_rank_90").click(function(e) {
-        var start_time = "-90"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
-        var end_time = "0"; //0 for all. If set it specifies end filter.
-        e.preventDefault();
-        $.ajax({
-            type: "POST",
-            url: "ajax/getJSON.php",
-            dataType: "JSON",
-            async: false,
-            data: { option: "race_rank", start_time: start_time, end_time: end_time },
-            success: function(res) {
-                data = res;
-                rank_table.ajax.reload();
-                //Redraw data table?? //fixme
-            }
-        });
-    });
+	    $("#race_rank_90").click(function(e) {
+	        var start_time = "-90"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
+	        var end_time = "0"; //0 for all. If set it specifies end filter.
+	        e.preventDefault();
+	        $.ajax({
+	            type: "POST",
+	            url: "ajax/getJSON.php",
+	            dataType: "JSON",
+	            async: false,
+	            data: { option: "race_rank", start_time: start_time, end_time: end_time },
+	            success: function(res) {
+	                data = res;
+	                console.log(rank_table);
+	                rank_table.ajax.reload();
+	                //Redraw data table?? //fixme
+	            }
+	        });
+	    });
 
 
 
@@ -957,6 +954,10 @@ function race_list(){
     $(document).ready(function() {
         var data = null;
 
+        //Get time of cache set, get last race update time
+        //if cache is out of date, update it
+        //else data = cache
+
         /*if(localStorage.getItem("dataCache")) { //We also have to check if its up to date? hmm.
             data = JSON.parse(localStorage.getItem("dataCache"));
         } else*/ {
@@ -968,6 +969,7 @@ function race_list(){
                 data: { option: "race_list" },
                 success: function(res) {//JSON
                     data = res;
+
                     //localStorage.setItem("dataCache", JSON.stringify(res));
                 }
             });
@@ -1014,7 +1016,6 @@ function race_list(){
                             var val = $.fn.dataTable.util.escapeRegex(
                                 $(this).val()
                             );
-                            alert (val);
                             column
                                 .search( val ? '^'+val+'$' : '', true, false )
                                 .draw();
@@ -1096,13 +1097,8 @@ function player_title(){ //Show total number of players, get each playername for
     HTML+='                        <i class="pe page-header-icon pe-7s-shield"></i>';
     HTML+='                    </div>';
     HTML+='                    <div class="header-title">';
-    HTML+='                        <h3>Players (WIP)</h3>';
-    HTML+='                        <small>';
-    HTML+='                            '+player ? player : 'Select the player you want to see.' ;
-    HTML+='                        </small>';
-
+    HTML+='                        <h3>'+ (player ? player : "Players") + ' (WIP) <button class="btn btn-warning" id="update_player">Update</button></h3>';
     HTML+='                        <select id="dropdown"></select>'; //Should be live-searchable 
-
     HTML+='                    </div>';
     HTML+='                </div>';
     HTML+='                <hr>';
@@ -1131,8 +1127,25 @@ function player_title(){ //Show total number of players, get each playername for
         data: { option: "player_accounts" },
         success: function(res) {
             data = res;
-            helpers.buildDropdown( data, $('#dropdown'), 'Select an option' ); 
+            helpers.buildDropdown( data, $('#dropdown'), 'Select a player' ); 
         }
+    });
+
+    //Update button
+    $("#update_player").click(function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "ajax/updateDB.php",
+            data: { option: "accounts" },
+            success: function(result) {
+            	location.reload();  //this is bad! it should just redraw the table..
+                //alert('ok');
+            },
+            error: function(result) {
+                //alert('error');
+            }
+        });
     });
 
 }
@@ -1180,7 +1193,7 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
             },
             credits: false,
             title: {
-                text: 'Most popular map-styles'
+                text: 'Most popular maps'
             },
             plotOptions: {
                 pie: {
@@ -1197,11 +1210,11 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
                 type: 'pie',
                 name: 'Count',
                 data: [
-                      [data[5][0], data[5][2]],
-                      [data[6][0], data[6][2]],
-                      [data[7][0], data[7][2]],
-                      [data[8][0], data[8][2]],
-                      [data[9][0], data[9][2]]
+                      [data[5][0], Number(data[5][2])],
+                      [data[6][0], Number(data[6][2])],
+                      [data[7][0], Number(data[7][2])],
+                      [data[8][0], Number(data[8][2])],
+                      [data[9][0], Number(data[9][2])]
                 ]
             }]
         });
@@ -1217,7 +1230,7 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
             },
             credits: false,
             title: {
-                text: 'Most exclusive maps'
+                text: 'Most exclusive map-styles'
             },
             plotOptions: {
                 pie: {
@@ -1234,11 +1247,11 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
                 type: 'pie',
                 name: 'Count',
                 data:   [
-                        [data[0][0]+" "+RaceToString(data[0][1]), data[0][2]],
-                        [data[1][0]+" "+RaceToString(data[1][1]), data[1][2]],
-                        [data[2][0]+" "+RaceToString(data[2][1]), data[2][2]],
-                        [data[3][0]+" "+RaceToString(data[3][1]), data[3][2]],
-                        [data[4][0]+" "+RaceToString(data[4][1]), data[4][2]]
+                        [data[0][0]+" "+RaceToString(data[0][1]), Number(data[0][2])],
+                        [data[1][0]+" "+RaceToString(data[1][1]), Number(data[1][2])],
+                        [data[2][0]+" "+RaceToString(data[2][1]), Number(data[2][2])],
+                        [data[3][0]+" "+RaceToString(data[3][1]), Number(data[3][2])],
+                        [data[4][0]+" "+RaceToString(data[4][1]), Number(data[4][2])]
                 ]
             }]
         });
@@ -1270,7 +1283,7 @@ function player_map_charts(){//Most popular maps, most popular styles, most excl
                 type: 'bar',
                 name: 'Seconds',
                 data: [
-                      [RaceToString(data[10][1]), data[10][2]/1000],
+                      [RaceToString(data[10][1]), data[10][2]/1000], //Who knows why this doesnt need to be Number() formatted
                       [RaceToString(data[11][1]), data[11][2]/1000],
                       [RaceToString(data[12][1]), data[12][2]/1000],
                       [RaceToString(data[13][1]), data[13][2]/1000],
@@ -1351,21 +1364,21 @@ function player_duel_charts(){//
 
 
                 data: [
-                      [DuelToString(data[0][0]), data[0][1]],
-                      [DuelToString(data[1][0]), data[1][1]],
-                      [DuelToString(data[2][0]), data[2][1]],
-                      [DuelToString(data[3][0]), data[3][1]],
-                      [DuelToString(data[4][0]), data[4][1]],
-                      [DuelToString(data[5][0]), data[5][1]],
-                      [DuelToString(data[6][0]), data[6][1]],
-                      [DuelToString(data[7][0]), data[7][1]],
-                      [DuelToString(data[8][0]), data[8][1]],
-                      [DuelToString(data[9][0]), data[9][1]],
-                      [DuelToString(data[10][0]), data[10][1]],
-                      [DuelToString(data[11][0]), data[11][1]],
-                      [DuelToString(data[12][0]), data[12][1]],
-                      [DuelToString(data[13][0]), data[13][1]],
-                      [DuelToString(data[14][0]), data[14][1]],
+                      [DuelToString(data[0][0]), Number(data[0][1])],
+                      [DuelToString(data[1][0]), Number(data[1][1])],
+                      [DuelToString(data[2][0]), Number(data[2][1])],
+                      [DuelToString(data[3][0]), Number(data[3][1])],
+                      [DuelToString(data[4][0]), Number(data[4][1])],
+                      [DuelToString(data[5][0]), Number(data[5][1])],
+                      [DuelToString(data[6][0]), Number(data[6][1])],
+                      [DuelToString(data[7][0]), Number(data[7][1])],
+                      [DuelToString(data[8][0]), Number(data[8][1])],
+                      [DuelToString(data[9][0]), Number(data[9][1])],
+                      [DuelToString(data[10][0]), Number(data[10][1])],
+                      [DuelToString(data[11][0]), Number(data[11][1])],
+                      [DuelToString(data[12][0]), Number(data[12][1])],
+                      [DuelToString(data[13][0]), Number(data[13][1])],
+                      [DuelToString(data[14][0]), Number(data[14][1])],
                 ]
 
 

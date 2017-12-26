@@ -194,7 +194,7 @@ switch ($option) {
 	case "player_map_charts": //Get Most popular courses,  most exclusive course-styles.  The ordering isn't reliable like it is in sqlite?
 		$newArray = null;
 		$query = "SELECT SQL_CACHE coursename, -1 AS style, count FROM (SELECT coursename, COUNT(*) as count 
-				FROM Races GROUP BY coursename ORDER BY count, coursename DESC LIMIT 5) AS T
+				FROM Races GROUP BY coursename ORDER BY count DESC, coursename DESC LIMIT 5) AS T
 			UNION ALL
 			SELECT coursename, style, count FROM (SELECT coursename, style, COUNT(*) as count 
 				FROM Races GROUP BY coursename, style ORDER BY count, coursename, end_time ASC LIMIT 5) AS T
@@ -239,6 +239,7 @@ switch ($option) {
 		$result = $stmt->execute();
 		$arr = preparedsql2arr($result);
 		$result->finalize();
+		$result->free();
 
 	    if($arr){
 			$min = min(array_column($arr, 'elo'));
@@ -264,6 +265,7 @@ switch ($option) {
 		$result = $stmt->execute();
 		$arr = preparedsql2arr($result);
 		$result->finalize();
+		$result->free();
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
@@ -282,16 +284,17 @@ switch ($option) {
 		$newArray = null;
 		$stmt = $db->prepare("SELECT end_time, type, CAST(winner_elo AS INT) AS elo FROM Duels WHERE winner = ? 
 			UNION
-			SELECT end_time, type, CAST(loser_elo AS INT) AS elo FROM Duels WHERE loser = :username 
+			SELECT end_time, type, CAST(loser_elo AS INT) AS elo FROM Duels WHERE loser = ? 
 			ORDER BY end_time ASC");
-		$stmt->bind_param('s', $username);
+		$stmt->bind_param('ss', $username, $username);
 		$result = $stmt->execute();
 		$arr = preparedsql2arr($result);
 		$result->finalize();
+		$result->free();
 	
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array(0=>$value["end_time"],1=>$value["elo"]);
+		    	$newArray[]=array(0=>$value["end_time"],1=>$value["type"],2=>$value["elo"]);
 		    }
 	    }
 
@@ -306,7 +309,7 @@ $db->close();
 
 function preparedsql2arr($result){ //For prepared statements that needed to be bound
 	if ($result) {
-		while ($row = $result->fetch_assoc()) {
+		while ($row = $result->fetch_assoc()) { //error here?
 			$arrayResult[]=$row;
 		}
 		if ($arrayResult) {
@@ -330,6 +333,7 @@ function sql2arr($query){
 		while ($row = $result->fetch_assoc()) {
 			$arrayResult[]=$row;
 		}
+		$result->free();
 		if ($arrayResult) {
 			return $arrayResult;
 		} else {

@@ -162,6 +162,7 @@ $(document).ready(function () {
 //////////////////////////////////HOME////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
+var dashboardData;
 function dashboard(page) {
     $(document).ready(function() {
         var data = null;
@@ -173,6 +174,7 @@ function dashboard(page) {
             data: { option: "dashboard"},
             success: function(res) {
                 data = res;
+                dashboardData = data;
                	var time = parseInt(Date.now()/1000);
 	            if (page=="duel") {
 	            	UpdateButton("update_duels", time - data[5][1]);
@@ -220,8 +222,8 @@ function home(){
 //////////////////////////////////////////////////////////////////////////
 
 function duel_title(){
-    var HTML;
-    HTML='<div class="row">';
+    var HTML = '';
+    HTML+='<div class="row">';
     HTML+='            <div class="col-lg-12">';
     HTML+='                <div class="view-header">';
     HTML+='                    <div class="pull-right text-right" style="line-height: 14px">';
@@ -374,16 +376,26 @@ function duel_rank(){
     $("#main-content").append(panel);
 
     $(document).ready(function() {
-        $.ajax({
-            type: "POST",
-            url: "ajax/getJSON.php",
-            dataType: "JSON",
-            async: true,
-            data: { option: "duel_rank" },
-            success: function(res) {
-                DuelRankTable(res);
-            }
-        });
+        var data = null;
+        var last_update = dashboardData[5][1];
+        if(last_update > localStorage.getItem("duelUpdateTime") || !localStorage.getItem("duelRankCache")) { //Out of date
+            $.ajax({
+                type: "POST",
+                url: "ajax/getJSON.php",
+                dataType: "JSON",
+                async: true,
+                data: { option: "duel_rank" },
+                success: function(res) {//JSON
+                    DuelRankTable(res);
+                    localStorage.setItem("duelRankCache", JSON.stringify(res));
+                    localStorage.setItem("duelUpdateTime", last_update);
+                }
+            });
+        }
+        else {
+        	data = JSON.parse(localStorage.getItem("duelRankCache"));
+        	DuelRankTable(data);
+        }
 
         function DuelRankTable(data) {
 	        $('#datatable_duel_rank').DataTable( {
@@ -480,16 +492,25 @@ function duel_list(){
 
     $(document).ready(function() {
         var data = null;
-        $.ajax({
-            type: "POST",
-            url: "ajax/getJSON.php",
-            dataType: "JSON",
-            async: true,
-            data: { option: "duel_list" },
-            success: function(res) {
-                DuelListTable(res);
-            }
-        });
+        var last_update = dashboardData[5][1];
+        if(last_update > localStorage.getItem("duelUpdateTime") || !localStorage.getItem("duelListCache")) { //Out of date
+            $.ajax({
+                type: "POST",
+                url: "ajax/getJSON.php",
+                dataType: "JSON",
+                async: true,
+                data: { option: "duel_list" },
+                success: function(res) {//JSON
+                    DuelListTable(res);
+                    localStorage.setItem("duelListCache", JSON.stringify(res));
+                    localStorage.setItem("duelUpdateTime", last_update);
+                }
+            });
+        }
+        else {
+        	data = JSON.parse(localStorage.getItem("duelListCache"));
+        	DuelListTable(data);
+        }
 
         function DuelListTable(data) {
 	        $('#datatable_duel_list').DataTable( {
@@ -589,8 +610,8 @@ function duel_list(){
 
 
 function race_title(){
-    var HTML;
-    HTML= '<div class="row">';
+    var HTML = '';
+    HTML+= '<div class="row">';
     HTML+='            <div class="col-lg-12">';
     HTML+='                <div class="view-header">';
     HTML+='                    <div class="pull-right text-right" style="line-height: 14px">';
@@ -747,18 +768,26 @@ function race_rank(){
     $("#main-content").append(panel);
 
     $(document).ready(function() {
-        var data = null;
-        $.ajax({
-            type: "POST",
-            url: "ajax/getJSON.php",
-            dataType: "JSON",
-            async: true,
-            data: { option: "race_rank", start_time: "0", end_time: "0" },
-            success: function(res) {
-                RaceRankTable(res);
-                //RaceRankData = data
-            }
-        });
+		var data = null;
+        var last_update = dashboardData[4][1];
+        if(last_update > localStorage.getItem("raceUpdateTime") || !localStorage.getItem("raceRankCache")) { //Out of date
+            $.ajax({
+	            type: "POST",
+	            url: "ajax/getJSON.php",
+	            dataType: "JSON",
+	            async: true,
+	            data: { option: "race_rank", start_time: "0", end_time: "0" },
+	            success: function(res) {
+                    RaceRankTable(res);
+                    localStorage.setItem("raceRankCache", JSON.stringify(res));
+                    localStorage.setItem("raceUpdateTime", last_update);
+                }
+            });
+        }
+        else {
+        	data = JSON.parse(localStorage.getItem("raceRankCache"));
+        	RaceRankTable(data);
+        }
 
         function RaceRankTable(data) {
 	        rank_table = $('#datatable_race_rank').DataTable( {
@@ -912,19 +941,13 @@ function race_list(){
     panel += '</div>';
     $("#main-content").append(panel);
 
-    var background = '<style type="text/css"> .row { background-size: cover; opacity: 1; background-repeat: no-repeat; } </style>'; //improve this
+    var background = '<style type="text/css"> .content-background { background-size: cover; opacity: 1; background-repeat: no-repeat; } </style>'; //improve this
     $("#main-content").append(background);
 
     $(document).ready(function() {
         var data = null;
-
-        //Get time of cache set, get last race update time
-        //if cache is out of date, update it
-        //else data = cache
-
-        /*if(localStorage.getItem("dataCache")) { //We also have to check if its up to date? hmm.
-            data = JSON.parse(localStorage.getItem("dataCache"));
-        } else*/ {
+        var last_update = dashboardData[4][1];
+        if(last_update > localStorage.getItem("raceUpdateTime") || !localStorage.getItem("raceListCache")) { //Out of date
             $.ajax({
                 type: "POST",
                 url: "ajax/getJSON.php",
@@ -933,10 +956,14 @@ function race_list(){
                 data: { option: "race_list" },
                 success: function(res) {//JSON
                     RaceListTable(res);
-
-                    //localStorage.setItem("dataCache", JSON.stringify(res));
+                    localStorage.setItem("raceListCache", JSON.stringify(res));
+                    localStorage.setItem("raceUpdateTime", last_update);
                 }
             });
+        }
+        else {
+        	data = JSON.parse(localStorage.getItem("raceListCache"));
+        	RaceListTable(data);
         }
 
         function RaceListTable(data) {
@@ -1008,7 +1035,7 @@ function race_list(){
 	                            {
 		                           	var mapname = encodeURIComponent($(this).val());
 		                           	mapname = mapname.replace(/%2F/gi, "/"); //Hmm
-		                            document.getElementById("third_row").style.backgroundImage = 'url("../images/levelshots/'+mapname+'.jpg")';
+		                            document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/'+mapname+'.jpg")';
 	                        	}
 
 	                            column
@@ -1052,8 +1079,8 @@ function race_list(){
 /////////////////////////////////////////////////////////////////////
 
 function player_title(){ //Show total number of players, get each playername for dropdown select
-    var HTML;
-    HTML='<div class="row">';
+    var HTML = '';
+    HTML+='<div class="row">';
     HTML+='            <div class="col-lg-12">';
     HTML+='                <div class="view-header">';
     HTML+='                    <div class="pull-right text-right" style="line-height: 14px">';
@@ -1658,7 +1685,8 @@ function player_duel_graph(){
 /////////////////////////////////////////////////////////////////////
 
 function maps(){
-        HTML='<div class="row">';
+		var HTML='';
+        HTML+='<div class="row">';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Trick Arena</h2>';
         HTML+='  <p>Map for race</p>';
@@ -1707,36 +1735,40 @@ function maps(){
         HTML+='</div>';
         $("#main-content").html(HTML);
 
+		var background = '<style type="text/css"> .content-background { background-size: cover; opacity: 1; background-repeat: no-repeat; } </style>'; //improve this
+    	$("#main-content").append(background);
+
         $('.jk-nav li').removeClass("active");
         $('#menu_maps').addClass("active");
 
         $(document).ready(function () {
 			$( "#trickarena" ).mouseover(function() {
-        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/trickarena.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/trickarena.jpg")';
 			});
 			$( "#racearena" ).mouseover(function() {
-        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/racearena.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/racearena.jpg")';
 			});
 			$( "#racepack1" ).mouseover(function() {
-        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/racepack1.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/racepack1.jpg")';
 			});
 			$( "#racepack2" ).mouseover(function() {
-        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/racepack2.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/racepack2.jpg")';
 			});
 			$( "#racepack3" ).mouseover(function() {
-        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/racepack3.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/racepack3.jpg")';
 			});
 			$( "#racepack4" ).mouseover(function() {
-        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/racepack4.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/racepack4.jpg")';
 			});
 			$( "#racepack5" ).mouseover(function() {
-        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/racepack5.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/racepack5.jpg")';
 			});
 		});
 	}
 
 function servers(){
-        HTML='<div class="row">';
+	var HTML = '';
+   		HTML+='<div class="row">';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>.ups playja.pro</h2>';
         HTML+='  <p>/connect s.playja.pro</p>';

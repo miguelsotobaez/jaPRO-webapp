@@ -58,7 +58,7 @@ require_once('inc/page.inc.php');
 
 
     <!-- Main content-->
-    <section class="content">
+    <section class="content" id="content-background">      
             <div id="main-content" class="container-fluid">
 
                

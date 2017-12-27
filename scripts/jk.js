@@ -1662,54 +1662,78 @@ function maps(){
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Trick Arena</h2>';
         HTML+='  <p>Map for race</p>';
-        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/z780uk203zma9h7/mapTrickArena.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='  <p><a id="trickarena" class="btn btn-default" href="https://www.dropbox.com/s/z780uk203zma9h7/mapTrickArena.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Arena</h2>';
         HTML+='  <p>Map for race</p>';
-        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/fu6pbb8jvfvu2hm/mapRaceArena.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='  <p><a id="racearena" class="btn btn-default" href="https://www.dropbox.com/s/fu6pbb8jvfvu2hm/mapRaceArena.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 1</h2>';
         HTML+='  <p>Map for race</p>';
-        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/84if2dkpuhr6572/mapRacepack1.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='  <p><a id="racepack1" class="btn btn-default" href="https://www.dropbox.com/s/84if2dkpuhr6572/mapRacepack1.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 2</h2>';
         HTML+='  <p>Map for race</p>';
-        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/4crbnrgqr248f81/mapRacepack2.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='  <p><a id="racepack2" class="btn btn-default" href="https://www.dropbox.com/s/4crbnrgqr248f81/mapRacepack2.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 3</h2>';
         HTML+='  <p>Map for race</p>';
-        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/kggwqzdxnzoekqz/mapRacepack3.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='  <p><a id="racepack3" class="btn btn-default" href="https://www.dropbox.com/s/kggwqzdxnzoekqz/mapRacepack3.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 4</h2>';
         HTML+='  <p>Map for race</p>';
-        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/at3n9gz4tvo6jia/mapRacePack4.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='  <p><a id="racepack4" class="btn btn-default" href="https://www.dropbox.com/s/at3n9gz4tvo6jia/mapRacePack4.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 5</h2>';
         HTML+='  <p>Map for race</p>';
-        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/esblp84azv4vwh0/mapRacepack5_beta.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='  <p><a id="racepack5" class="btn btn-default" href="https://www.dropbox.com/s/esblp84azv4vwh0/mapRacepack5_beta.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Tritoch Pack</h2>';
         HTML+='  <p>CTF map pack</p>';
-        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/bwescubuoh4u53l/mapTritoch_pack.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='  <p><a id="tritoch" class="btn btn-default" href="https://www.dropbox.com/s/bwescubuoh4u53l/mapTritoch_pack.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>JK2 MP Maps</h2>';
         HTML+='  <p>JK Multiplayer map pack</p>';
-        HTML+='  <p><a class="btn btn-default" href="https://www.dropbox.com/s/x4vl8siviy0d57t/mapJK2MultiplayerMaps.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='  <p><a id="jk2" class="btn btn-default" href="https://www.dropbox.com/s/x4vl8siviy0d57t/mapJK2MultiplayerMaps.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='</div>';
         $("#main-content").html(HTML);
 
         $('.jk-nav li').removeClass("active");
         $('#menu_maps').addClass("active");
-}
+
+        $(document).ready(function () {
+			$( "#trickarena" ).mouseover(function() {
+        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/trickarena.jpg")';
+			});
+			$( "#racearena" ).mouseover(function() {
+        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/racearena.jpg")';
+			});
+			$( "#racepack1" ).mouseover(function() {
+        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/racepack1.jpg")';
+			});
+			$( "#racepack2" ).mouseover(function() {
+        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/racepack2.jpg")';
+			});
+			$( "#racepack3" ).mouseover(function() {
+        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/racepack3.jpg")';
+			});
+			$( "#racepack4" ).mouseover(function() {
+        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/racepack4.jpg")';
+			});
+			$( "#racepack5" ).mouseover(function() {
+        		document.getElementById("main-content").style.backgroundImage = 'url("../images/levelshots/racepack5.jpg")';
+			});
+		});
+	}
 
 function servers(){
         HTML='<div class="row">';

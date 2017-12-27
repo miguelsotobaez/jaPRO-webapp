@@ -169,19 +169,19 @@ function dashboard(page) {
             type: "POST",
             url: "ajax/getJSON.php",
             dataType: "JSON",
-            async: false,
+            async: false, //We need this for other stuff so i guess keep this not async ?
             data: { option: "dashboard"},
             success: function(res) {
                 data = res;
                	var time = parseInt(Date.now()/1000);
 	            if (page=="duel") {
-	            	buttonUpdate("update_duels", time - data[5][1]);
+	            	UpdateButton("update_duels", time - data[5][1]);
 	        	}
 	        	else if (page=="race") {
-	            	buttonUpdate("update_races", time - data[4][1]);
+	            	UpdateButton("update_races", time - data[4][1]);
 	        	}
 				else if (page=="player") {
-	            	buttonUpdate("update_player", time - data[3][1]);
+	            	UpdateButton("update_player", time - data[3][1]);
 	        	}
             }
         });
@@ -189,7 +189,7 @@ function dashboard(page) {
     });
 }
 
-function buttonUpdate(button, since) {
+function UpdateButton(button, since) {
 	if (since < 61) { //60+ seconds
 		document.getElementById(button).innerHTML = 'Up to date'; //Gray out the button too?
 		document.getElementById(button).setAttribute('disabled','disabled');
@@ -199,12 +199,9 @@ function buttonUpdate(button, since) {
 		document.getElementById(button).innerHTML = 'Up to date'; //Gray out the button too?
 		document.getElementById(button).setAttribute('disabled','disabled');
 	}
-	else
+	else {
 		document.getElementById(button).innerHTML = 'Updated '+timeSince(since)+ ' ago';
-
-
-
-
+	}
 }
 
 function home(){
@@ -274,77 +271,81 @@ function duel_count(){
             type: "POST",
             url: "ajax/getJSON.php",
             dataType: "JSON",
-            async: false,
+            async: true,
             data: { option: "duel_count"},
             success: function(res) {
-                data = res;
+                DuelCountChart(res);
             }
         });
 
-        //Loda fixme, this can use the json from datatable_duel_rank maybe and avoid a query?
-    var chart
-        chart = new Highcharts.Chart({
-            chart: {
-                type: 'bar',
-                renderTo: 'chart_duel_count',
-                margin: 0,
-                height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
-            },
-            title: null,
-            credits: false,
-            xAxis: {
-                labels: {
-                   enabled: false
-                },
-                lineColor: 'transparent',
-                minorTickLength: 0,
-                tickLength: 0,
-            },
-            yAxis: {
-                labels: {
-                    enabled: false
-                },
-                minorTickLength: 0,
-                tickLength: 0,
-                reversedStacks: false,
-                gridLineColor: 'transparent',
-                title: {
-                    enabled: false,
-                }
-            },
-            legend: {
-                enabled: false
-            },
-                labels: {
-                    enabled: false
-                },
-            plotOptions: {
-                series: {
-                    stacking: 'normal'
-                }
-            },         
-            tooltip: {
-              formatter: function() {
-                return this.series.name + ' ('+ this.y +' duels)';
-              }
-            },   
-            series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?  Also should skip if the item is less than like 5percent?
-                name: DuelToString(data[0][0]),
-                data: [Number(data[0][1])]
-            }, {
-                name: DuelToString(data[1][0]),
-                data: [Number(data[1][1])]
-            }, {
-                name: DuelToString(data[2][0]),
-                data: [Number(data[2][1])]
-            }, {
-                name: DuelToString(data[3][0]),
-                data: [Number(data[3][1])]
-            }, {
-                name: DuelToString(data[4][0]),
-                data: [Number(data[4][1])]
-            }]
-        });
+    	//Loda fixme, this can use the json from datatable_duel_rank maybe and avoid a query?
+    	function DuelCountChart (data) {
+	        var chart = new Highcharts.Chart({
+	            chart: {
+	                type: 'bar',
+	                renderTo: 'chart_duel_count',
+	                margin: 0,
+	                height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
+	            },
+	            title: null,
+	            credits: false,
+	            xAxis: {
+	                labels: {
+	                   enabled: false
+	                },
+	                lineColor: 'transparent',
+	                minorTickLength: 0,
+	                tickLength: 0,
+	            },
+	            yAxis: {
+	                labels: {
+	                    enabled: false
+	                },
+	                minorTickLength: 0,
+	                tickLength: 0,
+	                reversedStacks: false,
+	                gridLineColor: 'transparent',
+	                title: {
+	                    enabled: false,
+	                }
+	            },
+	            legend: {
+	                enabled: false
+	            },
+	                labels: {
+	                    enabled: false
+	                },
+	            plotOptions: {
+	                series: {
+	                    stacking: 'normal'
+	                }
+	            },         
+	            tooltip: {
+	              formatter: function() {
+	                return this.series.name + ' ('+ this.y +' duels)';
+	              }
+	            },   
+	            series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?  Also should skip if the item is less than like 5percent?
+	                name: DuelToString(data[0][0]),
+	                data: [Number(data[0][1])]
+	            }, {
+	                name: DuelToString(data[1][0]),
+	                data: [Number(data[1][1])]
+	            }, {
+	                name: DuelToString(data[2][0]),
+	                data: [Number(data[2][1])]
+	            }, {
+	                name: DuelToString(data[3][0]),
+	                data: [Number(data[3][1])]
+	            }, {
+	                name: DuelToString(data[4][0]),
+	                data: [Number(data[4][1])]
+	            }]
+	        });
+
+    	}
+
+
     });
 
     $('.jk-nav li').removeClass("active");
@@ -377,109 +378,79 @@ function duel_rank(){
             type: "POST",
             url: "ajax/getJSON.php",
             dataType: "JSON",
-            async: false,
+            async: true,
             data: { option: "duel_rank" },
             success: function(res) {
-                data = res;
+                DuelRankTable(res);
             }
         });
 
-        $('#datatable_duel_rank').DataTable( {
-            "order": [[ 3, "desc" ]],
-            "bLengthChange": false,
-            "deferRender": true,
-            "dom": 'lrtp', //Hide search box
-            "data": data,
-            "columns": [
-                { "data": null,  "render": 
-                    function ( data, type, row, meta ) { 
-                     return meta.row+1 }}, //Well.. this is not quite what we want, but I guess it will be ok (shows rank of their elo compared to every other elo regardless of type)
-                { "data": 0, "render": 
-                    function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
-                { "data": 1, "render": 
-                    function ( data, type, row, meta ) { 
-                        return DuelToString(data) }},
-                { "data": 2 },
-                { "data": 3 },
-                { "data": 4 }
-            ],
-            /*
-            "columns": [
-                { "data": null, defaultContent: "N/A" }, //How get position for this
-                { "data": "username", "render": 
-                    function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
-                { "data": "type", "render": 
-                    function ( data, type, row, meta ) { 
-                        return DuelToString(data) }},
-                { "data": "elo" },
-                { "data": "TS" },
-                { "data": "count" }
-            ],
-            */
-            /*
-            "fnDrawCallback": function ( oSettings ) {
-            //Need to redo the counters if filtered or sorted
-                if ( oSettings.bSorted || oSettings.bFiltered )
-                {
-                    for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
-                    {
-                        $('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
-                    }
-                }
-            },
-            */
-/*
-            "columnDefs": [
-              { "sType": "html", "aTargets": [ 1 ] } //numbers-html plugin
-              //{ "sType": "numeric", "aTargets": [ 7 ] } //time-uni sort plugin
-            ],
-            */
-            "aoColumnDefs": [
-                { "bSortable": false, "aTargets": [ 0 ] }
-            ],
-            "oLanguage": {
-                        "sInfo": '',
-                        "sInfoFiltered": ''
-            },
-            "aaSorting": [[ 1, 'asc' ]], // ?
+        function DuelRankTable(data) {
+	        $('#datatable_duel_rank').DataTable( {
+	            "order": [[ 3, "desc" ]],
+	            "bLengthChange": false,
+	            "deferRender": true,
+	            "dom": 'lrtp', //Hide search box
+	            "data": data,
+	            "columns": [
+	                { "data": null,  "render": 
+	                    function ( data, type, row, meta ) { 
+	                     return meta.row+1 }}, //Well.. this is not quite what we want, but I guess it will be ok (shows rank of their elo compared to every other elo regardless of type)
+	                { "data": 0, "render": 
+	                    function ( data, type, row, meta ) { 
+	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+	                { "data": 1, "render": 
+	                    function ( data, type, row, meta ) { 
+	                        return DuelToString(data) }},
+	                { "data": 2 },
+	                { "data": 3 },
+	                { "data": 4 }
+	            ],
+	            "aoColumnDefs": [
+	                { "bSortable": false, "aTargets": [ 0 ] }
+	            ],
+	            "oLanguage": {
+	                        "sInfo": '',
+	                        "sInfoFiltered": ''
+	            },
+	            "aaSorting": [[ 1, 'asc' ]], // ?
 
-            initComplete: function () {
-                this.api().columns([1]).every( function () {
-                    var column = this;
-                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-                        .appendTo( $(column.footer()).empty() )
-                        .on( 'change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-                            column
-                                .search( val ? '^'+val+'$' : '', true, false ) //IDK
-                                .draw();
-                        } );
-                    column.data().unique().sort().each( function ( d, j ) {
-                        select.append( '<option value="'+d+'">'+d+'</option>' )
-                    } );
-                } );
-                this.api().columns([2]).every( function () {
-                    var column = this;
-                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-                        .appendTo( $(column.footer()).empty() )
-                        .on( 'change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-                            column
-                                .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
-                                .draw();
-                        } );
-                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
-                        select.append( '<option value="'+(d)+'">'+DuelToString(d)+'</option>' )
-                    } );
-                } );
-            }
-        });
+	            initComplete: function () {
+	                this.api().columns([1]).every( function () {
+	                    var column = this;
+	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+	                        .appendTo( $(column.footer()).empty() )
+	                        .on( 'change', function () {
+	                            var val = $.fn.dataTable.util.escapeRegex(
+	                                $(this).val()
+	                            );
+	                            column
+	                                .search( val ? '^'+val+'$' : '', true, false ) //IDK
+	                                .draw();
+	                        } );
+	                    column.data().unique().sort().each( function ( d, j ) {
+	                        select.append( '<option value="'+d+'">'+d+'</option>' )
+	                    } );
+	                } );
+	                this.api().columns([2]).every( function () {
+	                    var column = this;
+	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+	                        .appendTo( $(column.footer()).empty() )
+	                        .on( 'change', function () {
+	                            var val = $.fn.dataTable.util.escapeRegex(
+	                                $(this).val()
+	                            );
+	                            column
+	                                .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
+	                                .draw();
+	                        } );
+	                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
+	                        select.append( '<option value="'+(d)+'">'+DuelToString(d)+'</option>' )
+	                    } );
+	                } );
+	            }
+	        });
+		}
     });
 
     $('.jk-nav li').removeClass("active");
@@ -513,93 +484,95 @@ function duel_list(){
             type: "POST",
             url: "ajax/getJSON.php",
             dataType: "JSON",
-            async: false,
+            async: true,
             data: { option: "duel_list" },
             success: function(res) {
-                data = res;
+                DuelListTable(res);
             }
         });
 
-        $('#datatable_duel_list').DataTable( {
-            "order": [[ 5, "desc" ]],
-            "deferRender": true,
-            "bLengthChange": false,
-            "data": data,
-            "dom": 'lrtp', //Hide search box
-            "columns": [
-                { "data": 0, "render": 
-                    function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
-                { "data": 1, "render": 
-                    function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+        function DuelListTable(data) {
+	        $('#datatable_duel_list').DataTable( {
+	            "order": [[ 5, "desc" ]],
+	            "deferRender": true,
+	            "bLengthChange": false,
+	            "data": data,
+	            "dom": 'lrtp', //Hide search box
+	            "columns": [
+	                { "data": 0, "render": 
+	                    function ( data, type, row, meta ) { 
+	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+	                { "data": 1, "render": 
+	                    function ( data, type, row, meta ) { 
+	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
 
 
-                { "data": 2, "render": 
-                    function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? DuelToString(data) : ("<button id='duelfilter'>" + DuelToString(data) + "</button>") }},                       
-                { "data": 3 , sType: "num-duelhp" }, //This does not sort properly - x/y  format, sort by sum(x+y)
-                { "data": 4, "render": 
-                    function ( data, type, row, meta ) {
-                    if (data <= 15) 
-                        return '<b><font color="#bc5700">'+data+'%</font></b>'; 
-                    else 
-                        return data+'%'; }},
-                { "data": 5, "render": 
-                    function ( data, type, row, meta ) { 
-                        var date = new Date(data*1000);
-                        //+RaceToString(row[3]).toLowerCase()+'.dm_26">'+date.toISOString().substring(0, 10)+'<a>' }},
-                        return (date.getYear()-100) + '-' + ('0'+(date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + ' ' 
-                            + ('0'+(date.getHours()+1)).slice(-2) + ':' + ('0'+(date.getMinutes()+1)).slice(-2) + '<a>' }},
-                { "data": 6, "sType": "num-dur", "className": "duration_ms", "render": //should be uni-time
-                    function ( data, type, row, meta ) { 
-                        return DuelTimeToString(data) }}
-            ],
-            initComplete: function () {         
+	                { "data": 2, "render": 
+	                    function ( data, type, row, meta ) { 
+	                        return (type == 'filter') ? DuelToString(data) : ("<button id='duelfilter'>" + DuelToString(data) + "</button>") }},                       
+	                { "data": 3 , sType: "num-duelhp" }, //This does not sort properly - x/y  format, sort by sum(x+y)
+	                { "data": 4, "render": 
+	                    function ( data, type, row, meta ) {
+	                    if (data <= 15) 
+	                        return '<b><font color="#bc5700">'+data+'%</font></b>'; 
+	                    else 
+	                        return data+'%'; }},
+	                { "data": 5, "render": 
+	                    function ( data, type, row, meta ) { 
+	                        var date = new Date(data*1000);
+	                        //+RaceToString(row[3]).toLowerCase()+'.dm_26">'+date.toISOString().substring(0, 10)+'<a>' }},
+	                        return (date.getYear()-100) + '-' + ('0'+(date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + ' ' 
+	                            + ('0'+(date.getHours()+1)).slice(-2) + ':' + ('0'+(date.getMinutes()+1)).slice(-2) + '<a>' }},
+	                { "data": 6, "sType": "num-dur", "className": "duration_ms", "render": //should be uni-time
+	                    function ( data, type, row, meta ) { 
+	                        return DuelTimeToString(data) }}
+	            ],
+	            initComplete: function () {         
 
-                $('#datatable_duel_list tbody').on( 'click', '#duelfilter', function () {
-                    //alert("hello");         
+	                $('#datatable_duel_list tbody').on( 'click', '#duelfilter', function () {
+	                    //alert("hello");         
 
-                    //Filter column
-                });
+	                    //Filter column
+	                });
 
-                this.api().columns([0, 1]).every( function () {
-                    var column = this;
-                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-                        .appendTo( $(column.footer()).empty() )
-                        .on( 'change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-                            column
-                                .search( val ? '^'+val+'$' : '', true, false )
-                                .draw();
-                        } );
-                    column.data().unique().sort().each( function ( d, j ) {
+	                this.api().columns([0, 1]).every( function () {
+	                    var column = this;
+	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+	                        .appendTo( $(column.footer()).empty() )
+	                        .on( 'change', function () {
+	                            var val = $.fn.dataTable.util.escapeRegex(
+	                                $(this).val()
+	                            );
+	                            column
+	                                .search( val ? '^'+val+'$' : '', true, false )
+	                                .draw();
+	                        } );
+	                    column.data().unique().sort().each( function ( d, j ) {
 
-                //table.column(4).search(this.value).column(5).search(this.val‌​ue).draw();
+	                //table.column(4).search(this.value).column(5).search(this.val‌​ue).draw();
 
-                        select.append( '<option value="'+d+'">'+d+'</option>' )
-                    } );
-                } );
-                this.api().columns([2]).every( function () {
-                    var column = this;
-                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-                        .appendTo( $(column.footer()).empty() )
-                        .on( 'change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-                            column
-                                .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
-                                .draw();
-                        } );
-                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
-                        select.append( '<option value="'+d+'">'+DuelToString(d)+'</option>' )
-                    } );
-                } );
-            }
-        });
+	                        select.append( '<option value="'+d+'">'+d+'</option>' )
+	                    } );
+	                } );
+	                this.api().columns([2]).every( function () {
+	                    var column = this;
+	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+	                        .appendTo( $(column.footer()).empty() )
+	                        .on( 'change', function () {
+	                            var val = $.fn.dataTable.util.escapeRegex(
+	                                $(this).val()
+	                            );
+	                            column
+	                                .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
+	                                .draw();
+	                        } );
+	                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
+	                        select.append( '<option value="'+d+'">'+DuelToString(d)+'</option>' )
+	                    } );
+	                } );
+	            }
+	        });
+		}
     });
 
 
@@ -670,79 +643,79 @@ function race_count(){
             type: "POST",
             url: "ajax/getJSON.php",
             dataType: "JSON",
-            async: false,
+            async: true,
             data: { option: "race_count"},
             success: function(res) {
-                data = res;
+                RaceCountChart(res);
             }
         });
 
+        function RaceCountChart(data) {
         //Loda fixme, this can use the json from datatable_duel_rank maybe and avoid a query?
-        var chart = new Highcharts.Chart({
-            chart: {
-                type: 'bar',
-                renderTo: 'chart_race_count',
-                margin: 0,
-                height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
-            },
-            title: null,
-            credits: false,
-            xAxis: {
-                labels: {
-                   enabled: false
-                },
-                lineColor: 'transparent',
-                minorTickLength: 0,
-                tickLength: 0,
-            },
-            yAxis: {
-                labels: {
-                    enabled: false
-                },
-                minorTickLength: 0,
-                tickLength: 0,
-                reversedStacks: false,
-                gridLineColor: 'transparent',
-                title: {
-                    enabled: false,
-                }
-            },
-            legend: {
-                enabled: false
-            },
-            labels: {
-                    enabled: false
-            },
-            plotOptions: {
-                series: {
-                    stacking: 'normal'
-                }
-            },         
-            tooltip: {
-              formatter: function() {
-                return this.series.name + ' ('+ this.y +' races)';
-              }
-            },      
-            series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?
-                name: RaceToString(data[0][0]),
-                data: [Number(data[0][1])]
-            }, {
-                name: RaceToString(data[1][0]),
-                data: [Number(data[1][1])]
-            }, {
-                name: RaceToString(data[2][0]),
-                data: [Number(data[2][1])]
-            }, {
-                name: RaceToString(data[3][0]),
-                data: [Number(data[3][1])]
-            }, {
-                name: RaceToString(data[4][0]),
-                data: [Number(data[4][1])]
-            }]
-        });
-
+	        var chart = new Highcharts.Chart({
+	            chart: {
+	                type: 'bar',
+	                renderTo: 'chart_race_count',
+	                margin: 0,
+	                height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
+	            },
+	            title: null,
+	            credits: false,
+	            xAxis: {
+	                labels: {
+	                   enabled: false
+	                },
+	                lineColor: 'transparent',
+	                minorTickLength: 0,
+	                tickLength: 0,
+	            },
+	            yAxis: {
+	                labels: {
+	                    enabled: false
+	                },
+	                minorTickLength: 0,
+	                tickLength: 0,
+	                reversedStacks: false,
+	                gridLineColor: 'transparent',
+	                title: {
+	                    enabled: false,
+	                }
+	            },
+	            legend: {
+	                enabled: false
+	            },
+	            labels: {
+	                    enabled: false
+	            },
+	            plotOptions: {
+	                series: {
+	                    stacking: 'normal'
+	                }
+	            },         
+	            tooltip: {
+	              formatter: function() {
+	                return this.series.name + ' ('+ this.y +' races)';
+	              }
+	            },      
+	            series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?
+	                name: RaceToString(data[0][0]),
+	                data: [Number(data[0][1])]
+	            }, {
+	                name: RaceToString(data[1][0]),
+	                data: [Number(data[1][1])]
+	            }, {
+	                name: RaceToString(data[2][0]),
+	                data: [Number(data[2][1])]
+	            }, {
+	                name: RaceToString(data[3][0]),
+	                data: [Number(data[3][1])]
+	            }, {
+	                name: RaceToString(data[4][0]),
+	                data: [Number(data[4][1])]
+	            }]
+	        });
+	    }
     });
-
 
     $('.jk-nav li').removeClass("active");
     $('#menu_race').addClass("active");
@@ -779,100 +752,101 @@ function race_rank(){
             type: "POST",
             url: "ajax/getJSON.php",
             dataType: "JSON",
-            async: false,
+            async: true,
             data: { option: "race_rank", start_time: "0", end_time: "0" },
             success: function(res) {
-                data = res;
+                RaceRankTable(res);
                 //RaceRankData = data
             }
         });
 
-        rank_table = $('#datatable_race_rank').DataTable( {
-            "order": [[ 3, "desc" ]],
-            "bLengthChange": false,
-            "deferRender": true,
-            "dom": 'lrtp', //Hide search box
-            "data": data,
-            "columns": [                
-                { "data": null,  "render":                 //{ "data": null, defaultContent: "N/A" }, //How get position for this
-                    function ( data, type, row, meta ) { 
-                     return meta.row+1 }}, //This is not what we want since it counts combined styles as a style.          
-                { "data": 0, "render": 
-                    function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},   
-                { "data": 1, "sType": "numeric", "render": 
-                    function ( data, type, row, meta ) { 
-                        return RaceToString(data) }},
-                { "data": 2 },
-                { "data": 3 },
-                { "data": 4 },
-                { "data": 5 },
-                { "data": 6 },
-                { "data": 7 },
-                { "data": 8 },
-                { "data": 9 }
-            ],
-            /*
-             "fnDrawCallback": function ( oSettings ) { //fixme
-            // Need to redo the counters if filtered or sorted
-                if ( oSettings.bSorted || oSettings.bFiltered )
-                {
-                    for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
-                    {
-                        $('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
-                    }
-                }
-            },
-            */
-            "aoColumnDefs": [
-                { "bSortable": false, "aTargets": [ 0,2 ] }
-            ],
-             "oLanguage": {
-                        "sInfo": '',
-                        "sInfoFiltered": ''
-            },  
-            "aaSorting": [[ 1, 'asc' ]],
-            initComplete: function () {
-                this.api().columns([1]).every( function () {
-                    var column = this;
-                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-                        .appendTo( $(column.footer()).empty() )
-                        .on( 'change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-                            column
-                                .search( val ? '^'+val+'$' : '', true, false )
-                                .draw();
-                        } );
-                    column.data().unique().sort().each( function ( d, j ) {
-                        select.append( '<option value="'+d+'">'+d+'</option>' )
-                    } );
-                } );
-                this.api().columns([2]).every( function () {
-                    var column = this;
-                    var select = $('<select class="filter form-control input-sm"></select>') //Why does jetpack and swoop show up in middle - because it sorts by string not numeric? Why does it not filter by all on pageload even though its selected
-                        .appendTo( $(column.footer()).empty() )
-                        .on( 'change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-                            column
-                                .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
-                                .draw();
-                        } );
-                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
-                        if (d == 99) //Style for "ALL"
-                            select.append( '<option selected="selected" value="'+d+'">'+RaceToString(d)+'</option>' )
-                        else
-                            select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
-                    } );
-                } );
-                this.api().columns(2).search('All')
-                this.api().draw();
-            }
-        });
-
+        function RaceRankTable(data) {
+	        rank_table = $('#datatable_race_rank').DataTable( {
+	            "order": [[ 3, "desc" ]],
+	            "bLengthChange": false,
+	            "deferRender": true,
+	            "dom": 'lrtp', //Hide search box
+	            "data": data,
+	            "columns": [                
+	                { "data": null,  "render":                 //{ "data": null, defaultContent: "N/A" }, //How get position for this
+	                    function ( data, type, row, meta ) { 
+	                     return meta.row+1 }}, //This is not what we want since it counts combined styles as a style.          
+	                { "data": 0, "render": 
+	                    function ( data, type, row, meta ) { 
+	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},   
+	                { "data": 1, "sType": "numeric", "render": 
+	                    function ( data, type, row, meta ) { 
+	                        return RaceToString(data) }},
+	                { "data": 2 },
+	                { "data": 3 },
+	                { "data": 4 },
+	                { "data": 5 },
+	                { "data": 6 },
+	                { "data": 7 },
+	                { "data": 8 },
+	                { "data": 9 }
+	            ],
+	            /*
+	             "fnDrawCallback": function ( oSettings ) { //fixme
+	            // Need to redo the counters if filtered or sorted
+	                if ( oSettings.bSorted || oSettings.bFiltered )
+	                {
+	                    for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
+	                    {
+	                        $('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
+	                    }
+	                }
+	            },
+	            */
+	            "aoColumnDefs": [
+	                { "bSortable": false, "aTargets": [ 0,2 ] }
+	            ],
+	             "oLanguage": {
+	                        "sInfo": '',
+	                        "sInfoFiltered": ''
+	            },  
+	            "aaSorting": [[ 1, 'asc' ]],
+	            initComplete: function () {
+	                this.api().columns([1]).every( function () {
+	                    var column = this;
+	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+	                        .appendTo( $(column.footer()).empty() )
+	                        .on( 'change', function () {
+	                            var val = $.fn.dataTable.util.escapeRegex(
+	                                $(this).val()
+	                            );
+	                            column
+	                                .search( val ? '^'+val+'$' : '', true, false )
+	                                .draw();
+	                        } );
+	                    column.data().unique().sort().each( function ( d, j ) {
+	                        select.append( '<option value="'+d+'">'+d+'</option>' )
+	                    } );
+	                } );
+	                this.api().columns([2]).every( function () {
+	                    var column = this;
+	                    var select = $('<select class="filter form-control input-sm"></select>') //Why does jetpack and swoop show up in middle - because it sorts by string not numeric? Why does it not filter by all on pageload even though its selected
+	                        .appendTo( $(column.footer()).empty() )
+	                        .on( 'change', function () {
+	                            var val = $.fn.dataTable.util.escapeRegex(
+	                                $(this).val()
+	                            );
+	                            column
+	                                .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
+	                                .draw();
+	                        } );
+	                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
+	                        if (d == 99) //Style for "ALL"
+	                            select.append( '<option selected="selected" value="'+d+'">'+RaceToString(d)+'</option>' )
+	                        else
+	                            select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
+	                    } );
+	                } );
+	                this.api().columns(2).search('All')
+	                this.api().draw();
+	            }
+	        });
+		}
 
 
 
@@ -887,9 +861,9 @@ function race_rank(){
 	            async: false,
 	            data: { option: "race_rank", start_time: start_time, end_time: end_time },
 	            success: function(res) {
-	                data = res;
+	            	RaceRankTable(res);
 	                console.log(rank_table);
-	                rank_table.ajax.reload();
+	                //rank_table.ajax.reload();
 	                //Redraw data table?? //fixme
 	            }
 	        });
@@ -906,9 +880,10 @@ function race_rank(){
 	            async: false,
 	            data: { option: "race_rank", start_time: start_time, end_time: end_time },
 	            success: function(res) {
-	                data = res;
+	            	RaceRankTable(res);
+	                //data = res;
 	                console.log(rank_table);
-	                rank_table.ajax.reload();
+	                //rank_table.ajax.reload();
 	                //Redraw data table?? //fixme
 	            }
 	        });
@@ -965,113 +940,115 @@ function race_list(){
                 type: "POST",
                 url: "ajax/getJSON.php",
                 dataType: "JSON",
-                async: false,
+                async: true,
                 data: { option: "race_list" },
                 success: function(res) {//JSON
-                    data = res;
+                    RaceListTable(res);
 
                     //localStorage.setItem("dataCache", JSON.stringify(res));
                 }
             });
         }
 
-        $('#datatable_race_list').DataTable( {
-            "order": [[ 6, "desc" ]],
-            "deferRender": true,
-            "bLengthChange": false,
-            "dom": 'lrtp', //Hide search box
-            "data": data,
-            "columns": [
-                { "data": 0, "sType": "num-html", "render": 
-                    function ( data, type, row, meta ) {
-                    if (data == 1) 
-                        return '<b><font color="#bc5700">1</font></b>'; //Muted orange
-                    else 
-                        return data; }},
-                { "data": 1, "render": 
-                    function ( data, type, row, meta ) { 
-                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
-                { "data": 2 }, 
-                { "data": 3, "render": 
-                    function ( data, type, row, meta ) { 
-                        return RaceToString(data) }},
-                { "data": 4 },
-                { "data": 5 },
-                { "data": 6, "render": 
-                    function ( data, type, row, meta ) { 
-                        var date = new Date(data*1000); //fixme the IP should be a global variable defined somewhere?
-                        return '<a href="http://162.248.89.208/races/'+encodeURIComponent(row[1])+'/'+encodeURIComponent(row[1])+'-'+encodeURIComponent(row[2].replace(" ", ""))+'-'
-                            +RaceToString(row[3]).toLowerCase()+'.dm_26">'+(date.getYear()-100) + '-' + ('0'+(date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + ' ' 
-                            + ('0'+(date.getHours()+1)).slice(-2) + ':' + ('0'+(date.getMinutes()+1)).slice(-2) + '<a>' }},
-                { "data": 7, "sType": "num-durhtml", "className": "duration_ms", "render":
-                    function ( data, type, row, meta ) { 
-                        return '<td style="text-align: right;">'+RaceTimeToString(data)+'</td>' }} //Why doesnt this work..
-            ],  
-            initComplete: function () {     
-				this.api().columns([1]).every( function () {
-                    var column = this;
-                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-                        .appendTo( $(column.footer()).empty() )
-                        .on( 'change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-                            column
-                                .search( val ? '^'+val+'$' : '', true, false )
-                                .draw();
-                        } );
-                    column.data().unique().sort().each( function ( d, j ) {
-                        select.append( '<option value="'+d+'">'+d+'</option>' )
-                    } );
-                } );
-                this.api().columns([2]).every( function () {
-                    var column = this;
-                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-                        .appendTo( $(column.footer()).empty() )
-                        .on( 'change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-                            //Update background image
-                            /*
-                            if ($(this).val() == "") {
-                            	alert("hi");
-                            	document.getElementById("third_row").style.backgroundImage = null;
-                            }
-                            else 
-                            	*/
-                            {
-	                           	var mapname = encodeURIComponent($(this).val());
-	                           	mapname = mapname.replace(/%2F/gi, "/"); //Hmm
-	                            document.getElementById("third_row").style.backgroundImage = 'url("../images/levelshots/'+mapname+'.jpg")';
-                        	}
+        function RaceListTable(data) {
+	        $('#datatable_race_list').DataTable( {
+	            "order": [[ 6, "desc" ]],
+	            "deferRender": true,
+	            "bLengthChange": false,
+	            "dom": 'lrtp', //Hide search box
+	            "data": data,
+	            "columns": [
+	                { "data": 0, "sType": "num-html", "render": 
+	                    function ( data, type, row, meta ) {
+	                    if (data == 1) 
+	                        return '<b><font color="#bc5700">1</font></b>'; //Muted orange
+	                    else 
+	                        return data; }},
+	                { "data": 1, "render": 
+	                    function ( data, type, row, meta ) { 
+	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+	                { "data": 2 }, 
+	                { "data": 3, "render": 
+	                    function ( data, type, row, meta ) { 
+	                        return RaceToString(data) }},
+	                { "data": 4 },
+	                { "data": 5 },
+	                { "data": 6, "render": 
+	                    function ( data, type, row, meta ) { 
+	                        var date = new Date(data*1000); //fixme the IP should be a global variable defined somewhere?
+	                        return '<a href="http://162.248.89.208/races/'+encodeURIComponent(row[1])+'/'+encodeURIComponent(row[1])+'-'+encodeURIComponent(row[2].replace(" ", ""))+'-'
+	                            +RaceToString(row[3]).toLowerCase()+'.dm_26">'+(date.getYear()-100) + '-' + ('0'+(date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + ' ' 
+	                            + ('0'+(date.getHours()+1)).slice(-2) + ':' + ('0'+(date.getMinutes()+1)).slice(-2) + '<a>' }},
+	                { "data": 7, "sType": "num-durhtml", "className": "duration_ms", "render":
+	                    function ( data, type, row, meta ) { 
+	                        return '<td style="text-align: right;">'+RaceTimeToString(data)+'</td>' }} //Why doesnt this work..
+	            ],  
+	            initComplete: function () {     
+					this.api().columns([1]).every( function () {
+	                    var column = this;
+	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+	                        .appendTo( $(column.footer()).empty() )
+	                        .on( 'change', function () {
+	                            var val = $.fn.dataTable.util.escapeRegex(
+	                                $(this).val()
+	                            );
+	                            column
+	                                .search( val ? '^'+val+'$' : '', true, false )
+	                                .draw();
+	                        } );
+	                    column.data().unique().sort().each( function ( d, j ) {
+	                        select.append( '<option value="'+d+'">'+d+'</option>' )
+	                    } );
+	                } );
+	                this.api().columns([2]).every( function () {
+	                    var column = this;
+	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+	                        .appendTo( $(column.footer()).empty() )
+	                        .on( 'change', function () {
+	                            var val = $.fn.dataTable.util.escapeRegex(
+	                                $(this).val()
+	                            );
+	                            //Update background image
+	                            /*
+	                            if ($(this).val() == "") {
+	                            	alert("hi");
+	                            	document.getElementById("third_row").style.backgroundImage = null;
+	                            }
+	                            else 
+	                            	*/
+	                            {
+		                           	var mapname = encodeURIComponent($(this).val());
+		                           	mapname = mapname.replace(/%2F/gi, "/"); //Hmm
+		                            document.getElementById("third_row").style.backgroundImage = 'url("../images/levelshots/'+mapname+'.jpg")';
+	                        	}
 
-                            column
-                                .search( val ? '^'+val+'$' : '', true, false )
-                                .draw();
-                        } );
-                    column.data().unique().sort().each( function ( d, j ) {
-                        select.append( '<option value="'+d+'">'+d+'</option>' )
-                    } );
-                } );
-                this.api().columns([3]).every( function () {
-                    var column = this;
-                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-                        .appendTo( $(column.footer()).empty() )
-                        .on( 'change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-                            column
-                                .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
-                                .draw();
-                        } );
-                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
-                        select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
-                    } );
-                } );
-            }
-        });
+	                            column
+	                                .search( val ? '^'+val+'$' : '', true, false )
+	                                .draw();
+	                        } );
+	                    column.data().unique().sort().each( function ( d, j ) {
+	                        select.append( '<option value="'+d+'">'+d+'</option>' )
+	                    } );
+	                } );
+	                this.api().columns([3]).every( function () {
+	                    var column = this;
+	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+	                        .appendTo( $(column.footer()).empty() )
+	                        .on( 'change', function () {
+	                            var val = $.fn.dataTable.util.escapeRegex(
+	                                $(this).val()
+	                            );
+	                            column
+	                                .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
+	                                .draw();
+	                        } );
+	                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
+	                        select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
+	                    } );
+	                } );
+	            }
+	        });
+		}
     });
 
     $('.jk-nav li').removeClass("active");

@@ -941,9 +941,6 @@ function race_list(){
     panel += '</div>';
     $("#main-content").append(panel);
 
-    var background = '<style type="text/css"> .content-background { background-size: cover; opacity: 1; background-repeat: no-repeat; } </style>'; //improve this
-    $("#main-content").append(background);
-
     $(document).ready(function() {
         var data = null;
         var last_update = dashboardData[4][1];
@@ -1734,9 +1731,6 @@ function maps(){
         HTML+='</div>';
         HTML+='</div>';
         $("#main-content").html(HTML);
-
-		var background = '<style type="text/css"> .content-background { background-size: cover; opacity: 1; background-repeat: no-repeat; } </style>'; //improve this
-    	$("#main-content").append(background);
 
         $('.jk-nav li').removeClass("active");
         $('#menu_maps').addClass("active");

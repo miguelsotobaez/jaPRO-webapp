@@ -2630,6 +2630,12 @@ table.dataTable.dtr-inline.collapsed>tbody>tr.parent>td:first-child:before, tabl
     letter-spacing: 5px;
 }
 
-.duration_ms{
+.duration_ms {
   text-align: right
+}
+
+#content-background {
+    background-size: cover;
+    /*opacity: 1;*/
+    background-repeat: no-repeat;
 }

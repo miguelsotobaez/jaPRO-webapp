@@ -1022,17 +1022,16 @@ function race_list(){
 	                                $(this).val()
 	                            );
 	                            //Update background image
-	                            /*
+	                            
 	                            if ($(this).val() == "") {
-	                            	alert("hi");
-	                            	document.getElementById("third_row").style.backgroundImage = null;
+	                            	document.getElementById("content-background").style.backgroundImage = null;
 	                            }
 	                            else 
-	                            	*/
+	                            	
 	                            {
 		                           	var mapname = encodeURIComponent($(this).val());
 		                           	mapname = mapname.replace(/%2F/gi, "/"); //Hmm
-		                            document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/'+mapname+'.jpg")';
+		                            document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/'+mapname+'.jpg")';
 	                        	}
 
 	                            column
@@ -1410,15 +1409,16 @@ function player_race_stats(){//Most popular duels, total number of duels
         type: "POST",
         url: "ajax/getJSON.php",
         dataType: "JSON",
-        async: false,
+        async: true,
         data: { option: "player_race_stats", player: player},
         success: function(res) {
-            data = res;
+        	var data=res.map(Number); // ????
+            PlayerRaceChart(data);
         }
     });
 
-    var chart;
-        chart = new Highcharts.Chart({
+    function PlayerRaceChart(data) {
+        var chart = new Highcharts.Chart({
             chart: {
                 renderTo: 'player_race_stats',
                 plotBackgroundColor: null,
@@ -1443,6 +1443,7 @@ function player_race_stats(){//Most popular duels, total number of duels
                 data: data
             }]
         });
+    }
 
     $('.jk-nav li').removeClass("active");
     $('#menu_player').addClass("active");
@@ -1467,21 +1468,19 @@ function player_duel_stats(){//Most popular duels, total number of duels
     panel += '            </div>';
     $("#main-content").append(panel);
 
-
-    var data1 = null;
     $.ajax({
         type: "POST",
         url: "ajax/getJSON.php",
         dataType: "JSON",
-        async: false,
+        async: true,
         data: { option: "player_duel_stats", player: player},
         success: function(res) {
-            data1 = res;
+            PlayerDuelChart(res);
         }
     });
 
-    var chart1;
-        chart = new Highcharts.Chart({
+    function PlayerDuelChart(data) {
+    	var chart = new Highcharts.Chart({
             chart: {
                 renderTo: 'player_duel_stats',
                 plotBackgroundColor: null,
@@ -1503,32 +1502,32 @@ function player_duel_stats(){//Most popular duels, total number of duels
             series: [{
                 type: 'pie',
                 name: 'Strength',
-                data: data1
+                data: data
             }]
         });
+	}
 
-    var data2 = null;
     $.ajax({
         type: "POST",
         url: "ajax/getJSON.php",
         dataType: "JSON",
-        async: false,
+        async: true,
         data: { option: "player_duel_graph", player: player},
         success: function(res) {
-            data2 = res;
+        	PlayerDuelGraph(res);
         }
     });
 
-    var dataSub;
-    for (i=0; i<15; i++) {
-        if (data2[i] != undefined) {
-            dataSub.push(data2[i][0]);
+	function PlayerDuelGraph(data) {
+ 		var dataSub = null;
+	    for (i=0; i<15; i++) {
+	        if (data[i] != undefined) {
+	            dataSub.push(data[i][0]);
 
-        }
-    }
+	        }
+	    }
 
-    var chart2;
-        chart = new Highcharts.Chart({
+        var chart = new Highcharts.Chart({
             chart: {
                 renderTo: 'player_duel_graph',
                 plotBackgroundColor: null,
@@ -1553,6 +1552,7 @@ function player_duel_stats(){//Most popular duels, total number of duels
                 data: dataSub
             }]
         });
+    }
 
     $('.jk-nav li').removeClass("active");
     $('#menu_player').addClass("active");
@@ -1737,25 +1737,25 @@ function maps(){
 
         $(document).ready(function () {
 			$( "#trickarena" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/trickarena.jpg")';
+        		ddocument.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/trickarena.jpg")';
 			});
 			$( "#racearena" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/racearena.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racearena.jpg")';
 			});
 			$( "#racepack1" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/racepack1.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack1.jpg")';
 			});
 			$( "#racepack2" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/racepack2.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack2.jpg")';
 			});
 			$( "#racepack3" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/racepack3.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack3.jpg")';
 			});
 			$( "#racepack4" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/racepack4.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack4.jpg")';
 			});
 			$( "#racepack5" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'url("../images/levelshots/racepack5.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack5.jpg")';
 			});
 		});
 	}

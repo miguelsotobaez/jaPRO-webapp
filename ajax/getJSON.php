@@ -236,9 +236,9 @@ switch ($option) {
 				UNION
 				SELECT type, ROUND(loser_elo,0) AS elo, end_time FROM Duels WHERE loser = ? GROUP BY type) AS T GROUP BY type ORDER BY elo DESC LIMIT 5");
 		$stmt->bind_param('ss', $username, $username);
-		$result = $stmt->execute();
+		$stmt->execute();
+		$result = $stmt->get_result();
 		$arr = preparedsql2arr($result);
-		$result->finalize();
 		$result->free();
 
 	    if($arr){
@@ -259,12 +259,12 @@ switch ($option) {
 		}
 		$username = $_POST["player"]; //accept either GET or POST 
 		$newArray = null;
-	   	$stmt = $db->prepare("SELECT SQL_CACHE x.style AS style, ROUND(x.score/y.avg_score, 0) AS diff FROM (SELECT style, SUM(entries/rank) AS score from Races WHERE username=? group by style) as x, 
+	   	$stmt = $db->prepare("SELECT SQL_CACHE x.style AS style, ROUND(x.score/y.avg_score, 0) AS diff FROM (SELECT style, SUM(entries/rank) AS score from Races WHERE username = ? group by style) as x, 
 	    	(SELECT style, AVG(entries/rank) AS avg_score FROM Races GROUP BY style) as y WHERE x.style = y.style ORDER BY diff DESC LIMIT 5");
 		$stmt->bind_param('s', $username);
-		$result = $stmt->execute();
+		$stmt->execute();
+		$result = $stmt->get_result();
 		$arr = preparedsql2arr($result);
-		$result->finalize();
 		$result->free();
 
 	    if($arr){
@@ -287,9 +287,9 @@ switch ($option) {
 			SELECT end_time, type, CAST(loser_elo AS INT) AS elo FROM Duels WHERE loser = ? 
 			ORDER BY end_time ASC");
 		$stmt->bind_param('ss', $username, $username);
-		$result = $stmt->execute();
+		$stmt->execute();
+		$result = $stmt->get_result();
 		$arr = preparedsql2arr($result);
-		$result->finalize();
 		$result->free();
 	
 	    if($arr){

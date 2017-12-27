@@ -733,7 +733,7 @@ function race_rank(){
     panel += '          </div>';
     panel += '          <div class="panel-body">';
 
-    panel +='                        <button class="btn btn-warning" id="race_rank_all">All</button> <button class="btn btn-warning" id="race_rank_90">Last 3 months</button>'; //Get dashboard getJSON info to show last update time 
+    panel +='                        <button class="btn btn-warning" id="race_rank_all">All</button> <button class="btn btn-warning" id="race_rank_90">Last 3 months</button> <button class="btn btn-warning" id="race_rank_7">Last week</button>'; //Get dashboard getJSON info to show last update time 
 
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_race_rank" width="100%" class="table table-striped table-hover">';
@@ -762,13 +762,14 @@ function race_rank(){
 
         function RaceRankTable(data) {
 	        rank_table = $('#datatable_race_rank').DataTable( {
+	        	 destroy: true,
 	            "order": [[ 3, "desc" ]],
 	            "bLengthChange": false,
 	            "deferRender": true,
 	            "dom": 'lrtp', //Hide search box
 	            "data": data,
 	            "columns": [                
-	                { "data": null,  "render":                 //{ "data": null, defaultContent: "N/A" }, //How get position for this
+	                { "data": null,  "render":
 	                    function ( data, type, row, meta ) { 
 	                     return meta.row+1 }}, //This is not what we want since it counts combined styles as a style.          
 	                { "data": 0, "render": 
@@ -786,18 +787,6 @@ function race_rank(){
 	                { "data": 8 },
 	                { "data": 9 }
 	            ],
-	            /*
-	             "fnDrawCallback": function ( oSettings ) { //fixme
-	            // Need to redo the counters if filtered or sorted
-	                if ( oSettings.bSorted || oSettings.bFiltered )
-	                {
-	                    for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
-	                    {
-	                        $('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
-	                    }
-	                }
-	            },
-	            */
 	            "aoColumnDefs": [
 	                { "bSortable": false, "aTargets": [ 0,2 ] }
 	            ],
@@ -848,8 +837,6 @@ function race_rank(){
 	        });
 		}
 
-
-
 	    $("#race_rank_all").click(function(e) { //idk
 	        var start_time = "0"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
 	        var end_time = "0"; //0 for all. If set it specifies end filter.
@@ -858,13 +845,10 @@ function race_rank(){
 	            type: "POST",
 	            url: "ajax/getJSON.php",
 	            dataType: "JSON",
-	            async: false,
+	            async: true,
 	            data: { option: "race_rank", start_time: start_time, end_time: end_time },
 	            success: function(res) {
 	            	RaceRankTable(res);
-	                console.log(rank_table);
-	                //rank_table.ajax.reload();
-	                //Redraw data table?? //fixme
 	            }
 	        });
 	    });
@@ -877,25 +861,30 @@ function race_rank(){
 	            type: "POST",
 	            url: "ajax/getJSON.php",
 	            dataType: "JSON",
-	            async: false,
+	            async: true,
 	            data: { option: "race_rank", start_time: start_time, end_time: end_time },
 	            success: function(res) {
 	            	RaceRankTable(res);
-	                //data = res;
-	                console.log(rank_table);
-	                //rank_table.ajax.reload();
-	                //Redraw data table?? //fixme
 	            }
 	        });
 	    });
 
+	    $("#race_rank_7").click(function(e) {
+	        var start_time = "-7"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
+	        var end_time = "0"; //0 for all. If set it specifies end filter.
+	        e.preventDefault();
+	        $.ajax({
+	            type: "POST",
+	            url: "ajax/getJSON.php",
+	            dataType: "JSON",
+	            async: true,
+	            data: { option: "race_rank", start_time: start_time, end_time: end_time },
+	            success: function(res) {
+	            	RaceRankTable(res);
+	            }
+	        });
+	    });
 
-
-
-
-
-
-        //table;
     });
 
     $('.jk-nav li').removeClass("active");

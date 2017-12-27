@@ -94,13 +94,13 @@ switch ($option) {
 			$result->finalize();
 		}
 		else if ($start_time <= 0 && $end_time == $last_time) { //Preset filter so we can use sql cache
-			$start_time = strtotime('today'); //Get time at midnight today so we can cache daily
+			$now = strtotime('today'); //Get time at midnight today so we can cache daily
 			if ($start_time == -365)
-				$start_time -= 60*60*24*365;
+				$start_time = $now - 60*60*24*365;
 			else if ($start_time == -90)
-				$start_time -= 60*60*24*90; //Minus 90 days
+				$start_time = $now - 60*60*24*90; //Minus 90 days
 			else if ($start_time == -7)
-				$start_time -= 60*60*24*7;
+				$start_time = $now - 60*60*24*7;
 			else 
 				$start_time = 0;
 

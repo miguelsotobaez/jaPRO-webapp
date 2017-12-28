@@ -413,7 +413,7 @@ function duel_rank(){
 	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
 	                { "data": 1, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return DuelToString(data) }},
+	                        return (type == 'filter') ? DuelToString(data) : ('<button type="button" class="btn btn-warning btn-xs" id="duel_rank_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},   
 	                { "data": 2 },
 	                { "data": 3 },
 	                { "data": 4 }
@@ -428,6 +428,15 @@ function duel_rank(){
 	            "aaSorting": [[ 1, 'asc' ]], // ?
 
 	            initComplete: function () {
+					$('#datatable_duel_rank').on('click', '#duel_rank_filter_type', function () {
+						if (document.getElementById("duel_rank_typedropdown").value == "") {
+							$("select[id='duel_rank_typedropdown']").val($(this).val()).change()
+						}
+						else {
+							$("select[id='duel_rank_typedropdown']").val("").change() //Should go back to show all, intead goes back to saber
+						}
+					});
+
 	                this.api().columns([1]).every( function () {
 	                    var column = this;
 	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
@@ -446,7 +455,7 @@ function duel_rank(){
 	                } );
 	                this.api().columns([2]).every( function () {
 	                    var column = this;
-	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+	                    var select = $('<select id="duel_rank_typedropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
 	                        .appendTo( $(column.footer()).empty() )
 	                        .on( 'change', function () {
 	                            var val = $.fn.dataTable.util.escapeRegex(
@@ -530,7 +539,7 @@ function duel_list(){
 
 	                { "data": 2, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? DuelToString(data) : ("<button id='duelfilter'>" + DuelToString(data) + "</button>") }},                       
+	                        return (type == 'filter') ? DuelToString(data) : ('<button type="button" class="btn btn-warning btn-xs" id="duel_list_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},                       
 	                { "data": 3 , sType: "num-duelhp" }, //This does not sort properly - x/y  format, sort by sum(x+y)
 	                { "data": 4, "render": 
 	                    function ( data, type, row, meta ) {
@@ -549,12 +558,14 @@ function duel_list(){
 	                        return DuelTimeToString(data) }}
 	            ],
 	            initComplete: function () {         
-
-	                $('#datatable_duel_list tbody').on( 'click', '#duelfilter', function () {
-	                    //alert("hello");         
-
-	                    //Filter column
-	                });
+					$('#datatable_duel_list').on('click', '#duel_list_filter_type', function () {
+						if (document.getElementById("duel_list_typedropdown").value == "") {
+							$("select[id='duel_list_typedropdown']").val($(this).val()).change()
+						}
+						else {
+							$("select[id='duel_list_typedropdown']").val("").change() //Should go back to show all, intead goes back to saber
+						}
+					});
 
 	                this.api().columns([0, 1]).every( function () {
 	                    var column = this;
@@ -577,7 +588,7 @@ function duel_list(){
 	                } );
 	                this.api().columns([2]).every( function () {
 	                    var column = this;
-	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+	                    var select = $('<select id="duel_list_typedropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
 	                        .appendTo( $(column.footer()).empty() )
 	                        .on( 'change', function () {
 	                            var val = $.fn.dataTable.util.escapeRegex(
@@ -979,11 +990,13 @@ function race_list(){
 	                        return data; }},
 	                { "data": 1, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
-	                { "data": 2 }, 
+	                        return (type == 'filter') ? data : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+	                { "data": 2, "render": 
+	                    function ( data, type, row, meta ) { 
+	                        return (type == 'filter') ? data : ('<button type="button" class="btn btn-warning btn-xs" id="race_list_filter_course" value="'+data+'">' + data + '</button>') }},  
 	                { "data": 3, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return RaceToString(data) }},
+	                        return (type == 'filter') ? RaceToString(data) : ('<button type="button" class="btn btn-warning btn-xs" id="race_list_filter_style" value="'+data+'">' + RaceToString(data) + '</button>') }},  
 	                { "data": 4 },
 	                { "data": 5 },
 	                { "data": 6, "render": 
@@ -997,6 +1010,24 @@ function race_list(){
 	                        return '<td style="text-align: right;">'+RaceTimeToString(data)+'</td>' }} //Why doesnt this work..
 	            ],  
 	            initComplete: function () {     
+					$('#datatable_race_list').on('click', '#race_list_filter_course', function () {
+						if (document.getElementById("race_list_coursedropdown").value == "") {
+							$("select[id='race_list_coursedropdown']").val($(this).val()).change()
+						}
+						else {
+							$("select[id='race_list_coursedropdown']").val("").change() //Should go back to show all, intead goes back to saber
+						}
+					}); 
+
+					$('#datatable_race_list').on('click', '#race_list_filter_style', function () {
+						if (document.getElementById("race_list_styledropdown").value == "") {
+							$("select[id='race_list_styledropdown']").val($(this).val()).change()
+						}
+						else {
+							$("select[id='race_list_styledropdown']").val("").change() //Should go back to show all, intead goes back to saber
+						}
+					}); 
+
 					this.api().columns([1]).every( function () {
 	                    var column = this;
 	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
@@ -1015,7 +1046,7 @@ function race_list(){
 	                } );
 	                this.api().columns([2]).every( function () {
 	                    var column = this;
-	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+	                    var select = $('<select id="race_list_coursedropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
 	                        .appendTo( $(column.footer()).empty() )
 	                        .on( 'change', function () {
 	                            var val = $.fn.dataTable.util.escapeRegex(
@@ -1044,7 +1075,7 @@ function race_list(){
 	                } );
 	                this.api().columns([3]).every( function () {
 	                    var column = this;
-	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+	                    var select = $('<select id="race_list_styledropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
 	                        .appendTo( $(column.footer()).empty() )
 	                        .on( 'change', function () {
 	                            var val = $.fn.dataTable.util.escapeRegex(
@@ -1774,7 +1805,66 @@ function servers(){
         $('#menu_maps').addClass("active");
 }
 
+var duelnames = [
+    "Saber",
+    "Force",
+    "Unknown",
+    "Unknown",
+    "Melee",
+    "Unknown",
+    "Pistol",
+    "Blaster",
+    "Sniper",
+    "Bowcaster",
+    "Repeater",
+    "Demp2",
+    "Flechette",
+    "Rocket",
+    "Thermal",
+    "Trip mine",
+    "Det pack",
+    "Concussion",
+    "Bryar pistol",
+    "Stun baton",
+    "All weapons"
+];
+
 function DuelToString(type) {
+	var number = Number(type);
+
+	if (number >= 0 && number < duelnames.length)
+		return duelnames[number];
+	else return "Unknown";
+}
+
+racenames = [
+	"Siege",
+	"JKA",
+	"QW",
+	"CPM",
+	"Q3",
+	"PJK",
+	"WSW",
+	"RJQ3",
+	"RJCPM",
+	"Swoop",
+	"Jetpack",
+	"Speed",
+	"SP"
+];
+
+function RaceToString(type) {
+	if (type == "99")
+		return "All";
+
+	var number = Number(type);
+
+	if (number >= 0 && number < racenames.length)
+		return racenames[number];
+	else return "Unknown";
+}
+
+function DuelToString2(type) {
   typeStr = "Unknown";
   if (type == 0)
     typeStr = "Saber";
@@ -1815,7 +1905,7 @@ function DuelToString(type) {
   return typeStr;
 }
 
-function RaceToString(val){
+function RaceToString2(val){
     style="Unknown";
     if (val==99)
         style="All";

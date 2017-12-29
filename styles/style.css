@@ -1536,6 +1536,7 @@ sup {
     color: #949ba2;
     background-color: transparent;
     border: 1px solid #585d6e;
+    margin-top: -2em;
 }
 
 .pagination > li > a:hover,

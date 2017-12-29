@@ -413,7 +413,7 @@ function duel_rank(){
 	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
 	                { "data": 1, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? DuelToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="duel_rank_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},  //id should be unique 
+	                        return (type == 'filter') ? DuelToString(data) : ('<button type="button" data-hook="duel_rank_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},  //id should be unique 
 	                { "data": 2 },
 	                { "data": 3 },
 	                { "data": 4 }
@@ -431,17 +431,9 @@ function duel_rank(){
 					$('#datatable_duel_rank').on('click', 'button[data-hook="duel_rank_filter_type"]', function () {
 						if (document.getElementById("duel_rank_typedropdown").value) {
 							$("select[id='duel_rank_typedropdown']").val("").change()
-							var buttons = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
-						    for (var i = 0; i < buttons.length; i++){
-						       	buttons[i].className = "btn btn-warning btn-xs";
-							}
 						}
 						else {
 							$("select[id='duel_rank_typedropdown']").val($(this).val()).change()
-						    var buttons = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
-						    for (var i = 0; i < buttons.length; i++){
-						        buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
-						    }
 						}
 					});
 	                this.api().columns([1]).every( function () {
@@ -471,24 +463,28 @@ function duel_rank(){
 	                            column
 	                                .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
 	                                .draw();
-	                         		if (val) {//Check all
-										var aa = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
-									    for (var i = 0; i < aa.length; i++){
-									        aa[i].className = "btn btn-warning btn-xs active";
-									    }
-		                            }
-		                            else { //Uncheck all
-										var aa = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
-									    for (var i = 0; i < aa.length; i++){
-									        aa[i].className = "btn btn-warning btn-xs";
-									    }
-		                            }
 	                        } );
 	                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
 	                        select.append( '<option value="'+(d)+'">'+DuelToString(d)+'</option>' )
 	                    } );
 	                } );
-	            }
+	            },
+				"drawCallback": function( settings ) { //Pagination button active fixes
+					$(document).ready(function () {
+						if (document.getElementById("duel_rank_typedropdown").value) {
+							var buttons = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
+						    for (var i = 0; i < buttons.length; i++){
+						        buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
+						    }
+						}
+						else {
+							var buttons = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
+						    for (var i = 0; i < buttons.length; i++){
+						       	buttons[i].className = "btn btn-warning btn-xs";
+							}
+						}
+					});
+			    }
 	        });
 		}
     });
@@ -558,7 +554,7 @@ function duel_list(){
 
 	                { "data": 2, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? DuelToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="duel_list_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},                       
+	                        return (type == 'filter') ? DuelToString(data) : ('<button type="button" data-hook="duel_list_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},                       
 	                { "data": 3 , sType: "num-duelhp" }, //This does not sort properly - x/y  format, sort by sum(x+y)
 	                { "data": 4, "render": 
 	                    function ( data, type, row, meta ) {
@@ -580,17 +576,9 @@ function duel_list(){
 					$('#datatable_duel_list').on('click', 'button[data-hook="duel_list_filter_type"]', function () {
 						if (document.getElementById("duel_list_typedropdown").value) {
 							$("select[id='duel_list_typedropdown']").val("").change()
-							var buttons = document.querySelectorAll("[data-hook=duel_list_filter_type]");
-						    for (var i = 0; i < buttons.length; i++){
-						       	buttons[i].className = "btn btn-warning btn-xs";
-							}
 						}
 						else {
 							$("select[id='duel_list_typedropdown']").val($(this).val()).change()
-						    var buttons = document.querySelectorAll("[data-hook=duel_list_filter_type]");
-						    for (var i = 0; i < buttons.length; i++){
-						        buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
-						    }
 						}
 					});
 
@@ -641,7 +629,23 @@ function duel_list(){
 	                        select.append( '<option value="'+d+'">'+DuelToString(d)+'</option>' )
 	                    } );
 	                } );
-	            }
+	            },
+				"drawCallback": function( settings ) { //Pagination button active fixes
+					$(document).ready(function () {
+						if (document.getElementById("duel_list_typedropdown").value) {
+							var buttons = document.querySelectorAll("[data-hook=duel_list_filter_type]");
+						    for (var i = 0; i < buttons.length; i++){
+						        buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
+						    }
+						}
+						else {
+							var buttons = document.querySelectorAll("[data-hook=duel_list_filter_type]");
+						    for (var i = 0; i < buttons.length; i++){
+						       	buttons[i].className = "btn btn-warning btn-xs";
+							}
+						}
+					});
+			    }
 	        });
 		}
     });
@@ -804,7 +808,12 @@ function race_rank(){
     panel += '          </div>';
     panel += '          <div class="panel-body">';
 
-    panel +='                        <button class="btn btn-warning" id="race_rank_all">All</button> <button class="btn btn-warning" id="race_rank_90">Last 3 months</button> <button class="btn btn-warning" id="race_rank_7">Last week</button>'; //Get dashboard getJSON info to show last update time 
+    panel += '						<div class="btn-group" data-toggle="buttons">';
+    panel += '                      	<label class="btn btn-warning active" id="race_rank_all"><input type="radio" checked>All</input></label>';
+    panel += ' 						 	<label class="btn btn-warning" id="race_rank_365"><input type="radio">Last year</input></label>';
+    panel += ' 						 	<label class="btn btn-warning" id="race_rank_90"><input type="radio">Last 3 months</input></label>';
+    panel += '							<label class="btn btn-warning" id="race_rank_7"><input type="radio">Last week</input></label>'; //Get dashboard getJSON info to show last update time 
+	panel += '          			</div>';
 
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_race_rank" width="100%" class="table table-striped table-hover">';
@@ -932,6 +941,22 @@ function race_rank(){
 	        });
 	    });
 
+	    $("#race_rank_365").click(function(e) {
+	        var start_time = "-365"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
+	        var end_time = "0"; //0 for all. If set it specifies end filter.
+	        e.preventDefault();
+	        $.ajax({
+	            type: "POST",
+	            url: "ajax/getJSON.php",
+	            dataType: "JSON",
+	            async: true,
+	            data: { option: "race_rank", start_time: start_time, end_time: end_time },
+	            success: function(res) {
+	            	RaceRankTable(res);
+	            }
+	        });
+	    });
+
 	    $("#race_rank_90").click(function(e) {
 	        var start_time = "-90"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
 	        var end_time = "0"; //0 for all. If set it specifies end filter.
@@ -1032,10 +1057,10 @@ function race_list(){
 	                        return (type == 'filter') ? data : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
 	                { "data": 2, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? data : ('<button type="button" class="btn btn-warning btn-xs" data-hook="race_list_filter_course" value="'+data+'">' + data + '</button>') }},  
+	                        return (type == 'filter') ? data : ('<button type="button" data-hook="race_list_filter_course" value="'+data+'">' + data + '</button>') }},  
 	                { "data": 3, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? RaceToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="race_list_filter_style" value="'+data+'">' + RaceToString(data) + '</button>') }},  
+	                        return (type == 'filter') ? RaceToString(data) : ('<button type="button" data-hook="race_list_filter_style" value="'+data+'">' + RaceToString(data) + '</button>') }},  
 	                { "data": 4 },
 	                { "data": 5 },
 	                { "data": 6, "render": 
@@ -1052,33 +1077,17 @@ function race_list(){
 					$('#datatable_race_list').on('click', 'button[data-hook="race_list_filter_style"]', function () {
 						if (document.getElementById("race_list_styledropdown").value) {
 							$("select[id='race_list_styledropdown']").val("").change()
-							var buttons = document.querySelectorAll("[data-hook=race_list_filter_style]");
-						    for (var i = 0; i < buttons.length; i++){
-						       	buttons[i].className = "btn btn-warning btn-xs";
-							}
 						}
 						else {
 							$("select[id='race_list_styledropdown']").val($(this).val()).change()
-						    var buttons = document.querySelectorAll("[data-hook=race_list_filter_style]");
-						    for (var i = 0; i < buttons.length; i++){
-						        buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
-						    }
 						}
 					});
 					$('#datatable_race_list').on('click', 'button[data-hook="race_list_filter_course"]', function () {
 						if (document.getElementById("race_list_coursedropdown").value) {
 							$("select[id='race_list_coursedropdown']").val("").change()
-							var buttons = document.querySelectorAll("[data-hook=race_list_filter_course]");
-						    for (var i = 0; i < buttons.length; i++){
-						       	buttons[i].className = "btn btn-warning btn-xs";
-							}
 						}
 						else {
 							$("select[id='race_list_coursedropdown']").val($(this).val()).change()
-						    var buttons = document.querySelectorAll("[data-hook=race_list_filter_course]");
-						    for (var i = 0; i < buttons.length; i++){
-						        buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
-						    }
 						}
 					});
 					this.api().columns([1]).every( function () {
@@ -1104,36 +1113,19 @@ function race_list(){
 	                        .on( 'change', function () {
 	                            var val = $.fn.dataTable.util.escapeRegex(
 	                                $(this).val()
-	                            );
-	                            //Update background image
-	                            
-	                            if ($(this).val() == "") {
+	                            );	                            
+	                            if ($(this).val() == "") { //Update background image
 	                            	document.getElementById("content-background").style.backgroundImage = null;
 	                            }
-	                            else 
-	                            	
-	                            {
+	                            else {
 		                           	var mapname = encodeURIComponent($(this).val());
 		                           	mapname = mapname.replace(/%2F/gi, "/"); //Hmm
 		                            document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/'+mapname+'.jpg")';
 	                        	}
-
 	                            column
 	                                .search( val ? '^'+val+'$' : '', true, false )
 	                                .draw();
-									if (val) {//Check all
-										var aa = document.querySelectorAll("[data-hook=race_list_filter_course]");
-									    for (var i = 0; i < aa.length; i++){
-									        aa[i].className = "btn btn-warning btn-xs active";
-									    }
-		                            }
-		                            else { //Uncheck all
-										var aa = document.querySelectorAll("[data-hook=race_list_filter_course]");
-									    for (var i = 0; i < aa.length; i++){
-									        aa[i].className = "btn btn-warning btn-xs";
-									    }
-		                            }
-	                        } );
+		                        } );
 	                    column.data().unique().sort().each( function ( d, j ) {
 	                        select.append( '<option value="'+d+'">'+d+'</option>' )
 	                    } );
@@ -1148,25 +1140,42 @@ function race_list(){
 	                            );
 	                            column
 	                                .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
-	                                .draw();
-									if (val) {//Check all
-										var aa = document.querySelectorAll("[data-hook=race_list_filter_style]");
-									    for (var i = 0; i < aa.length; i++){
-									        aa[i].className = "btn btn-warning btn-xs active";
-									    }
-		                            }
-		                            else { //Uncheck all
-										var aa = document.querySelectorAll("[data-hook=race_list_filter_style]");
-									    for (var i = 0; i < aa.length; i++){
-									        aa[i].className = "btn btn-warning btn-xs";
-									    }
-		                            }
+	                                .draw();	
 	                        } );
 	                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
 	                        select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
 	                    } );
 	                } );
-	            }
+	            },
+				"drawCallback": function( settings ) { //Pagination button active fixes
+					$(document).ready(function () {
+						if (document.getElementById("race_list_styledropdown").value) {
+							var buttons = document.querySelectorAll("[data-hook=race_list_filter_style]");
+						    for (var i = 0; i < buttons.length; i++){
+						        buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
+						    }
+						}
+						else {
+							var buttons = document.querySelectorAll("[data-hook=race_list_filter_style]");
+						    for (var i = 0; i < buttons.length; i++){
+						       	buttons[i].className = "btn btn-warning btn-xs";
+							}
+						}
+
+						if (document.getElementById("race_list_coursedropdown").value) {
+							var buttons = document.querySelectorAll("[data-hook=race_list_filter_course]");
+						    for (var i = 0; i < buttons.length; i++){
+						        buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
+						    }
+						}
+						else {
+							var buttons = document.querySelectorAll("[data-hook=race_list_filter_course]");
+						    for (var i = 0; i < buttons.length; i++){
+						       	buttons[i].className = "btn btn-warning btn-xs";
+							}
+						}
+					});
+			    }
 	        });
 		}
     });

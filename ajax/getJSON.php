@@ -19,7 +19,7 @@ switch ($option) {
 			INNER JOIN (SELECT winner AS username2, type AS type2, COUNT(*) AS win_count, SUM(odds) AS win_ts FROM Duels GROUP BY username2, type2) AS D2
 			ON D1.username = D2.username2 AND D1.type = D2.type2)
 			INNER JOIN (SELECT loser AS username3, type AS type3, COUNT(*) AS loss_count, SUM(1-odds) AS loss_ts FROM Duels GROUP BY username3, type3) AS D3
-			ON D1.username = D3.username3 AND D1.type = D3.type3 ORDER BY elo DESC";
+			ON D1.username = D3.username3 AND D1.type = D3.type3 ORDER BY elo DESC"; //Does not return rows of people-types with 0 wins or with 0 losses
 
 	    $arr = sql2arr($query);
 	    if($arr){
@@ -61,62 +61,38 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
+
+	//Have top dropdown for seasons that replaces last year/month/week?
+	//query is just where season = ? instead of end time <>? filters.
+
 	case "race_rank":
-		$last_time = 2147483647;
+		if (isset($_POST['season']))
+			$season = $_POST["season"];
+		else
+			$season = 0;
+
+		if ($season < 0 || $season >= 512)
+			$season = 0;
+
 		$newArray = null;
 
-		if (isset($_POST['start_time']))
-			$start_time = $_POST["start_time"];
-		else
-			$start_time = 0;
-		if (isset($_POST['end_time']))
-			$end_time = $_POST["end_time"];
-		else
-			$end_time = $last_time;
-
-		if ($end_time > $last_time)
-			$end_time = $last_time;
-		if ($end_time <= 0)
-			$end_time = $last_time;
-		if ($start_time > $last_time)
-			$start_time = $last_time;
-
-		if ($start_time > 0 || ($end_time < $last_time)) { //Custom filter
-			$stmt = $db->prepare("SELECT username, style, CAST(((score+newscore)/2) AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(rank AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(silvers, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
-				SELECT username, 99 AS style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries-rank) AS newscore, SUM(CAST(entries AS DECIMAL(10, 2))/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE end_time > ? AND end_time < ? GROUP BY username
-				UNION ALL
-				SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries-rank) AS newscore, SUM(CAST(entries AS DECIMAL(10, 2))/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE end_time > ? AND end_time < ? GROUP BY username, style) AS T
-				ORDER BY score DESC");
-
-			$stmt->bind_param('iiii', $start_time, $end_time, $start_time, $end_time);
-			$result = $stmt->execute();
-			$arr = preparedsql2arr($result);
-			$result->finalize();
-		}
-		else if ($start_time <= 0 && $end_time == $last_time) { //Preset filter so we can use sql cache
-			$now = strtotime('today'); //Get time at midnight today so we can cache daily
-			if ($start_time == -365)
-				$start_time = $now - 60*60*24*365;
-			else if ($start_time == -90)
-				$start_time = $now - 60*60*24*90; //Minus 90 days
-			else if ($start_time == -7)
-				$start_time = $now - 60*60*24*7;
-			else 
-				$start_time = 0;
-
-			if ($start_time < 0 || $start_time > $last_time)
-				break;
-
+		if ($season) { //Preset filter so we can use sql cache
 			$query = "SELECT SQL_CACHE username, style, CAST(((score+newscore)/2) AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(rank AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(silvers, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
-				SELECT username, 99 AS style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries-rank) AS newscore, SUM(CAST(entries AS DECIMAL(10, 2))/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE end_time > {$start_time} GROUP BY username
+				SELECT username, 99 AS style, SUM(season_rank) AS rank, COUNT(*) as count, SUM(season_entries-season_rank) AS newscore, SUM(CAST(season_entries AS DECIMAL(10, 2))/season_rank) AS score, SUM((season_entries - CAST(season_rank-1 AS DECIMAL(10, 2)))/season_entries) AS percentile, SUM(CASE WHEN season_rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN season_rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN season_rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE season = {$season} GROUP BY username
 				UNION ALL
-				SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries-rank) AS newscore, SUM(CAST(entries AS DECIMAL(10, 2))/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE end_time > {$start_time} GROUP BY username, style) AS T
+				SELECT username, style, SUM(season_rank) AS rank, COUNT(*) as count, SUM(season_entries-season_rank) AS newscore, SUM(CAST(season_entries AS DECIMAL(10, 2))/season_rank) AS score, SUM((season_entries - CAST(season_rank-1 AS DECIMAL(10, 2)))/season_entries) AS percentile, SUM(CASE WHEN season_rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN season_rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN season_rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE season = {$season} GROUP BY username, style) AS T
 				ORDER BY score DESC";
 
 			$arr = sql2arr($query);
 		}
 		else {
-			$arr = null;
+			$query = "SELECT SQL_CACHE username, style, CAST(((score+newscore)/2) AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(rank AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(silvers, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
+				SELECT username, 99 AS style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries-rank) AS newscore, SUM(CAST(entries AS DECIMAL(10, 2))/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE rank != 0 GROUP BY username
+				UNION ALL
+				SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries-rank) AS newscore, SUM(CAST(entries AS DECIMAL(10, 2))/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE rank != 0 GROUP BY username, style) AS T
+				ORDER BY score DESC";
+
+			$arr = sql2arr($query);
 		}
 
 	    if($arr){
@@ -144,8 +120,28 @@ switch ($option) {
 	break;
 	
 	case "race_list":	
+		if (isset($_POST['season']))
+			$season = $_POST["season"];
+		else
+			$season = 0;
+
+		if ($season < 0 || $season >= 512)
+			$season = 0;
+
 		$newArray = null;
-		$query = "SELECT rank, username, coursename, style, topspeed, average, end_time, duration_ms FROM Races ORDER BY end_time DESC";
+
+		if ($season == 0) //We dont want to select somones slower season entries, just the one fastest season entry.  Slower season entries have rank=0?
+			$query = "SELECT rank, username, coursename, style, topspeed, average, end_time, duration_ms FROM Races WHERE rank != 0 ORDER BY end_time DESC";
+		else
+			$query = "SELECT season_rank AS rank, username, coursename, style, topspeed, average, end_time, duration_ms FROM Races WHERE season = {$season} ORDER BY end_time DESC";
+			
+
+		//Season update:
+		//Select season as well, have a dropdown for it.
+		//If dropdown is set to ALL
+		//Dont show all seasons per user/course/style, just the fastest.  (how to do this)
+
+			//Possible solution:  Season dropdown be serverside and require a new query.  Put it at top of race list table.
 
 		$arr = sql2arr($query);
 		if($arr) {
@@ -165,7 +161,9 @@ switch ($option) {
 			UNION ALL
 			SELECT 'race_count' AS type, COUNT(*) AS count FROM Races
 			UNION ALL
-			SELECT type, last_update AS count FROM Updates";
+			SELECT type, last_update AS count FROM Updates
+			UNION ALL
+			SELECT 'seasons' AS type, COUNT(DISTINCT season) AS count from Races";
 
 		$arr = sql2arr($query);
 		if($arr) {
@@ -303,7 +301,7 @@ switch ($option) {
 
 }
 
-ob_start('ob_gzhandler'); //Compress json
+//ob_start('ob_gzhandler'); //Compress json
 echo $json;
 $db->close();
 

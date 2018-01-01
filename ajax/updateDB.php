@@ -28,7 +28,10 @@ function UpdateRaces() {
 	$data = GetStats("races", $last_update);
 
 	if ($data) {
-		if (!$db->query("DROP INDEX IF EXISTS RaceRankIndex on japro_web.Races;")) {
+		if (!$db->query("DROP INDEX IF EXISTS RaceRankIndex on japro_web.Races")) {
+			echo $db->error;
+		}
+		if (!$db->query("DROP INDEX IF EXISTS RaceSeasonRankIndex on japro_web.Races")) {
 			echo $db->error;
 		}
 	}
@@ -36,13 +39,16 @@ function UpdateRaces() {
 	$values = "";
 	if ($data) {
 		foreach ($data as $value) {
-			$values .= "('".$value[0]."', '".$value[1]."', '".$value[2]."', '".$value[3]."', '".$value[4]."', '".$value[5]."', '".$value[6]."', '".$value[7]."', '".$value[8]."'),";
+			$values .= "('".$value[0]."', '".$value[1]."', '".$value[2]."', '".$value[3]."', '".$value[4]."', '".$value[5]."', '".$value[6]."', '".$value[7]."', '".$value[8]."', '".$value[9]."', '".$value[10]."', '".$value[11]."'),";
 		}
 	}
-	InsertStats("REPLACE INTO Races(username, coursename, style, duration_ms, topspeed, average, end_time, rank, entries)", $values);
+	InsertStats("REPLACE INTO Races(username, coursename, style, season, duration_ms, topspeed, average, end_time, rank, entries, season_rank, season_entries)", $values);
 
 	if ($data)	{//Index rank, this speeds up gold/silver/bronze query a bit //Fixme make sure no results means this doesnt go through
 		if (!$db->query("CREATE INDEX IF NOT EXISTS RaceRankIndex ON Races (rank)")) {
+			echo $db->error;
+		}
+		if (!$db->query("CREATE INDEX IF NOT EXISTS RaceSeasonRankIndex ON Races (season_rank)")) {
 			echo $db->error;
 		}
 	}

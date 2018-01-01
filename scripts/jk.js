@@ -413,7 +413,7 @@ function duel_rank(){
 	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
 	                { "data": 1, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? DuelToString(data) : ('<button type="button" data-hook="duel_rank_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},  //id should be unique 
+	                        return (type == 'filter') ? DuelToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="duel_rank_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},  //id should be unique 
 	                { "data": 2 },
 	                { "data": 3 },
 	                { "data": 4 }
@@ -554,7 +554,7 @@ function duel_list(){
 
 	                { "data": 2, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? DuelToString(data) : ('<button type="button" data-hook="duel_list_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},                       
+	                        return (type == 'filter') ? DuelToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="duel_list_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},                       
 	                { "data": 3 , sType: "num-duelhp" }, //This does not sort properly - x/y  format, sort by sum(x+y)
 	                { "data": 4, "render": 
 	                    function ( data, type, row, meta ) {
@@ -565,7 +565,6 @@ function duel_list(){
 	                { "data": 5, "render": 
 	                    function ( data, type, row, meta ) { 
 	                        var date = new Date(data*1000);
-	                        //+RaceToString(row[3]).toLowerCase()+'.dm_26">'+date.toISOString().substring(0, 10)+'<a>' }},
 	                        return (date.getYear()-100) + '-' + ('0'+(date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + ' ' 
 	                            + ('0'+(date.getHours()+1)).slice(-2) + ':' + ('0'+(date.getMinutes()+1)).slice(-2) + '<a>' }},
 	                { "data": 6, "sType": "num-dur", "className": "duration_ms", "render": //should be uni-time
@@ -581,7 +580,6 @@ function duel_list(){
 							$("select[id='duel_list_typedropdown']").val($(this).val()).change()
 						}
 					});
-
 	                this.api().columns([0, 1]).every( function () {
 	                    var column = this;
 	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
@@ -595,9 +593,6 @@ function duel_list(){
 	                                .draw();
 	                        } );
 	                    column.data().unique().sort().each( function ( d, j ) {
-
-	                //table.column(4).search(this.value).column(5).search(this.val‌​ue).draw();
-
 	                        select.append( '<option value="'+d+'">'+d+'</option>' )
 	                    } );
 	                } );
@@ -612,18 +607,6 @@ function duel_list(){
 	                            column
 	                                .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
 	                                .draw();
-									if (val) {//Check all
-										var aa = document.querySelectorAll("[data-hook=duel_list_filter_type]");
-									    for (var i = 0; i < aa.length; i++){
-									        aa[i].className = "btn btn-warning btn-xs active";
-									    }
-		                            }
-		                            else { //Uncheck all
-										var aa = document.querySelectorAll("[data-hook=duel_list_filter_type]");
-									    for (var i = 0; i < aa.length; i++){
-									        aa[i].className = "btn btn-warning btn-xs";
-									    }
-		                            }
 	                        } );
 	                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
 	                        select.append( '<option value="'+d+'">'+DuelToString(d)+'</option>' )
@@ -808,12 +791,17 @@ function race_rank(){
     panel += '          </div>';
     panel += '          <div class="panel-body">';
 
+    panel += '						<select id="race_rank_seasondropdown" class="filter form-control input-sm"><option value="0">Show all</option></select>'; //Make this get populated by season numbers.  Make it send POST to getJSON to requery with season number
+
+/*
     panel += '						<div class="btn-group" data-toggle="buttons">';
     panel += '                      	<label class="btn btn-warning active" id="race_rank_all"><input type="radio" checked>All</input></label>';
     panel += ' 						 	<label class="btn btn-warning" id="race_rank_365"><input type="radio">Last year</input></label>';
     panel += ' 						 	<label class="btn btn-warning" id="race_rank_90"><input type="radio">Last 3 months</input></label>';
     panel += '							<label class="btn btn-warning" id="race_rank_7"><input type="radio">Last week</input></label>'; //Get dashboard getJSON info to show last update time 
 	panel += '          			</div>';
+*/
+
 
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_race_rank" width="100%" class="table table-striped table-hover">';
@@ -827,26 +815,56 @@ function race_rank(){
     $("#main-content").append(panel);
 
     $(document).ready(function() {
-		var data = null;
-        var last_update = dashboardData[4][1];
-        if(last_update > localStorage.getItem("raceUpdateTime") || !localStorage.getItem("raceRankCache")) { //Out of date
-            $.ajax({
+		var last_update = dashboardData[4][1];
+    	var seasonSelect = document.getElementById('race_rank_seasondropdown');
+
+    	for (var i = 1; i <= dashboardData[6][1]; i++) { //Seasons start at 1 and are consecutive.  //dashboardData[6][1]
+	    	seasonSelect.options.add( new Option("Season " + i, i));
+	    }
+
+		$('#race_rank_seasondropdown').change(function(e){
+	        e.preventDefault(); //idk why
+	        var season = $(this).val();
+
+            var cacheName = "raceRankCache" + (season > 0 ? season : "All");
+            var updateTimeName = "raceRankCacheTime" + (season > 0 ? season : "All");
+
+            //localStorage.removeItem(cacheName);
+            //localStorage.removeItem(updateTimeName);
+
+
+	        if(last_update > localStorage.getItem(updateTimeName) || !localStorage.getItem(cacheName)) { //Out of date
+	        	//alert("Querying " + updateTimeName + " " + cacheName);
+				GetRaceRank(season);
+	        }
+	        else 
+	        {
+	        	//alert("From Cache " + updateTimeName + " " + cacheName);
+	        	data = JSON.parse(localStorage.getItem(cacheName));
+	        	RaceRankTable(data);
+	        }
+
+	    });
+
+	    $("#race_rank_seasondropdown").val(0).change(); //Need to trigger so onchange function is called on pageload
+
+		function GetRaceRank(season) {
+	        $.ajax({
 	            type: "POST",
 	            url: "ajax/getJSON.php",
 	            dataType: "JSON",
 	            async: true,
-	            data: { option: "race_rank", start_time: "0", end_time: "0" },
+	            data: { option: "race_rank", season: season},
 	            success: function(res) {
-                    RaceRankTable(res);
-                    localStorage.setItem("raceRankCache", JSON.stringify(res));
-                    localStorage.setItem("raceUpdateTime", last_update);
-                }
-            });
-        }
-        else {
-        	data = JSON.parse(localStorage.getItem("raceRankCache"));
-        	RaceRankTable(data);
-        }
+					RaceRankTable(res);
+
+					var cacheName = "raceRankCache" + (season > 0 ? season : "All");
+            		var updateTimeName = "raceRankCacheTime" + (season > 0 ? season : "All");
+            		localStorage.setItem(cacheName, JSON.stringify(res));
+                    localStorage.setItem(updateTimeName, last_update);
+	            }
+	        });
+	    }
 
         function RaceRankTable(data) {
 	        rank_table = $('#datatable_race_rank').DataTable( {
@@ -925,6 +943,7 @@ function race_rank(){
 	        });
 		}
 
+/*
 	    $("#race_rank_all").click(function(e) { //idk
 	        var start_time = "0"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
 	        var end_time = "0"; //0 for all. If set it specifies end filter.
@@ -988,6 +1007,10 @@ function race_rank(){
 	            }
 	        });
 	    });
+*/
+
+
+
 
     });
 
@@ -1005,6 +1028,9 @@ function race_list(){
     panel += '              Records';
     panel += '          </div>';
     panel += '          <div class="panel-body">';
+
+    panel += '						<select id="race_list_seasondropdown" class="filter form-control input-sm"><option value="0">Show all</option></select>'; //Make this get populated by season numbers.  Make it send POST to getJSON to requery with season number
+
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_race_list" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Rank</th><th>Username</th><th>Coursename</th><th>Style</th><th data-hide="phone,table">Topspeed</th><th data-hide="phone,table">Average</th><th>Date</th><th>Time</th></tr></thead>';
@@ -1016,30 +1042,117 @@ function race_list(){
     panel += '</div>';
     $("#main-content").append(panel);
 
+
     $(document).ready(function() {
-        var data = null;
-        var last_update = dashboardData[4][1];
-        if(last_update > localStorage.getItem("raceUpdateTime") || !localStorage.getItem("raceListCache")) { //Out of date
-            $.ajax({
-                type: "POST",
-                url: "ajax/getJSON.php",
-                dataType: "JSON",
-                async: true,
-                data: { option: "race_list" },
-                success: function(res) {//JSON
-                    RaceListTable(res);
-                    localStorage.setItem("raceListCache", JSON.stringify(res));
-                    localStorage.setItem("raceUpdateTime", last_update);
-                }
-            });
-        }
-        else {
-        	data = JSON.parse(localStorage.getItem("raceListCache"));
-        	RaceListTable(data);
-        }
+    	/*
+		var last_update = dashboardData[4][1];
+    	var seasonSelect = document.getElementById('race_list_seasondropdown');
+
+    	for (var i = 1; i <= dashboardData[6][1]; i++) { //Seasons start at 1 and are consecutive.  //dashboardData[6][1]
+	    	seasonSelect.options.add( new Option("Season " + i, i));
+	    }
+
+		$('#race_list_seasondropdown').change(function(e){
+	        e.preventDefault(); //idk why
+	        var season = $(this).val();
+
+            var cacheName = "raceListCache" + (season > 0 ? season : "All");
+            var updateTimeName = "raceListCacheTime" + (season > 0 ? season : "All");
+
+
+	        if(last_update > localStorage.getItem(updateTimeName) || !localStorage.getItem(cacheName)) { //Out of date
+	        	//alert("Querying " + updateTimeName + " " + cacheName);
+				GetRaceList(season);
+	        }
+	        else 
+	        {
+	        	//alert("From Cache " + updateTimeName + " " + cacheName);
+	        	data = JSON.parse(localStorage.getItem(cacheName));
+	        	RaceListTable(data);
+	        }
+
+	    });
+
+	    $("#race_list_seasondropdown").val(0).change(); //Need to trigger so onchange function is called on pageload
+
+		function GetRaceList(season) {
+	        $.ajax({
+	            type: "POST",
+	            url: "ajax/getJSON.php",
+	            dataType: "JSON",
+	            async: true,
+	            data: { option: "race_list", season: season},
+	            success: function(res) {
+					RaceListTable(res);
+
+					var cacheName = "raceListCache" + (season > 0 ? season : "All");
+            		var updateTimeName = "raceListCacheTime" + (season > 0 ? season : "All");
+            		localStorage.setItem(cacheName, JSON.stringify(res));
+                    localStorage.setItem(updateTimeName, last_update);
+	            }
+	        });
+	    }
+	    */
+
+
+	    var last_update = dashboardData[4][1];
+    	var seasonSelect = document.getElementById('race_list_seasondropdown');
+
+    	for (var i = 1; i <= dashboardData[6][1]; i++) { //Seasons start at 1 and are consecutive.  //dashboardData[6][1]
+	    	seasonSelect.options.add( new Option("Season " + i, i));
+	    }
+
+		$('#race_list_seasondropdown').change(function(e){
+	        e.preventDefault(); //idk why
+	        var season = $(this).val();
+
+            var cacheName = "raceListCache" + (season > 0 ? season : "All");
+            var updateTimeName = "raceListCacheTime" + (season > 0 ? season : "All");
+
+            //localStorage.removeItem(cacheName);
+            //localStorage.removeItem(updateTimeName);
+
+
+	        if(last_update > localStorage.getItem(updateTimeName) || !localStorage.getItem(cacheName)) { //Out of date
+	        	//alert("Querying " + updateTimeName + " " + cacheName);
+				GetRaceList(season);
+	        }
+	        else 
+	        {
+	        	//alert("From Cache " + updateTimeName + " " + cacheName);
+	        	data = JSON.parse(localStorage.getItem(cacheName));
+	        	RaceListTable(data);
+	        }
+
+	    });
+
+		//AT END?s
+	    $("#race_list_seasondropdown").val(0).change(); //Need to trigger so onchange function is called on pageload
+
+		function GetRaceList(season) {
+	        $.ajax({
+	            type: "POST",
+	            url: "ajax/getJSON.php",
+	            dataType: "JSON",
+	            async: true,
+	            data: { option: "race_list", season: season},
+	            success: function(res) {
+					RaceListTable(res);
+
+					var cacheName = "raceListCache" + (season > 0 ? season : "All");
+            		var updateTimeName = "raceListCacheTime" + (season > 0 ? season : "All");
+            		localStorage.setItem(cacheName, JSON.stringify(res));
+                    localStorage.setItem(updateTimeName, last_update);
+	            }
+	        });
+	    }
 
         function RaceListTable(data) {
+        	//if (!data)
+        		//return; //Why does data being null fuck up the entire race table formatting???
+
 	        $('#datatable_race_list').DataTable( {
+	        	destroy: true,
 	            "order": [[ 6, "desc" ]],
 	            "deferRender": true,
 	            "bLengthChange": false,
@@ -1057,10 +1170,10 @@ function race_list(){
 	                        return (type == 'filter') ? data : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
 	                { "data": 2, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? data : ('<button type="button" data-hook="race_list_filter_course" value="'+data+'">' + data + '</button>') }},  
+	                        return (type == 'filter') ? data : ('<button type="button" class="btn btn-warning btn-xs" data-hook="race_list_filter_course" value="'+data+'">' + data + '</button>') }},  
 	                { "data": 3, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? RaceToString(data) : ('<button type="button" data-hook="race_list_filter_style" value="'+data+'">' + RaceToString(data) + '</button>') }},  
+	                        return (type == 'filter') ? RaceToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="race_list_filter_style" value="'+data+'">' + RaceToString(data) + '</button>') }},  
 	                { "data": 4 },
 	                { "data": 5 },
 	                { "data": 6, "render": 
@@ -1147,8 +1260,12 @@ function race_list(){
 	                    } );
 	                } );
 	            },
-				"drawCallback": function( settings ) { //Pagination button active fixes
+				"drawCallback": function( settings ) { //Pagination button active fixes - This causes a problem ?
 					$(document).ready(function () {
+
+/*
+						$("#race_list_seasondropdown").val(0).change();
+
 						if (document.getElementById("race_list_styledropdown").value) {
 							var buttons = document.querySelectorAll("[data-hook=race_list_filter_style]");
 						    for (var i = 0; i < buttons.length; i++){
@@ -1174,10 +1291,12 @@ function race_list(){
 						       	buttons[i].className = "btn btn-warning btn-xs";
 							}
 						}
+						*/
 					});
 			    }
 	        });
 		}
+
     });
 
     $('.jk-nav li').removeClass("active");

@@ -1951,9 +1951,14 @@ function maps(){
         HTML+='  <p><a id="racepack4" class="btn btn-default" href="https://www.dropbox.com/s/at3n9gz4tvo6jia/mapRacePack4.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
-        HTML+='  <h2>Race Pack 5</h2>';
+        HTML+='  <h2>Race Pack 5 Beta</h2>';
         HTML+='  <p>Map for race</p>';
         HTML+='  <p><a id="racepack5" class="btn btn-default" href="https://www.dropbox.com/s/esblp84azv4vwh0/mapRacepack5_beta.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='</div>';
+        HTML+='<div class="col-md-4">';
+        HTML+='  <h2>Race Pack 6 Beta</h2>';
+        HTML+='  <p>Map for race</p>';
+        HTML+='  <p><a id="racepack6" class="btn btn-default" href="https://www.dropbox.com/s/fdsb3sd8jbo3cpd/mapRacepack6_beta.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Tritoch Pack</h2>';
@@ -1973,7 +1978,7 @@ function maps(){
 
         $(document).ready(function () {
 			$( "#trickarena" ).mouseover(function() {
-        		ddocument.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/trickarena.jpg")';
+        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/trickarena.jpg")';
 			});
 			$( "#racearena" ).mouseover(function() {
         		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racearena.jpg")';
@@ -1992,6 +1997,9 @@ function maps(){
 			});
 			$( "#racepack5" ).mouseover(function() {
         		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack5.jpg")';
+			});
+			$( "#racepack6" ).mouseover(function() {
+        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack6.jpg")';
 			});
 		});
 	}

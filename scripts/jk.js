@@ -209,10 +209,16 @@ function UpdateButton(button, since) {
 function home(){
     var p1 = '<h1>Welcome to jaPRO Mod!</h1><p>It is a mod started by loda based on OpenJK.</p>';
     var p2 = '<h4>What does jaPRO do for me?</h4><p><ul><li>Player accounts and stat database</li><li>Improved netcode with lag compensation</li><li>Multiple duel types</li><li>Full featured race-mode</li><li>Highscores and Elo</li><li>Improved weapon balancing and new weapon abilities</li><li>Improved full force balancing and features</li><li>Skill based grapple hook</li><li>New style of jetpack</li><li>Physics based flag-throw</li><li>Advanced bot AI</li><li>Instant update server settings (no longer requiring a map restart)</li><li>Lots of JK2 gameplay options</li><li>Improved vote system</li><li>Simple admin system with low potential for abuse</li><li>Ability to configure every setting back to basejk gameplay</li></ul></p>';
-    var p3 = '<p><a class="btn btn-default btn-lg" href="https://github.com/videoP/jaPRO/raw/master/japro3.pk3" role="button">Download jaPRO Client</a> </p>';
+    //var p3 = '<p><a class="btn btn-default btn-lg" href="https://github.com/videoP/jaPRO/raw/master/japro3.pk3" role="button">Download jaPRO Client</a> </p>';
+    var p3 = '<p><a class="btn btn-default btn-lg download" href="https://github.com/eternalcodes/EternalJK/releases/latest" role="button">Download jaPRO Client</a></p>'
     $("#main-content").html('<div class="container">'+p1+' <br> '+p2+' '+p3+'</div>');
     $('.jk-nav li').removeClass("active");
     $('#menu_home').addClass("active");
+
+    $.getJSON("https://api.github.com/repos/eternalcodes/EternalJK/releases/latest").done(function(release) {
+        var asset = release.assets[0];
+        $(".download").attr("href", asset.browser_download_url);
+    });
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -268,7 +274,6 @@ function duel_count(){
     $("#main-content").append(panel);
 
     $(document).ready(function() {
-        var data = null;
         $.ajax({
             type: "POST",
             url: "ajax/getJSON.php",
@@ -376,9 +381,9 @@ function duel_rank(){
     $("#main-content").append(panel);
 
     $(document).ready(function() {
-        var data = null;
         var last_update = dashboardData[5][1];
         if(last_update > localStorage.getItem("duelUpdateTime") || !localStorage.getItem("duelRankCache")) { //Out of date
+        //if (1) {
             $.ajax({
                 type: "POST",
                 url: "ajax/getJSON.php",
@@ -393,7 +398,7 @@ function duel_rank(){
             });
         }
         else {
-        	data = JSON.parse(localStorage.getItem("duelRankCache"));
+        	var data = JSON.parse(localStorage.getItem("duelRankCache"));
         	DuelRankTable(data);
         }
 
@@ -471,6 +476,7 @@ function duel_rank(){
 	            },
 				"drawCallback": function( settings ) { //Pagination button active fixes
 					$(document).ready(function () {
+						
 						if (document.getElementById("duel_rank_typedropdown").value) {
 							var buttons = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
 						    for (var i = 0; i < buttons.length; i++){
@@ -483,6 +489,7 @@ function duel_rank(){
 						       	buttons[i].className = "btn btn-warning btn-xs";
 							}
 						}
+						
 					});
 			    }
 	        });
@@ -515,7 +522,6 @@ function duel_list(){
     $("#main-content").append(panel);
 
     $(document).ready(function() {
-        var data = null;
         var last_update = dashboardData[5][1];
         if(last_update > localStorage.getItem("duelUpdateTime") || !localStorage.getItem("duelListCache")) { //Out of date
             $.ajax({
@@ -532,7 +538,7 @@ function duel_list(){
             });
         }
         else {
-        	data = JSON.parse(localStorage.getItem("duelListCache"));
+        	var data = JSON.parse(localStorage.getItem("duelListCache"));
         	DuelListTable(data);
         }
 
@@ -614,6 +620,7 @@ function duel_list(){
 	                } );
 	            },
 				"drawCallback": function( settings ) { //Pagination button active fixes
+					
 					$(document).ready(function () {
 						if (document.getElementById("duel_list_typedropdown").value) {
 							var buttons = document.querySelectorAll("[data-hook=duel_list_filter_type]");
@@ -628,6 +635,7 @@ function duel_list(){
 							}
 						}
 					});
+					
 			    }
 	        });
 		}
@@ -696,7 +704,6 @@ function race_count(){
     $("#main-content").append(panel);
 
     $(document).ready(function() {
-        var data = null;
         $.ajax({
             type: "POST",
             url: "ajax/getJSON.php",
@@ -709,7 +716,7 @@ function race_count(){
         });
 
         function RaceCountChart(data) {
-        //Loda fixme, this can use the json from datatable_duel_rank maybe and avoid a query?
+        //Loda fixme, this can use the json from datatable_race_rank maybe and avoid a query?
 	        var chart = new Highcharts.Chart({
 	            chart: {
 	                type: 'bar',
@@ -1343,7 +1350,6 @@ function player_title(){ //Show total number of players, get each playername for
         } 
     }
 
-    var data = null;
     $.ajax({
         type: "POST",
         url: "ajax/getJSON.php",
@@ -1351,8 +1357,7 @@ function player_title(){ //Show total number of players, get each playername for
         async: false,
         data: { option: "player_accounts" },
         success: function(res) {
-            data = res;
-            helpers.buildDropdown( data, $('#dropdown'), 'Select a player' ); 
+            helpers.buildDropdown( res, $('#dropdown'), 'Select a player' ); 
         }
     });
 
@@ -1958,7 +1963,7 @@ function maps(){
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 6 Beta</h2>';
         HTML+='  <p>Map for race</p>';
-        HTML+='  <p><a id="racepack6" class="btn btn-default" href="https://www.dropbox.com/s/fdsb3sd8jbo3cpd/mapRacepack6_beta.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='  <p><a id="racepack6" class="btn btn-default" href="https://www.dropbox.com/s/vbiq8b01rle54wr/mapRacepack6_beta.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Tritoch Pack</h2>';

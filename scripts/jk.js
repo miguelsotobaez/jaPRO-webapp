@@ -1961,9 +1961,9 @@ function maps(){
         HTML+='  <p><a id="racepack5" class="btn btn-default" href="https://www.dropbox.com/s/esblp84azv4vwh0/mapRacepack5_beta.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
-        HTML+='  <h2>Race Pack 6 Beta</h2>';
+        HTML+='  <h2>Race Pack 6</h2>';
         HTML+='  <p>Map for race</p>';
-        HTML+='  <p><a id="racepack6" class="btn btn-default" href="https://www.dropbox.com/s/vbiq8b01rle54wr/mapRacepack6_beta.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='  <p><a id="racepack6" class="btn btn-default" href="https://www.dropbox.com/s/ii6hc1dt1jobnoi/mapRacepack6.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Tritoch Pack</h2>';
@@ -1973,7 +1973,7 @@ function maps(){
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>JK2 MP Maps</h2>';
         HTML+='  <p>JK Multiplayer map pack</p>';
-        HTML+='  <p><a id="jk2" class="btn btn-default" href="https://www.dropbox.com/s/x4vl8siviy0d57t/mapJK2MultiplayerMaps.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='  <p><a id="jk2" class="btn btn-default" href="https://www.dropbox.com/s/hxo0shd35hudg1q/mapJK2MultiplayerMaps.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='</div>';
         $("#main-content").html(HTML);

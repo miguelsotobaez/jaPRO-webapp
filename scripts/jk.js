@@ -1186,7 +1186,7 @@ function race_list(){
 	                { "data": 6, "render": 
 	                    function ( data, type, row, meta ) { 
 	                        var date = new Date(data*1000); //fixme the IP should be a global variable defined somewhere?
-	                        return '<a href="http://162.248.89.208/races/'+encodeURIComponent(row[1])+'/'+encodeURIComponent(row[1])+'-'+encodeURIComponent(row[2].replace(" ", ""))+'-'
+	                        return '<a href="http://162.248.89.208/races/'+encodeURIComponent(row[1])+'/'+encodeURIComponent(row[1])+'-'+encodeURIComponent(row[2].replace(/ |\//g, ""))+'-'
 	                            +RaceToString(row[3]).toLowerCase()+'.dm_26">'+(date.getYear()-100) + '-' + ('0'+(date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + ' ' 
 	                            + ('0'+(date.getHours()+1)).slice(-2) + ':' + ('0'+(date.getMinutes()+1)).slice(-2) + '<a>' }},
 	                { "data": 7, "sType": "num-durhtml", "className": "duration_ms", "render":

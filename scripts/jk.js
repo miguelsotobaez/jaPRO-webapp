@@ -14,17 +14,21 @@ $(document).ready(function () {
             player_header(); //Shows avatar and has buttons to switch between race and duel
             player_overall_stats(); //Combined stats for all duel types, all race styles, etc.
 
-            if (race) {//==1
-                if (0)//(player_race_style) //Ditch this maybe?
-                    player_race_style_stats();//Ditch this maybe?
-                else
-                    player_race_stats();//Do we have to get literally everything for this since we have to compare it to other players to get percentile?
-            }
-            else {
+            if (race == 0) {
                 if (0)//(player_duel_type)//Ditch this maybe?
                     player_duel_type_stats();//Ditch this maybe?
-                else
+                else {
+                    //player_duel_awards();
                     player_duel_stats();
+                }
+            }
+            else {
+                if (0)//(player_race_style) //Ditch this maybe?
+                    player_race_style_stats();//Ditch this maybe?
+                else {
+                    player_race_awards();
+                    player_race_stats();//Do we have to get literally everything for this since we have to compare it to other players to get percentile?
+                }
             }
 
         }
@@ -476,7 +480,7 @@ function duel_rank(){
 	            },
 				"drawCallback": function( settings ) { //Pagination button active fixes
 					$(document).ready(function () {
-						
+						/*
 						if (document.getElementById("duel_rank_typedropdown").value) {
 							var buttons = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
 						    for (var i = 0; i < buttons.length; i++){
@@ -489,7 +493,7 @@ function duel_rank(){
 						       	buttons[i].className = "btn btn-warning btn-xs";
 							}
 						}
-						
+						*/
 					});
 			    }
 	        });
@@ -619,9 +623,9 @@ function duel_list(){
 	                    } );
 	                } );
 	            },
-				"drawCallback": function( settings ) { //Pagination button active fixes
-					
+				"drawCallback": function( settings ) { //Pagination button active fixes	
 					$(document).ready(function () {
+                        /*
 						if (document.getElementById("duel_list_typedropdown").value) {
 							var buttons = document.querySelectorAll("[data-hook=duel_list_filter_type]");
 						    for (var i = 0; i < buttons.length; i++){
@@ -634,8 +638,8 @@ function duel_list(){
 						       	buttons[i].className = "btn btn-warning btn-xs";
 							}
 						}
+                        */
 					});
-					
 			    }
 	        });
 		}
@@ -887,7 +891,7 @@ function race_rank(){
 	                     return meta.row+1 }}, //This is not what we want since it counts combined styles as a style.          
 	                { "data": 0, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},   
+	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'&race=1>'+data+'</a>'); }},   
 	                { "data": 1, "sType": "numeric", "render": 
 	                    function ( data, type, row, meta ) { 
 	                        return RaceToString(data) }},
@@ -1174,7 +1178,7 @@ function race_list(){
 	                        return data; }},
 	                { "data": 1, "render": 
 	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? data : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+	                        return (type == 'filter') ? data : ('<a href=?page=player&name='+encodeURIComponent(data)+'&race=1>'+data+'</a>'); }},
 	                { "data": 2, "render": 
 	                    function ( data, type, row, meta ) { 
 	                        return (type == 'filter') ? data : ('<button type="button" class="btn btn-warning btn-xs" data-hook="race_list_filter_course" value="'+data+'">' + data + '</button>') }},  
@@ -1330,7 +1334,24 @@ function player_title(){ //Show total number of players, get each playername for
     HTML+='                    </div>';
     HTML+='                    <div class="header-title">';
     HTML+='                        <h3>'+ (player ? player : "Players") + ' (WIP) <button class="btn btn-warning" id="update_player">Update</button></h3>';
-    HTML+='                        <select id="dropdown"></select>'; //Should be live-searchable 
+    //HTML+='                        <select id="dropdown"></select>'; //Should be live-searchable 
+
+    HTML += '                      <form id="selectplayer" method="get" action="?">';
+    HTML += '                           <input type="hidden" name="page" value="player">';
+    HTML += '                           <select id="select_player_dropdown" class="filter form-control input-sm" name="name"></select>'; //Make update on change not submit click?
+    HTML += '                           <input type="hidden" name="race" value="'+ (race == 0 ? 0 : 1) +'">'; //Get race value
+    HTML += '                           <input type="submit">';
+    HTML += '                      </form>';
+
+    //Race toggle button
+    HTML += '                      <form id="selectraceorduel" method="get" action="?">';
+    HTML += '                           <input type="hidden" name="page" value="player">';
+    HTML += '                           <input type="hidden" name="name" value="'+ player +'">'; //Get race value
+    HTML += '                           <input checked data-toggle="toggle" type="radio" name="race" value="1">Race'; 
+    HTML += '                           <input checked data-toggle="toggle" type="radio" name="race" value="0">Duel'; 
+    HTML += '                           <input type="submit">';
+    HTML += '                      </form>';
+
     HTML+='                    </div>';
     HTML+='                </div>';
     HTML+='                <hr>';
@@ -1340,8 +1361,11 @@ function player_title(){ //Show total number of players, get each playername for
 
     var helpers = { 
         buildDropdown: function(result, dropdown, emptyMessage) { // Remove current options 
-            dropdown.html(''); // Add the empty option with the empty message 
+            //dropdown.html(''); // Add the empty option with the empty message 
             dropdown.append('<option value="">' + emptyMessage + '</option>'); // Check result isnt empty 
+
+
+
             if(result != '') { // Loop through each of the results and append the option to the dropdown 
                 $.each(result, function(k, v) { 
                     dropdown.append('<option value="' + v[0] + '">' + htmlEntities(v[0]) + '</option>'); //loda fixme does value need to be htmlentities too?
@@ -1357,7 +1381,7 @@ function player_title(){ //Show total number of players, get each playername for
         async: false,
         data: { option: "player_accounts" },
         success: function(res) {
-            helpers.buildDropdown( res, $('#dropdown'), 'Select a player' ); 
+            helpers.buildDropdown( res, $('#select_player_dropdown'), 'Select a player' ); 
         }
     });
 
@@ -1690,6 +1714,60 @@ function player_race_stats(){//Most popular duels, total number of duels
     $('#menu_player').addClass("active");
 }
 
+function player_race_awards(){//Most popular duels, total number of duels
+    var panel = "";
+    panel += '<div id="third_row" class="row">';
+    panel += '  <div class="col-md-6">';
+    panel += '                    <div class="panel panel-filled">';
+    panel += '                      <div class="panel-heading">';
+    panel += '                          Race Awards';
+    panel += '                      </div>';
+    panel += '                        <div class="panel-body">';
+    panel += '                            <div id="player_race_awards">';
+    panel += '                            </div>';
+    panel += '                        </div>';
+    panel += '                    </div>';
+    panel += '                </div>';
+    panel += '            </div>';
+    $("#main-content").append(panel);
+
+    $.ajax({
+        type: "POST",
+        url: "ajax/getJSON.php",
+        dataType: "JSON",
+        async: true,
+        data: { option: "player_race_awards", player: player},
+        success: function(res) {
+            PlayerRaceAwards(res);
+        }
+    });
+
+    function PlayerRaceAwards(data) {
+        //ajax should return 2d array, JS should search(?) for name and see if its 0 or 1
+        if (data[0] == 1) {
+            var img = document.createElement('img');
+            img.src = "images/awards/" + "jump1" + ".png";
+            img.title =  "Completed Jump1-JKA";
+            document.getElementById('player_race_awards').appendChild(img)
+        }
+        if (data[1] == 1) {
+            var img = document.createElement('img');
+            img.src = "images/awards/" + "jump2" + ".png";
+            img.title =  "Completed Jump2-JKA";
+            document.getElementById('player_race_awards').appendChild(img)
+        }
+        if (data[2] == 1) {
+            var img = document.createElement('img');
+            img.src = "images/awards/" + "jump3" + ".png";
+            img.title =  "Completed Jump3-JKA";
+            document.getElementById('player_race_awards').appendChild(img)
+        }
+    }
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_player').addClass("active");
+}
+
 function player_duel_stats(){//Most popular duels, total number of duels
     var panel = "";
     panel += '<div id="third_row" class="row">';
@@ -1927,53 +2005,47 @@ function maps(){
         HTML+='<div class="row">';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Trick Arena</h2>';
-        HTML+='  <p>Map for race</p>';
         HTML+='  <p><a id="trickarena" class="btn btn-default" href="https://www.dropbox.com/s/z780uk203zma9h7/mapTrickArena.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Arena</h2>';
-        HTML+='  <p>Map for race</p>';
         HTML+='  <p><a id="racearena" class="btn btn-default" href="https://www.dropbox.com/s/fu6pbb8jvfvu2hm/mapRaceArena.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 1</h2>';
-        HTML+='  <p>Map for race</p>';
         HTML+='  <p><a id="racepack1" class="btn btn-default" href="https://www.dropbox.com/s/84if2dkpuhr6572/mapRacepack1.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 2</h2>';
-        HTML+='  <p>Map for race</p>';
         HTML+='  <p><a id="racepack2" class="btn btn-default" href="https://www.dropbox.com/s/4crbnrgqr248f81/mapRacepack2.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 3</h2>';
-        HTML+='  <p>Map for race</p>';
         HTML+='  <p><a id="racepack3" class="btn btn-default" href="https://www.dropbox.com/s/kggwqzdxnzoekqz/mapRacepack3.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 4</h2>';
-        HTML+='  <p>Map for race</p>';
         HTML+='  <p><a id="racepack4" class="btn btn-default" href="https://www.dropbox.com/s/at3n9gz4tvo6jia/mapRacePack4.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 5 Beta</h2>';
-        HTML+='  <p>Map for race</p>';
         HTML+='  <p><a id="racepack5" class="btn btn-default" href="https://www.dropbox.com/s/esblp84azv4vwh0/mapRacepack5_beta.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Race Pack 6</h2>';
-        HTML+='  <p>Map for race</p>';
         HTML+='  <p><a id="racepack6" class="btn btn-default" href="https://www.dropbox.com/s/ii6hc1dt1jobnoi/mapRacepack6.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Tritoch Pack</h2>';
-        HTML+='  <p>CTF map pack</p>';
         HTML+='  <p><a id="tritoch" class="btn btn-default" href="https://www.dropbox.com/s/bwescubuoh4u53l/mapTritoch_pack.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>JK2 MP Maps</h2>';
-        HTML+='  <p>JK Multiplayer map pack</p>';
         HTML+='  <p><a id="jk2" class="btn btn-default" href="https://www.dropbox.com/s/hxo0shd35hudg1q/mapJK2MultiplayerMaps.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='</div>';
+        HTML+='<div class="col-md-4">';
+        HTML+='  <h2>Strafetrails (beta)</h2>';
+        HTML+='  <p><a id="jk2" class="btn btn-default" href="https://github.com/videoP/Demo2Trail/raw/master/Releases/strafetrails.pk3" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='</div>';
         $("#main-content").html(HTML);
@@ -2020,7 +2092,7 @@ function servers(){
         $("#main-content").html(HTML);
 
         $('.jk-nav li').removeClass("active");
-        $('#menu_maps').addClass("active");
+        $('#menu_servers').addClass("active");
 }
 
 var duelnames = [

@@ -162,4 +162,29 @@ function InsertStats($query, $values) {
 }
 
 
+function InsertStats2($query, $columns, $values) {
+	global $db;
+	if(!empty($values)) {
+		$values = substr($values, 0, -1); //Remove trailing comma
+
+		//$query is "REPLACE INTO Races" format
+		//$columns is "username, coursename, style" format
+		//$values is "(a b c), (d e f), (g h i), " format 
+		//formats can be changed if needed!
+
+		//Create the string of (? ? ?), (? ? ?), (? ? ?)  etc
+		//Should values just be an array of values without (), ??, or can it work in current format
+
+		$rowPlaces = '(' . implode(', ', array_fill(0, count($columns), '?')) . ')';
+		$allPlaces = implode(', ', array_fill(0, count($values), $rowPlaces));
+
+		$sql = $query . "(" . $columns . ") VALUES " . $allPlaces;
+		$stmt = $db->prepare($sql);
+
+		$stmt->execute($values); //???
+		$stmt->close();
+
+	}
+}
+
 ?>

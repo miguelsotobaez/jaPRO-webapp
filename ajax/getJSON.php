@@ -231,7 +231,7 @@ switch ($option) {
 		$username = $_POST["player"];
 		$newArray = null;
 		$stmt = $db->prepare("SELECT SQL_CACHE type, elo FROM (SELECT type, ROUND(winner_elo,0) AS elo, end_time FROM Duels WHERE winner = ? GROUP BY type
-				UNION
+				UNION ALL
 				SELECT type, ROUND(loser_elo,0) AS elo, end_time FROM Duels WHERE loser = ? GROUP BY type) AS T GROUP BY type ORDER BY elo DESC LIMIT 5");
 		$stmt->bind_param('ss', $username, $username);
 		$stmt->execute();
@@ -281,7 +281,7 @@ switch ($option) {
 		$username = $_POST["player"];
 		$newArray = null;
 		$stmt = $db->prepare("SELECT end_time, type, CAST(winner_elo AS INT) AS elo FROM Duels WHERE winner = ? 
-			UNION
+			UNION ALL
 			SELECT end_time, type, CAST(loser_elo AS INT) AS elo FROM Duels WHERE loser = ? 
 			ORDER BY end_time ASC");
 		$stmt->bind_param('ss', $username, $username);
@@ -299,9 +299,49 @@ switch ($option) {
 	    $json = json_encode($newArray);
 	break;
 
+	case "player_race_awards": //Should select type, and let client filter that.. should apply smoothing? 
+		if (!isset($_POST['player'])) {
+			break;
+		}
+		$username = $_POST["player"];
+		$newArray = null;
+		$stmt = $db->prepare("SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (jump1)') THEN 1 ELSE 0 END AS 'AWARD' 
+			UNION ALL 
+			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (jump2)') THEN 1 ELSE 0 END AS 'AWARD' 
+			UNION ALL 
+			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (jump3)') THEN 1 ELSE 0 END AS 'AWARD' 
+			UNION ALL 
+			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (bhop)') THEN 1 ELSE 0 END AS 'AWARD' 
+			UNION ALL 
+			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (rocketjump)') THEN 1 ELSE 0 END AS 'AWARD' 
+			UNION ALL 
+			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (handbreaker)') THEN 1 ELSE 0 END AS 'AWARD' 
+			UNION ALL 
+			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (a-mountain)') THEN 1 ELSE 0 END AS 'AWARD' 
+			UNION ALL 
+			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (jump1)') THEN 1 ELSE 0 END AS 'AWARD' 
+			UNION ALL 
+			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racepack5 (b-mountain)') THEN 1 ELSE 0 END AS 'AWARD' 
+			UNION ALL 
+			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racepack6 (c-mountain)') THEN 1 ELSE 0 END AS 'AWARD'");
+		$stmt->bind_param('ssssssssss', $username, $username, $username, $username, $username, $username, $username, $username, $username, $username);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$arr = preparedsql2arr($result);
+		$result->free();
+	
+	    if($arr){
+		    foreach ($arr as $key => $value) {
+		    	$newArray[]=array(0=>$value["AWARD"]);
+		    }
+	    }
+
+	    $json = json_encode($newArray);
+	break;
+
 }
 
-//ob_start('ob_gzhandler'); //Compress json
+ob_start('ob_gzhandler'); //Compress json
 echo $json;
 $db->close();
 

@@ -1756,7 +1756,7 @@ function player_race_awards(){//Most popular duels, total number of duels
                     else if (data[i][1] < 9800)
                         award = 9800;
                     if (award > 0) {
-                        img.src = "images/awards/" + "dash" + award + ".png";
+                        img.src = "images/awards/" + "dash-" + award + ".png";
                         img.title =  "Completed dash1 in faster than " + award/1000 + " seconds"; //eh need 3rd column for description?
                         document.getElementById('player_race_awards').appendChild(img) //Scale to right size?
                     }
@@ -1772,7 +1772,7 @@ function player_race_awards(){//Most popular duels, total number of duels
                     else if (data[i][1] > 2000)
                         award = 2000;
                     if (award > 0) {
-                        img.src = "images/awards/" + "topspeed" + award + ".png";
+                        img.src = "images/awards/" + "topspeed-" + award + ".png";
                         img.title =  "Achieved topspeed faster than " + award; //eh need 3rd column for description?
                         document.getElementById('player_race_awards').appendChild(img) //Scale to right size?
                     }

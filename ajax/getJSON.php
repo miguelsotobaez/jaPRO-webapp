@@ -335,11 +335,22 @@ switch ($option) {
 			UNION ALL 
 			SELECT 'amountain-siege' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 6 AND username = ? AND coursename = 'racearena_pro (a-mountain)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
+			SELECT 'jumpgreenpro-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'jump_green_pro') THEN 1 ELSE 0 END AS 'val' 
+			UNION ALL 
+			SELECT 'hevil-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 't3_hevil') THEN 1 ELSE 0 END AS 'val' 
+			UNION ALL 
+			SELECT 'r724-swoop' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 9 AND username = ? AND coursename = 'racepack6 (r7-24)') THEN 1 ELSE 0 END AS 'val' 
+			UNION ALL 
+			SELECT 'yavin-under14-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racepack4 (yavin)' AND duration_ms < 14000) THEN 1 ELSE 0 END AS 'val' 
+			UNION ALL 
+			SELECT 'imperial-under5-speed' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 11 AND username = ? AND coursename = 'racepack6 (imperial)' AND duration_ms < 5000) THEN 1 ELSE 0 END AS 'val' 
+			UNION ALL 
 			SELECT 'dash' AS 'key', (SELECT MIN(duration_ms) FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (dash1)') AS 'val' 
 			UNION ALL 
 			SELECT 'topspeed' AS 'key', (SELECT MAX(topspeed) FROM Races WHERE username = ?) AS 'val'");
-		$stmt->bind_param('sssssssssssssssss', 
-			$username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username);
+		$stmt->bind_param('ssssssssssssssssssssss', 
+			$username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, 
+			$username, $username, $username, $username, $username, $username, $username);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		$arr = preparedsql2arr($result);

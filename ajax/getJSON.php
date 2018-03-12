@@ -305,26 +305,41 @@ switch ($option) {
 		}
 		$username = $_POST["player"];
 		$newArray = null;
-		$stmt = $db->prepare("SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (jump1)') THEN 1 ELSE 0 END AS 'AWARD' 
+		$stmt = $db->prepare("SELECT SQL_CACHE 'jump1-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (jump1)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
-			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (jump2)') THEN 1 ELSE 0 END AS 'AWARD' 
+			SELECT 'jump2-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (jump2)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
-			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (jump3)') THEN 1 ELSE 0 END AS 'AWARD' 
+			SELECT 'jump3-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (jump3)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
-			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (bhop)') THEN 1 ELSE 0 END AS 'AWARD' 
+			SELECT 'bhop-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (bhop)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
-			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (rocketjump)') THEN 1 ELSE 0 END AS 'AWARD' 
+			SELECT 'ysal-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (ysal)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
-			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (handbreaker)') THEN 1 ELSE 0 END AS 'AWARD' 
+			SELECT 'rocketjump-rjq3' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (rocketjump)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
-			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (a-mountain)') THEN 1 ELSE 0 END AS 'AWARD' 
+			SELECT 'handbreaker-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (handbreaker)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
-			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (jump1)') THEN 1 ELSE 0 END AS 'AWARD' 
+			SELECT 'amountain-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (a-mountain)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
-			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racepack5 (b-mountain)') THEN 1 ELSE 0 END AS 'AWARD' 
+			SELECT 'climb-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (climb)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
-			SELECT CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racepack6 (c-mountain)') THEN 1 ELSE 0 END AS 'AWARD'");
-		$stmt->bind_param('ssssssssss', $username, $username, $username, $username, $username, $username, $username, $username, $username, $username);
+			SELECT 'bmountain-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racepack5 (b-mountain)') THEN 1 ELSE 0 END AS 'val' 
+			UNION ALL 
+			SELECT 'cmountain-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racepack6 (c-mountain)') THEN 1 ELSE 0 END AS 'val' 
+			UNION ALL 
+			SELECT 'jump1-wsw' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 6 AND username = ? AND coursename = 'racearena_pro (jump1)') THEN 1 ELSE 0 END AS 'val' 
+			UNION ALL 
+			SELECT 'jump2-wsw' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 6 AND username = ? AND coursename = 'racearena_pro (jump2)') THEN 1 ELSE 0 END AS 'val' 
+			UNION ALL 
+			SELECT 'handbreaker-wsw' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 6 AND username = ? AND coursename = 'racearena_pro (handbreaker)') THEN 1 ELSE 0 END AS 'val' 
+			UNION ALL 
+			SELECT 'amountain-siege' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 6 AND username = ? AND coursename = 'racearena_pro (a-mountain)') THEN 1 ELSE 0 END AS 'val' 
+			UNION ALL 
+			SELECT 'dash' AS 'key', (SELECT MIN(duration_ms) FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (dash1)') AS 'val' 
+			UNION ALL 
+			SELECT 'topspeed' AS 'key', (SELECT MAX(topspeed) FROM Races WHERE username = ?) AS 'val'");
+		$stmt->bind_param('sssssssssssssssss', 
+			$username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		$arr = preparedsql2arr($result);
@@ -332,7 +347,37 @@ switch ($option) {
 	
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array(0=>$value["AWARD"]);
+		    	$newArray[]=array(0=>$value["key"],1=>$value["val"]);
+		    }
+	    }
+
+	    $json = json_encode($newArray);
+	break;
+
+	case "player_duel_awards": //Should select type, and let client filter that.. should apply smoothing? 
+		if (!isset($_POST['player'])) {
+			break;
+		}
+		$username = $_POST["player"];
+		$newArray = null;
+		$stmt = $db->prepare("SELECT SQL_CACHE 'saber-wins' AS 'key', (SELECT COUNT(*) FROM Duels WHERE type = 0 AND winner = ?) AS 'val' 
+			UNION ALL 
+			SELECT 'force-wins' AS 'key', (SELECT COUNT(*) FROM Duels WHERE type = 1 AND winner = ?) AS 'val' 
+			UNION ALL 
+			SELECT 'gun-wins' AS 'key', (SELECT COUNT(*) FROM Duels WHERE type > 1 AND winner = ?) AS 'val' 
+			UNION ALL 
+			SELECT 'saber-flawless' AS 'key', (SELECT COUNT(*) FROM Duels WHERE type = 0 AND winner_hp = 100 AND winner_shield = 100 AND winner = ?) AS 'val' 
+			UNION ALL 
+			SELECT 'gun-flawless' AS 'key', (SELECT COUNT(*) FROM Duels WHERE type > 1 AND winner_hp = 100 AND winner_shield = 100 AND winner = ?) AS 'val'");
+		$stmt->bind_param('sssss', $username, $username, $username, $username, $username);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$arr = preparedsql2arr($result);
+		$result->free();
+	
+	    if($arr){
+		    foreach ($arr as $key => $value) {
+		    	$newArray[]=array(0=>$value["key"],1=>$value["val"]);
 		    }
 	    }
 

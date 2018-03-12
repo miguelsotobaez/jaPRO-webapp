@@ -18,7 +18,7 @@ $(document).ready(function () {
                 if (0)//(player_duel_type)//Ditch this maybe?
                     player_duel_type_stats();//Ditch this maybe?
                 else {
-                    //player_duel_awards();
+                    player_duel_awards();
                     player_duel_stats();
                 }
             }
@@ -1743,24 +1743,118 @@ function player_race_awards(){//Most popular duels, total number of duels
     });
 
     function PlayerRaceAwards(data) {
-        //ajax should return 2d array, JS should search(?) for name and see if its 0 or 1
-        if (data[0] == 1) {
-            var img = document.createElement('img');
-            img.src = "images/awards/" + "jump1" + ".png";
-            img.title =  "Completed Jump1-JKA";
-            document.getElementById('player_race_awards').appendChild(img)
+        //ajax should return 2d array [award][value], JS should loop through and print name-png if value is 1
+        for (i=0; i<data.length; i++) {
+            if (data[i][1] > 0) {
+                var img = document.createElement('img');
+                if (data[i][0] == "dash") {
+                    var award = 0;
+                    if (data[i][1] < 9600)
+                        award = 9600;
+                    else if (data[i][1] < 9700)
+                        award = 9700;
+                    else if (data[i][1] < 9800)
+                        award = 9800;
+                    if (award > 0) {
+                        img.src = "images/awards/" + "dash" + award + ".png";
+                        img.title =  "Completed dash1 in faster than " + award/1000 + " seconds"; //eh need 3rd column for description?
+                        document.getElementById('player_race_awards').appendChild(img) //Scale to right size?
+                    }
+                }
+                else if (data[i][0] == "topspeed") {
+                    var award = 0;
+                    if (data[i][1] > 5000)
+                        award = 5000;
+                    else if (data[i][1] > 4000)
+                        award = 4000;
+                    else if (data[i][1] > 3000)
+                        award = 3000;
+                    else if (data[i][1] > 2000)
+                        award = 2000;
+                    if (award > 0) {
+                        img.src = "images/awards/" + "topspeed" + award + ".png";
+                        img.title =  "Achieved topspeed faster than " + award; //eh need 3rd column for description?
+                        document.getElementById('player_race_awards').appendChild(img) //Scale to right size?
+                    }
+                }
+                else {
+                    img.src = "images/awards/" + data[i][0] + ".png";
+                    img.title =  "Completed " + data[i][0]; //eh need 3rd column for description?
+                    document.getElementById('player_race_awards').appendChild(img) //Scale to right size?
+                }
+            }
         }
-        if (data[1] == 1) {
-            var img = document.createElement('img');
-            img.src = "images/awards/" + "jump2" + ".png";
-            img.title =  "Completed Jump2-JKA";
-            document.getElementById('player_race_awards').appendChild(img)
+    }
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_player').addClass("active");
+}
+
+function player_duel_awards(){//Most popular duels, total number of duels
+    var panel = "";
+    panel += '<div id="third_row" class="row">';
+    panel += '  <div class="col-md-6">';
+    panel += '                    <div class="panel panel-filled">';
+    panel += '                      <div class="panel-heading">';
+    panel += '                          Duel Awards';
+    panel += '                      </div>';
+    panel += '                        <div class="panel-body">';
+    panel += '                            <div id="player_duel_awards">';
+    panel += '                            </div>';
+    panel += '                        </div>';
+    panel += '                    </div>';
+    panel += '                </div>';
+    panel += '            </div>';
+    $("#main-content").append(panel);
+
+    $.ajax({
+        type: "POST",
+        url: "ajax/getJSON.php",
+        dataType: "JSON",
+        async: true,
+        data: { option: "player_duel_awards", player: player},
+        success: function(res) {
+            PlayerDuelAwards(res);
         }
-        if (data[2] == 1) {
+    });
+
+    function CumulativeAward(name, count, description) {
+        var award = 0;
+        if (count > 1000)
+            award = 1000;
+        else if (count > 500)
+            award = 500;
+        else if (count > 250)
+            award = 250;
+        else if (count > 50)
+            award = 50;
+
+        if (award > 0) {
             var img = document.createElement('img');
-            img.src = "images/awards/" + "jump3" + ".png";
-            img.title =  "Completed Jump3-JKA";
-            document.getElementById('player_race_awards').appendChild(img)
+            img.src = "images/awards/" + name + "-" + award + ".png";
+            img.title =  "Won " + award + " " + description + " duels"; //eh need 3rd column for description?
+            document.getElementById('player_duel_awards').appendChild(img) //Scale to right size?
+        }
+    }
+
+    function PlayerDuelAwards(data) {
+        //ajax should return 2d array [award][value], JS should loop through and print name-png if value is 1
+        for (i=0; i<data.length; i++) {
+            if (data[i][0] == "saber-wins") {
+                CumulativeAward("saber", data[i][1], "saber");
+            }
+            else if (data[i][0] == "force-wins") {
+                CumulativeAward("force", data[i][1], "force");
+            }
+            else if (data[i][0] == "gun-wins") {
+                CumulativeAward("gun", data[i][1], "gun");
+            }
+            else if (data[i][0] == "saber-flawless") {
+                CumulativeAward("saber-flawless", data[i][1], "flawless saber");
+            }
+            else if (data[i][0] == "gun-flawless") {
+                CumulativeAward("gun-flawless", data[i][1], "flawless gun");
+            }
         }
     }
 
@@ -2087,9 +2181,12 @@ function servers(){
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>.ups playja.pro</h2>';
         HTML+='  <p>/connect s.playja.pro</p>';
+        HTML+='  <a id="tracker">k</a>';
         HTML+='</div>';
         HTML+='</div>';
         $("#main-content").html(HTML);
+
+
 
         $('.jk-nav li').removeClass("active");
         $('#menu_servers').addClass("active");

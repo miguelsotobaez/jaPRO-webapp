@@ -177,12 +177,12 @@ switch ($option) {
 
 	case "player_accounts":
 		$newArray = null;
-		$query = "SELECT username, lastlogin, created FROM Accounts ORDER BY username ASC";
+		$query = "SELECT username, created, lastlogin FROM Accounts ORDER BY username ASC";
 
 		$arr = sql2arr($query);
 		if($arr) {
 		    foreach ($arr as $key => $value) {
-				$newArray[]=array(0=>$value["username"],1=>$value["lastlogin"],2=>$value["created"]);
+				$newArray[]=array(0=>$value["username"],1=>$value["created"],2=>$value["lastlogin"]);
 		    }
 		}	
 
@@ -190,14 +190,14 @@ switch ($option) {
 	break;
 
 	case "player_map_charts": //Get Most popular courses,  most exclusive course-styles.  The ordering isn't reliable like it is in sqlite?
-		$newArray = null;
+		$newArray = null; //rank == 1 to avoid noob times, and treat all courses equally
 		$query = "SELECT SQL_CACHE coursename, -1 AS style, count FROM (SELECT coursename, COUNT(*) as count 
 				FROM Races GROUP BY coursename ORDER BY count DESC, coursename DESC LIMIT 5) AS T
 			UNION ALL
 			SELECT coursename, style, count FROM (SELECT coursename, style, COUNT(*) as count 
 				FROM Races GROUP BY coursename, style ORDER BY count, coursename, end_time ASC LIMIT 5) AS T
 			UNION ALL
-			SELECT -1 AS coursename, style, CAST(AVG(duration_ms) AS INT) FROM Races GROUP BY style
+			SELECT -1 AS coursename, style, CAST(AVG(duration_ms) AS INT) FROM Races WHERE rank = 1 GROUP BY style
 			ORDER BY count ASC";
 
 		$arr = sql2arr($query);
@@ -240,18 +240,19 @@ switch ($option) {
 		$result->free();
 
 	    if($arr){
-			$min = min(array_column($arr, 'elo'));
+			//$min = min(array_column($arr, 'elo'));
 		    foreach ($arr as $key => $value) {
-		    	$type = $value["type"];
-		    	$strength = $value["elo"] - $min + 100; //Subtract smallest element..
-		    	$newArray[]=array(0=>$type,1=>$strength);
+		    	//$type = $value["type"];
+		    	//$strength = $value["elo"] - $min + 100; //Subtract smallest element..
+		    	$newArray[]=array(0=>$value["type"],1=>$value["elo"]);
 		    }
 	    }
 
 	    $json = json_encode($newArray);
 	break;
 
-	case "player_race_stats": //Get relative strength of each race style for this player
+
+	case "player_race_statsOLD": //Get relative strength of each race style for this player
 		if (!isset($_POST['player'])) {
 			break;
 		}
@@ -273,6 +274,80 @@ switch ($option) {
 
 	    $json = json_encode($newArray);
 	break;
+
+	case "player_race_stats": //Combine with other stats query
+		if (!isset($_POST['player'])) {
+			break;
+		}
+		$username = $_POST["player"]; //accept either GET or POST 
+		$newArray = null;
+	   	$stmt = $db->prepare("SELECT SQL_CACHE style, newscore, oldscore, ROUND(oldscore/global_avg, 0) AS diff, ROUND(rank, 2) AS rank, ROUND(percentile, 2) AS percentile, golds, silvers, bronzes, count FROM 
+			(SELECT style, SUM(entries-rank) AS newscore, CAST(SUM(entries/CAST(rank AS DECIMAL(10, 2))) AS INT) AS oldscore, AVG(rank) as rank, AVG((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes, COUNT(*) as count from Races WHERE username = ? AND rank != 0 GROUP BY style) as T1, 
+			(SELECT style AS global_style, AVG(entries/rank) AS global_avg FROM Races GROUP BY style) as T2 WHERE style = global_style 
+			UNION ALL 
+			SELECT '-1' AS style, newscore, oldscore, ROUND(oldscore/global_avg, 0) AS diff, ROUND(rank, 2) AS rank, ROUND(percentile, 2) AS percentile, golds, silvers, bronzes, count FROM (SELECT SUM(entries-rank) AS newscore, CAST(SUM(entries/CAST(rank AS DECIMAL(10, 2))) AS INT) AS oldscore, AVG(rank) as rank, AVG((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes, COUNT(*) as count from Races WHERE username = ? AND rank != 0) as T1, 
+			(SELECT AVG(entries/rank) AS global_avg FROM Races) as T2 ORDER BY diff DESC");
+		$stmt->bind_param('ss', $username, $username);
+
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$arr = preparedsql2arr($result);
+		$result->free();
+
+	    if($arr){
+		    foreach ($arr as $key => $value) {
+		    	$newArray[]=array(0=>$value["style"],1=>$value["newscore"],2=>$value["oldscore"],3=>$value["diff"],4=>$value["rank"],5=>$value["percentile"],6=>$value["golds"],7=>$value["silvers"],8=>$value["bronzes"],9=>$value["count"]);
+		    }
+	    }
+
+	    $json = json_encode($newArray);
+	break;
+
+	case "player_best_races": //Get relative strength of each race style for this player
+		if (!isset($_POST['player'])) {
+			break;
+		}
+		$username = $_POST["player"]; //accept either GET or POST 
+		$newArray = null;
+	   	$stmt = $db->prepare("SELECT coursename, style, rank, ROUND(entries/rank, 0) AS strength, duration_ms, end_time FROM Races WHERE username = ? ORDER BY strength DESC LIMIT 50");
+		$stmt->bind_param('s', $username);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$arr = preparedsql2arr($result);
+		$result->free();
+
+	    if($arr){
+		    foreach ($arr as $key => $value) {
+		    	$newArray[]=array(0=>$value["coursename"],1=>$value["style"],2=>$value["rank"],3=>$value["strength"],4=>$value["end_time"],5=>$value["duration_ms"]);
+		    }
+	    }
+
+	    $json = json_encode($newArray);
+	break;
+	
+/*
+	case "player_race_stats": //Should select type, and let client filter that.. should apply smoothing? 
+		if (!isset($_POST['player'])) {
+			break;
+		}
+		$username = $_POST["player"];
+		$newArray = null;
+		$stmt = $db->prepare("SELECT SQL_CACHE style, COUNT(*) AS count FROM Races WHERE username = ? GROUP BY style ORDER BY count DESC");
+		$stmt->bind_param('s', $username);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$arr = preparedsql2arr($result);
+		$result->free();
+	
+	    if($arr){
+		    foreach ($arr as $key => $value) {
+		    	$newArray[]=array(0=>$value["style"],1=>$value["count"]);
+		    }
+	    }
+
+	    $json = json_encode($newArray);
+	break;
+	*/
 
 	case "player_duel_graph": //Should select type, and let client filter that.. should apply smoothing? 
 		if (!isset($_POST['player'])) {

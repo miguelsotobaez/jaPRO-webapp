@@ -1,6 +1,6 @@
 <?php
 
-function TimeToSTring($duration_ms) { //loda fixme... has to be a standard way to do this
+function TimeToString($duration_ms) { //loda fixme... has to be a standard way to do this
   if ($duration_ms >= (60*60*1000)) {
     $hours = (int)(($duration_ms / (1000*60*60)) % 24);
     $minutes = (int)(($duration_ms / (1000*60)) % 60);

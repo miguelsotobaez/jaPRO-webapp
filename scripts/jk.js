@@ -3,6 +3,8 @@
  *
  */
 
+ var icon_width = "72px";
+
 $(document).ready(function () {
 	dashboard(page);
 
@@ -12,22 +14,30 @@ $(document).ready(function () {
         player_title();//Show total number of players, get each playername for dropdown select
         if (player) { //Player selected, show specific stats
             player_header(); //Shows avatar and has buttons to switch between race and duel
-            player_overall_stats(); //Combined stats for all duel types, all race styles, etc.
+            //player_overall_stats(); //Combined stats for all duel types, all race styles, etc.
 
             if (race == 0) {
                 if (0)//(player_duel_type)//Ditch this maybe?
                     player_duel_type_stats();//Ditch this maybe?
                 else {
+                    player_duel_stats(); //Top 5 duel type elos ? With some visual representing how far above 1000 each is? Or just bar graph?
                     player_duel_awards();
-                    player_duel_stats();
+                    player_duel_graph();
+                    //Elo history graph? does that overlap with duel stats?
+                    //recent stuff?
+                    //most underdog wins? wont wory right cuz of early duels.
+
                 }
             }
             else {
                 if (0)//(player_race_style) //Ditch this maybe?
                     player_race_style_stats();//Ditch this maybe?
                 else {
-                    player_race_awards();
                     player_race_stats();//Do we have to get literally everything for this since we have to compare it to other players to get percentile?
+                    player_race_awards();
+                    player_best_races();
+                    //Recent stuff?
+                    //Strongest wins? .. max(entries/rank)
                 }
             }
 
@@ -37,9 +47,13 @@ $(document).ready(function () {
             //Total # of races is viewable on race page
             //Most popular styles is viewable on race page
             //I guess it could be course based?
+            if (race == 0) {
+                player_duel_charts(); // ?? what should this display
+            }
+            else {
+                player_map_charts(); //Most popular courses, most exclusive course-styles
 
-            player_map_charts(); //Most popular courses, most exclusive course-styles
-            player_duel_charts(); // ?? what should this display
+            }
         }
         
         //Global info for players, or should this be in a header shown on every page?
@@ -375,7 +389,7 @@ function duel_rank(){
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_duel_rank" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th><label title="Elo rank compared to every other elo regardless of type.">Rank</label></th><th>Player</th><th>Type</th><th>Elo</th><th data-hide="phone,table"><label title="Average strength of opponent. A lower value means this player faces easier opponents.">TS</label></th><th>Count</th></tr></thead>';
-    panel += '                      <tfoot><tr><th></th><th>Player</th><th>Type</th><th></th><th data-hide="phone,table"></th><th></th></tr></tfoot>';
+    panel += '                      <tfoot><tr><th></th><th>Player</th><th>Type</th><th></th><th data-hide="phone,table"></th><th></th></tr></tfoot></table>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -516,7 +530,7 @@ function duel_list(){
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_duel_list" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th>Winner</th><th>Loser</th><th>Type</th><th data-hide="phone,table">Winner Health</th><th>Odds</th><th>Date</th><th data-hide="phone,table">Duration</th></tr></thead>';
-    panel += '                      <tfoot><tr><th>Winner</th><th>Loser</th><th>Type</th><th data-hide="phone,table"></th><th></th><th></th><th data-hide="phone,table"></th></tr></tfoot>';
+    panel += '                      <tfoot><tr><th>Winner</th><th>Loser</th><th>Type</th><th data-hide="phone,table"></th><th></th><th></th><th data-hide="phone,table"></th></tr></tfoot></table>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -817,7 +831,7 @@ function race_rank(){
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_race_rank" width="100%" class="table table-striped table-hover">';
     panel += '                      <thead><tr><th><label title="Score rank compared to every other score regardless of style.">Rank</label></th><th>Username</th><th>Style</th><th>Score</th><th data-hide="phone,table">Average Score</th><th data-hide="phone,table">Average Percentile</th><th data-hide="phone,table">Average Rank</th><th data-hide="phone,table">Golds</th><th data-hide="phone,table">Silvers</th><th data-hide="phone,table">Bronzes</th><th>Count</th></tr></thead>';
-    panel += '                      <tfoot><tr><th></th><th>Username</th><th>Style</th><th></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th></th></tr></tfoot>';
+    panel += '                      <tfoot><tr><th></th><th>Username</th><th>Style</th><th></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th data-hide="phone,table"></th><th></th></tr></tfoot></table>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -1190,9 +1204,9 @@ function race_list(){
 	                { "data": 6, "render": 
 	                    function ( data, type, row, meta ) { 
 	                        var date = new Date(data*1000); //fixme the IP should be a global variable defined somewhere?
-	                        return '<a href="http://162.248.89.208/races/'+encodeURIComponent(row[1])+'/'+encodeURIComponent(row[1])+'-'+encodeURIComponent(row[2].replace(/ |\//g, ""))+'-'
-	                            +RaceToString(row[3]).toLowerCase()+'.dm_26">'+(date.getYear()-100) + '-' + ('0'+(date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + ' ' 
-	                            + ('0'+(date.getHours()+1)).slice(-2) + ':' + ('0'+(date.getMinutes()+1)).slice(-2) + '<a>' }},
+                            var playerHTML = encodeURIComponent(row[1]);
+	                        return '<a href="http://162.248.89.208/races/'+playerHTML+'/'+playerHTML+'-'+encodeURIComponent(row[2].replace(/ |\//g,""))+'-'+RaceToString(row[3]).toLowerCase()+'.dm_26">'+
+                                (date.getYear()-100)+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+date.getDate()).slice(-2)+' '+('0'+(date.getHours()+1)).slice(-2)+':'+('0'+(date.getMinutes()+1)).slice(-2)+'<a>'}},
 	                { "data": 7, "sType": "num-durhtml", "className": "duration_ms", "render":
 	                    function ( data, type, row, meta ) { 
 	                        return '<td style="text-align: right;">'+RaceTimeToString(data)+'</td>' }} //Why doesnt this work..
@@ -1334,22 +1348,21 @@ function player_title(){ //Show total number of players, get each playername for
     HTML+='                    </div>';
     HTML+='                    <div class="header-title">';
     HTML+='                        <h3>'+ (player ? player : "Players") + ' (WIP) <button class="btn btn-warning" id="update_player">Update</button></h3>';
-    //HTML+='                        <select id="dropdown"></select>'; //Should be live-searchable 
 
     HTML += '                      <form id="selectplayer" method="get" action="?">';
     HTML += '                           <input type="hidden" name="page" value="player">';
-    HTML += '                           <select id="select_player_dropdown" class="filter form-control input-sm" name="name"></select>'; //Make update on change not submit click?
+    HTML += '                           <select id="select_player_dropdown" class="filter form-control input-sm" name="name" onchange="this.form.submit()"></select>'; //Make update on change not submit click?
     HTML += '                           <input type="hidden" name="race" value="'+ (race == 0 ? 0 : 1) +'">'; //Get race value
-    HTML += '                           <input type="submit">';
     HTML += '                      </form>';
 
     //Race toggle button
     HTML += '                      <form id="selectraceorduel" method="get" action="?">';
     HTML += '                           <input type="hidden" name="page" value="player">';
     HTML += '                           <input type="hidden" name="name" value="'+ player +'">'; //Get race value
-    HTML += '                           <input checked data-toggle="toggle" type="radio" name="race" value="1">Race'; 
-    HTML += '                           <input checked data-toggle="toggle" type="radio" name="race" value="0">Duel'; 
-    HTML += '                           <input type="submit">';
+    HTML += '                           <div class="btn-group btn-group-toggle" data-toggle="buttons">'; 
+    HTML += '                               <label class="btn btn-primary"><input id="duelbutton" type="radio" name="race" value="0" onchange="this.form.submit()">Duel</label>'; 
+    HTML += '                               <label class="btn btn-primary"><input id="racebutton" type="radio" name="race" value="1" onchange="this.form.submit()">Race</label>'; 
+    HTML += '                           </div>'; 
     HTML += '                      </form>';
 
     HTML+='                    </div>';
@@ -1363,8 +1376,6 @@ function player_title(){ //Show total number of players, get each playername for
         buildDropdown: function(result, dropdown, emptyMessage) { // Remove current options 
             //dropdown.html(''); // Add the empty option with the empty message 
             dropdown.append('<option value="">' + emptyMessage + '</option>'); // Check result isnt empty 
-
-
 
             if(result != '') { // Loop through each of the results and append the option to the dropdown 
                 $.each(result, function(k, v) { 
@@ -1382,8 +1393,33 @@ function player_title(){ //Show total number of players, get each playername for
         data: { option: "player_accounts" },
         success: function(res) {
             helpers.buildDropdown( res, $('#select_player_dropdown'), 'Select a player' ); 
+            if (player)
+                PlayerStats(res);
         }
     });
+
+
+    function PlayerStats(data) {
+        var HTML = '';
+        $.each(data, function(k, v) { //bsearch instead of loop?
+            if (v[0] == player) { //break
+                if (v[1] > 1) { //Some accounts were created before this was stored
+                    var created = new Date(v[1]*1000);
+                    HTML+='Created: ' + (created.getYear()-100) + '-' + ('0'+(created.getMonth()+1)).slice(-2) + '-' + ('0' + created.getDate()).slice(-2) + ' ' 
+                                    + ('0'+(created.getHours()+1)).slice(-2) + ':' + ('0'+(created.getMinutes()+1)).slice(-2);
+                    HTML+='<br>';
+                }
+                if (v[2] > 1) {
+                    var lastlogin = new Date(v[2]*1000);
+                    HTML+= 'Lastlogin: ' + (lastlogin.getYear()-100) + '-' + ('0'+(lastlogin.getMonth()+1)).slice(-2) + '-' + ('0' + lastlogin.getDate()).slice(-2) + ' ' 
+                                    + ('0'+(lastlogin.getHours()+1)).slice(-2) + ':' + ('0'+(lastlogin.getMinutes()+1)).slice(-2);
+                }
+                return false; 
+            }
+        });
+
+        $("#main-content").append(HTML);
+    }
 
     //Update button
     $("#update_player").click(function(e) {
@@ -1401,6 +1437,14 @@ function player_title(){ //Show total number of players, get each playername for
             }
         });
     });
+
+    $("#select_player_dropdown").val(player);
+
+    if (race == 0)
+        document.getElementById('duelbutton').checked = true;
+    else
+        document.getElementById('racebutton').checked = true;
+    $(':input:checked').parent('.btn').addClass('active'); //sickening
 
 }
 
@@ -1643,72 +1687,253 @@ function player_duel_charts(){//
     $('#menu_player').addClass("active");
 }
 
-function player_header() {//Shows avatar and has buttons to switch between race and duel
+function player_header(){//Shows avatar and has buttons to switch between race and duel
 
 }
 
-function player_overall_stats() {//Combined stats for all duel types, all race styles, etc
+/*
+function player_overall_stats(){//Combined stats for all duel types, all race styles, etc
 
 }
+*/
 
-function player_race_stats(){//Most popular duels, total number of duels
-    var panel = "";
-    panel += '<div id="third_row" class="row">';
-    panel += '  <div class="col-md-6">';
-    panel += '                    <div class="panel panel-filled">';
-    panel += '                      <div class="panel-heading">';
-    panel += '                          Race Types';
-    panel += '                      </div>';
-    panel += '                        <div class="panel-body">';
-    panel += '                            <p>Favorite race types.</p>';
-    panel += '                            <div id="player_race_stats">';
-    panel += '                            </div>';
-    panel += '                        </div>';
-    panel += '                    </div>';
+function player_race_statsOLD(){ // Problem - crashes if less than 5 total styles are found?
+    var panel;
+    panel = '<div id="first_row" class="row">';
+    panel += '  <div class="col-md-12">';
+    panel += '      <div id="player_race_stats">';
+    panel += '      </div>';
     panel += '                </div>';
-    panel += '            </div>';
+    panel += '                </div>';
     $("#main-content").append(panel);
 
-    var data = null;
-    $.ajax({
-        type: "POST",
-        url: "ajax/getJSON.php",
-        dataType: "JSON",
-        async: true,
-        data: { option: "player_race_stats", player: player},
-        success: function(res) {
-        	var data=res.map(Number); // ????
-            PlayerRaceChart(data);
+    $(document).ready(function() {
+        $.ajax({
+            type: "POST",
+            url: "ajax/getJSON.php",
+            dataType: "JSON",
+            async: true,
+            data: { option: "player_race_stats", player: player},
+            success: function(res) {
+                PlayerRaceStats(res);
+            }
+        });
+
+        function PlayerRaceStats(data) {
+        //Loda fixme, this can use the json from datatable_race_rank maybe and avoid a query?
+            var chart = new Highcharts.Chart({
+                chart: {
+                    type: 'bar',
+                    renderTo: 'player_race_stats',
+                    margin: 0,
+                    height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
+                },
+                title: null,
+                credits: false,
+                xAxis: {
+                    labels: {
+                       enabled: false
+                    },
+                    lineColor: 'transparent',
+                    minorTickLength: 0,
+                    tickLength: 0,
+                },
+                yAxis: {
+                    labels: {
+                        enabled: false
+                    },
+                    minorTickLength: 0,
+                    tickLength: 0,
+                    reversedStacks: false,
+                    gridLineColor: 'transparent',
+                    title: {
+                        enabled: false,
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                labels: {
+                        enabled: false
+                },
+                plotOptions: {
+                    series: {
+                        stacking: 'normal'
+                    }
+                },         
+                tooltip: {
+                  formatter: function() {
+                    return this.series.name + ' ('+ this.y +' strength)';
+                  }
+                },      
+                series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?
+                    name: RaceToString(data[0][0]),
+                    data: [Number(data[0][1])]
+                }, {
+                    name: RaceToString(data[1][0]),
+                    data: [Number(data[1][1])]
+                }, {
+                    name: RaceToString(data[2][0]),
+                    data: [Number(data[2][1])]
+                }, {
+                    name: RaceToString(data[3][0]),
+                    data: [Number(data[3][1])]
+                }, {
+                    name: RaceToString(data[4][0]),
+                    data: [Number(data[4][1])]
+                }]
+            });
         }
     });
 
-    function PlayerRaceChart(data) {
-        var chart = new Highcharts.Chart({
-            chart: {
-                renderTo: 'player_race_stats',
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
-            },
-            title: null,
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        color: '#000000',
-                        connectorColor: '#000000'
+    $('.jk-nav li').removeClass("active");
+    $('#menu_player').addClass("active");
+}
+
+function player_race_stats(){ // Problem - crashes if less than 5 total styles are found?
+    var panel;
+    panel = '<div id="first_row" class="row">';
+    panel += '  <div class="col-md-12">';
+    panel += '      <div id="player_race_stats">';
+    panel += '      </div>';
+    panel += '      <div id="player_race_chart">';
+    panel += '      </div>';
+    panel += '                </div>';
+    panel += '                </div>';
+    $("#main-content").append(panel);
+
+    $(document).ready(function() {
+        $.ajax({
+            type: "POST",
+            url: "ajax/getJSON.php",
+            dataType: "JSON",
+            async: true,
+            data: { option: "player_race_stats", player: player},
+            success: function(res) {
+                var data = res;
+                var chartData = [ //Init this to zeroes so we dont get bugs if player has less than 5 styles
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0]
+                ];
+                var diffCount = 0;
+                for (i=0; i<data.length; i++) { //Get largest 5 diffs? Excluding style=-1
+                    var style = Number(data[i][0]);
+                    var score = (Number(data[i][1])+Number(data[i][2]))/2;
+                    var diff = Number(data[i][3]);
+                    var avg_rank = Number(data[i][4]);
+                    var percentile = Number(data[i][5]);
+                    var golds = Number(data[i][6]);
+                    var silvers = Number(data[i][7]);
+                    var bronzes = Number(data[i][8]);
+                    var count = Number(data[i][9]);
+                    var SPR = (Number(data[i][2])/count).toFixed(2);
+
+                    if (style == -1) {//Do stats up top for this one
+                        document.getElementById('player_race_stats').innerHTML='Score:'+score+' SPR:'+SPR+' Avg rank:'+avg_rank+' Percentile:'+percentile+' Golds:'+golds+' Silvers:'+silvers+' Bronzes:'+bronzes+' Count:'+count;
+
+                        //Remove row from data so we can reliably chart it?
+                    }
+                    else {//Make a panel for each style ?
+                        if (i < 2 || count > 3 || SPR > 3) { //Dont show trash.  But what if they only have trash lol .. Ehh idk.
+                            var panel = "";
+                            panel += '<div id="third_row" class="row">';
+                            panel += '  <div class="col-md-12">';
+                            panel += '                    <div class="panel panel-filled">';
+                            panel += '                      <div class="panel-heading">';
+                            panel += '                      <span id="player_race_award_count">Style ('+RaceToString(style)+')</span>'
+                            panel += '                      </div>';
+                            panel += '                        <div class="panel-body">';
+                            panel += '                            <div id="player_race_style_'+style+'">';
+                            panel += '                            </div>';
+                            panel += '                        </div>';
+                            panel += '                    </div>';
+                            panel += '                </div>';
+                            panel += '            </div>';
+                            $("#main-content").append(panel);
+
+                            document.getElementById('player_race_style_'+data[i][0]).innerHTML='Score:'+score+' SPR'+SPR+' Avg rank:'+avg_rank+' Percentile:'+percentile+' Golds:'+golds+' Silvers:'+silvers+' Bronzes:'+bronzes+' Count:'+count+' Diff: '+diff;
+                            //assoc array from JSON here even tho its bigger, so we can avoid the stupid [0] shit?
+                        }
+                        if (diffCount < 5) {
+                            chartData[diffCount][0] = style;
+                            chartData[diffCount][1] = diff;
+                         }
+                        diffCount++;
                     }
                 }
-            },
-            series: [{
-                type: 'pie',
-                name: 'Strength',
-                data: data
-            }]
+                PlayerRaceChart(chartData);
+            }
         });
-    }
+
+        function PlayerRaceChart(data) {
+        //Loda fixme, this can use the json from datatable_race_rank maybe and avoid a query?
+            var chart = new Highcharts.Chart({
+                chart: {
+                    type: 'bar',
+                    renderTo: 'player_race_chart',
+                    margin: 0,
+                    height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
+                },
+                title: null,
+                credits: false,
+                xAxis: {
+                    labels: {
+                       enabled: false
+                    },
+                    lineColor: 'transparent',
+                    minorTickLength: 0,
+                    tickLength: 0,
+                },
+                yAxis: {
+                    labels: {
+                        enabled: false
+                    },
+                    minorTickLength: 0,
+                    tickLength: 0,
+                    reversedStacks: false,
+                    gridLineColor: 'transparent',
+                    title: {
+                        enabled: false,
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                labels: {
+                        enabled: false
+                },
+                plotOptions: {
+                    series: {
+                        stacking: 'normal'
+                    }
+                },         
+                tooltip: {
+                  formatter: function() {
+                    return this.series.name + ' ('+ this.y +' strength)';
+                  }
+                },      
+                series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?
+                    name: RaceToString(data[0][0]),
+                    data: [Number(data[0][1])]
+                }, {
+                    name: RaceToString(data[1][0]),
+                    data: [Number(data[1][1])]
+                }, {
+                    name: RaceToString(data[2][0]),
+                    data: [Number(data[2][1])]
+                }, {
+                    name: RaceToString(data[3][0]),
+                    data: [Number(data[3][1])]
+                }, {
+                    name: RaceToString(data[4][0]),
+                    data: [Number(data[4][1])]
+                }]
+            });
+        }
+    });
 
     $('.jk-nav li').removeClass("active");
     $('#menu_player').addClass("active");
@@ -1717,10 +1942,10 @@ function player_race_stats(){//Most popular duels, total number of duels
 function player_race_awards(){//Most popular duels, total number of duels
     var panel = "";
     panel += '<div id="third_row" class="row">';
-    panel += '  <div class="col-md-6">';
+    panel += '  <div class="col-md-12">';
     panel += '                    <div class="panel panel-filled">';
     panel += '                      <div class="panel-heading">';
-    panel += '                          Race Awards';
+    panel += '                      <span id="player_race_award_count">Race awards (#)</span>'
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
     panel += '                            <div id="player_race_awards">';
@@ -1744,17 +1969,26 @@ function player_race_awards(){//Most popular duels, total number of duels
 
     function PlayerRaceAwards(data) {
         //ajax should return 2d array [award][value], JS should loop through and print name-png if value is 1
+        var count = 0;
         for (i=0; i<data.length; i++) {
             if (data[i][1] > 0) {
                 var img = document.createElement('img');
+                img.style.width = icon_width;
+                img.style.height = "auto";
                 if (data[i][0] == "dash") {
                     var award = 0;
-                    if (data[i][1] < 9600)
+                    if (data[i][1] < 9600) {
                         award = 9600;
-                    else if (data[i][1] < 9700)
+                        count+=3;
+                    }
+                    else if (data[i][1] < 9700) {
                         award = 9700;
-                    else if (data[i][1] < 9800)
+                        count+=2;
+                    }
+                    else if (data[i][1] < 9800) {
                         award = 9800;
+                        count++;
+                    }
                     if (award > 0) {
                         img.src = "images/awards/" + "dash-" + award + ".png";
                         img.title =  "Completed dash1 in faster than " + award/1000 + " seconds"; //eh need 3rd column for description?
@@ -1763,14 +1997,22 @@ function player_race_awards(){//Most popular duels, total number of duels
                 }
                 else if (data[i][0] == "topspeed") {
                     var award = 0;
-                    if (data[i][1] > 5000)
+                    if (data[i][1] > 5000) {
                         award = 5000;
-                    else if (data[i][1] > 4000)
+                        count+=4;
+                    }
+                    else if (data[i][1] > 4000) {
                         award = 4000;
-                    else if (data[i][1] > 3000)
+                        count+=3;
+                    }
+                    else if (data[i][1] > 3000) {
                         award = 3000;
-                    else if (data[i][1] > 2000)
+                        count+=2;
+                    }
+                    else if (data[i][1] > 2000) {
                         award = 2000;
+                        count++;
+                    }
                     if (award > 0) {
                         img.src = "images/awards/" + "topspeed-" + award + ".png";
                         img.title =  "Achieved topspeed faster than " + award; //eh need 3rd column for description?
@@ -1781,22 +2023,176 @@ function player_race_awards(){//Most popular duels, total number of duels
                     img.src = "images/awards/" + data[i][0] + ".png";
                     img.title =  "Completed " + data[i][0]; //eh need 3rd column for description?
                     document.getElementById('player_race_awards').appendChild(img) //Scale to right size?
+                    count++;
                 }
             }
         }
+
+        document.getElementById('player_race_award_count').innerHTML='Race awards ('+count+')';
+        //Edit in the count at top
+
     }
 
     $('.jk-nav li').removeClass("active");
     $('#menu_player').addClass("active");
 }
 
-function player_duel_awards(){//Most popular duels, total number of duels
+
+function player_best_races(){
+    var panel;
+    panel = '<div id="second_row" class="row">';
+    panel += '  <div class="col-md-12">';
+    panel += '      <div class="panel panel-filled">';
+    panel += '          <div class="panel-heading">';
+    panel += '              Best races';
+    panel += '          </div>';
+    panel += '          <div class="panel-body">';
+    panel += '              <div class="table-responsive">';
+    panel += '                  <table id="datatable_player_best_races" width="100%" class="table table-striped table-hover">';
+    panel += '                      <thead><tr><th>Course</th><th>Style</th><th>Rank</th><th>Strength</th><th>Date</th><th>Duration</th></tr></thead>';
+    panel += '                      <tfoot><tr><th></th><th></th><th></th><th></th><th></th><th></th></tr></tfoot></table>';
+    panel += '              </div>';
+    panel += '          </div>';
+    panel += '      </div>';
+    panel += '  </div>';
+    panel += '</div>';
+    $("#main-content").append(panel);
+
+    $(document).ready(function() {
+        $.ajax({
+            type: "POST",
+            url: "ajax/getJSON.php",
+            dataType: "JSON",
+            async: true,
+            data: { option: "player_best_races", player: player},
+            success: function(res) {//JSON
+                PlayerBestRaces(res);
+            }
+        });
+
+        function PlayerBestRaces(data) {
+            $('#datatable_player_best_races').DataTable( {
+                "order": [[ 3, "desc" ]],
+                "bLengthChange": false,
+                "deferRender": true,
+                "dom": 'lrtp', //Hide search box
+                "data": data,
+                "columns": [
+                    { "data": 0,  "render": //Course
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? (data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="player_race_filter_course" value="'+data+'">' + (data) + '</button>') }},  
+                    { "data": 1, "render": //Style
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? RaceToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="player_race_filter_style" value="'+data+'">' + RaceToString(data) + '</button>') }},  
+                    { "data": 2, "sType": "num-html", "render": 
+                        function ( data, type, row, meta ) {
+                        if (data == 1) 
+                            return '<b><font color="#bc5700">1</font></b>'; //Muted orange
+                        else 
+                            return data; }},
+                    { "data": 3 }, //Strength
+                    { "data": 4, "render": //Date
+                        function ( data, type, row, meta ) { 
+                            var date = new Date(data*1000)
+                            var playerHTML = encodeURIComponent(player);
+                            return '<a href="http://162.248.89.208/races/'+playerHTML+'/'+playerHTML+'-'+encodeURIComponent(row[0].replace(/ |\//g,""))+'-'+RaceToString(row[1]).toLowerCase()+'.dm_26">'+
+                                (date.getYear()-100)+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+date.getDate()).slice(-2)+' '+('0'+(date.getHours()+1)).slice(-2)+':'+('0'+(date.getMinutes()+1)).slice(-2) +'</a>'}},  
+                    { "data": 5, "render": //Duration
+                        function ( data, type, row, meta ) { 
+                            return RaceTimeToString(data) }}
+                ],
+                "aoColumnDefs": [
+                    { "bSortable": false, "aTargets": [ 0 ] }
+                ],
+                "oLanguage": {
+                            "sInfo": '',
+                            "sInfoFiltered": ''
+                },
+                "aaSorting": [[ 1, 'asc' ]], // ?
+
+                initComplete: function () {
+                    $('#datatable_player_best_races').on('click', 'button[data-hook="player_race_filter_course"]', function () {
+                        if (document.getElementById("player_best_coursedropdown").value) {
+                            $("select[id='player_best_coursedropdown']").val("").change()
+                        }
+                        else {
+                            $("select[id='player_best_coursedropdown']").val($(this).val()).change()
+                        }
+                    });
+                    $('#datatable_player_best_races').on('click', 'button[data-hook="player_race_filter_style"]', function () {
+                        if (document.getElementById("player_best_styledropdown").value) {
+                            $("select[id='player_best_styledropdown']").val("").change()
+                        }
+                        else {
+                            $("select[id='player_best_styledropdown']").val($(this).val()).change()
+                        }
+                    });
+                    this.api().columns([0]).every( function () {
+                        var column = this;
+                        var select = $('<select id="player_best_coursedropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
+                            .appendTo( $(column.footer()).empty() )
+                            .on( 'change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+                                column
+                                    .search( val ? '^'+val+'$' : '', true, false ) //IDK
+                                    .draw();
+                            } );
+                        column.data().unique().sort().each( function ( d, j ) {
+                            select.append( '<option value="'+d+'">'+d+'</option>' )
+                        } );
+                    } );
+                    this.api().columns([1]).every( function () {
+                        var column = this;
+                        var select = $('<select id="player_best_styledropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
+                            .appendTo( $(column.footer()).empty() )
+                            .on( 'change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+                                column
+                                    .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
+                                    .draw();
+                            } );
+                        column.data().unique().sort(sortFunction).each( function ( d, j ) {
+                            select.append( '<option value="'+(d)+'">'+RaceToString(d)+'</option>' )
+                        } );
+                    } );
+                },
+                "drawCallback": function( settings ) { //Pagination button active fixes
+                    $(document).ready(function () {
+                        /*
+                        if (document.getElementById("duel_rank_typedropdown").value) {
+                            var buttons = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
+                            for (var i = 0; i < buttons.length; i++){
+                                buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
+                            }
+                        }
+                        else {
+                            var buttons = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
+                            for (var i = 0; i < buttons.length; i++){
+                                buttons[i].className = "btn btn-warning btn-xs";
+                            }
+                        }
+                        */
+                    });
+                }
+            });
+        }
+    });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_duel').addClass("active");
+}
+
+function player_duel_awards(){//Most popular duels, total number of duels.
     var panel = "";
     panel += '<div id="third_row" class="row">';
     panel += '  <div class="col-md-6">';
     panel += '                    <div class="panel panel-filled">';
     panel += '                      <div class="panel-heading">';
-    panel += '                          Duel Awards';
+    panel += '                      <span id="player_duel_award_count">Duel awards (#)</span>'
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
     panel += '                            <div id="player_duel_awards">';
@@ -1820,219 +2216,170 @@ function player_duel_awards(){//Most popular duels, total number of duels
 
     function CumulativeAward(name, count, description) {
         var award = 0;
-        if (count > 1000)
+        var awardCount = 0;
+        if (count > 1000) {
             award = 1000;
-        else if (count > 500)
+            awardCount = 4;
+        }
+        else if (count > 500) {
             award = 500;
-        else if (count > 250)
+            awardCount = 3;
+        }
+        else if (count > 250) {
             award = 250;
-        else if (count > 50)
+            awardCount = 2;
+        }
+        else if (count > 50){
             award = 50;
+            awardCount = 1;
+        }
 
         if (award > 0) {
             var img = document.createElement('img');
+            img.style.width = icon_width;
+            img.style.height = "auto";
             img.src = "images/awards/" + name + "-" + award + ".png";
             img.title =  "Won " + award + " " + description + " duels"; //eh need 3rd column for description?
             document.getElementById('player_duel_awards').appendChild(img) //Scale to right size?
         }
+        return awardCount;
     }
 
     function PlayerDuelAwards(data) {
         //ajax should return 2d array [award][value], JS should loop through and print name-png if value is 1
+        var count = 0;
         for (i=0; i<data.length; i++) {
             if (data[i][0] == "saber-wins") {
-                CumulativeAward("saber", data[i][1], "saber");
+                count += CumulativeAward("saber", data[i][1], "saber");
             }
             else if (data[i][0] == "force-wins") {
-                CumulativeAward("force", data[i][1], "force");
+                count += CumulativeAward("force", data[i][1], "force");
             }
             else if (data[i][0] == "gun-wins") {
-                CumulativeAward("gun", data[i][1], "gun");
+                count += CumulativeAward("gun", data[i][1], "gun");
             }
             else if (data[i][0] == "saber-flawless") {
-                CumulativeAward("saber-flawless", data[i][1], "flawless saber");
+                count += CumulativeAward("saber-flawless", data[i][1], "flawless saber");
             }
             else if (data[i][0] == "gun-flawless") {
-                CumulativeAward("gun-flawless", data[i][1], "flawless gun");
+                count += CumulativeAward("gun-flawless", data[i][1], "flawless gun");
             }
         }
+        document.getElementById('player_duel_award_count').innerHTML='Duel awards ('+count+')';
     }
 
     $('.jk-nav li').removeClass("active");
     $('#menu_player').addClass("active");
 }
 
-function player_duel_stats(){//Most popular duels, total number of duels
-    var panel = "";
-    panel += '<div id="third_row" class="row">';
-    panel += '  <div class="col-md-6">';
-    panel += '                    <div class="panel panel-filled">';
-    panel += '                      <div class="panel-heading">';
-    panel += '                          Duel Types';
-    panel += '                      </div>';
-    panel += '                        <div class="panel-body">';
-    panel += '                            <div id="player_duel_stats">';
-    panel += '                            </div>';
-    panel += '                            <div id="player_duel_graph">';
-    panel += '                            </div>';
-    panel += '                        </div>';
-    panel += '                    </div>';
+function player_duel_stats(){ // Problem - crashes if less than 5 total styles are found?
+    var panel;
+    panel = '<div id="first_row" class="row">';
+    panel += '  <div class="col-md-12">';
+    panel += '      <div id="player_duel_stats">';
+    panel += '      </div>';
     panel += '                </div>';
-    panel += '            </div>';
+    panel += '                </div>';
     $("#main-content").append(panel);
 
-    $.ajax({
-        type: "POST",
-        url: "ajax/getJSON.php",
-        dataType: "JSON",
-        async: true,
-        data: { option: "player_duel_stats", player: player},
-        success: function(res) {
-            PlayerDuelChart(res);
+    $(document).ready(function() {
+        $.ajax({
+            type: "POST",
+            url: "ajax/getJSON.php",
+            dataType: "JSON",
+            async: true,
+            data: { option: "player_duel_stats", player: player},
+            success: function(res) {
+                data = res;
+
+                var normalized = [];
+                for (i=0; i<data.length; i++) {
+                    normalized[i] = data[i][1];
+                }
+                var min = Math.min(...normalized);
+
+                for (i=0; i<normalized.length; i++) {
+                    data[i][2] = data[i][1] - min + 100;
+                }
+
+                //Pass in a 
+
+                PlayerDuelStats(data);
+            }
+        });
+
+        function PlayerDuelStats(data) {
+        //Loda fixme, this can use the json from datatable_race_rank maybe and avoid a query?
+            var chart = new Highcharts.Chart({
+                chart: {
+                    type: 'bar',
+                    renderTo: 'player_duel_stats',
+                    margin: 0,
+                    height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
+                },
+                title: null,
+                credits: false,
+                xAxis: {
+                    labels: {
+                       enabled: false
+                    },
+                    lineColor: 'transparent',
+                    minorTickLength: 0,
+                    tickLength: 0,
+                },
+                yAxis: {
+                    labels: {
+                        enabled: false
+                    },
+                    minorTickLength: 0,
+                    tickLength: 0,
+                    reversedStacks: false,
+                    gridLineColor: 'transparent',
+                    title: {
+                        enabled: false,
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                labels: {
+                        enabled: false
+                },
+                plotOptions: {
+                    series: {
+                        stacking: 'normal'
+                    }
+                },         
+                tooltip: {
+                  formatter: function() {
+                    return this.series.name + ' ('+ this.y +' strength)';
+                  }
+                },      
+                series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?
+                    name: DuelToString(data[0][0]) + " " + data[0][1] + " elo",
+                    data: [Number(data[0][2])]
+                }, {
+                    name: DuelToString(data[1][0]) + " " + data[1][1] + " elo",
+                    data: [Number(data[1][2])]
+                }, {
+                    name: DuelToString(data[2][0]) + " " + data[2][1] + " elo",
+                    data: [Number(data[2][2])]
+                }, {
+                    name: DuelToString(data[3][0]) + " " + data[3][1] + " elo",
+                    data: [Number(data[3][2])]
+                }, {
+                    name: DuelToString(data[4][0]) + " " + data[4][1] + " elo",
+                    data: [Number(data[4][2])]
+                }]
+            });
         }
     });
-
-    function PlayerDuelChart(data) {
-    	var chart = new Highcharts.Chart({
-            chart: {
-                renderTo: 'player_duel_stats',
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
-            },
-            title: null,
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        color: '#000000',
-                        connectorColor: '#000000'
-                    }
-                }
-            },
-            series: [{
-                type: 'pie',
-                name: 'Strength',
-                data: data
-            }]
-        });
-	}
-
-    $.ajax({
-        type: "POST",
-        url: "ajax/getJSON.php",
-        dataType: "JSON",
-        async: true,
-        data: { option: "player_duel_graph", player: player},
-        success: function(res) {
-        	PlayerDuelGraph(res);
-        }
-    });
-
-	function PlayerDuelGraph(data) {
- 		var dataSub = null;
-	    for (i=0; i<15; i++) {
-	        if (data[i] != undefined) {
-	            dataSub.push(data[i][0]);
-
-	        }
-	    }
-
-        var chart = new Highcharts.Chart({
-            chart: {
-                renderTo: 'player_duel_graph',
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
-            },
-            title: null,
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        color: '#000000',
-                        connectorColor: '#000000'
-                    }
-                }
-            },
-            series: [{
-                type: 'line',
-                name: 'Strength',
-                data: dataSub
-            }]
-        });
-    }
 
     $('.jk-nav li').removeClass("active");
     $('#menu_player').addClass("active");
 }
 
-function player_race_chart(){ //This should be a stacked horizontal bar graph like githubs code breakdwon
-    var panel = "";
-    panel += '<div id="third_row" class="row">';
-    panel += '  <div class="col-md-6">';
-    panel += '                    <div class="panel panel-filled">';
-    panel += '                      <div class="panel-heading">';
-    panel += '                          Race Types';
-    panel += '                      </div>';
-    panel += '                        <div class="panel-body">';
-    panel += '                            <p>Favorite race styles.</p>';
-    panel += '                            <div id="player_race_count_chart">';
-    panel += '                            </div>';
-    panel += '                        </div>';
-    panel += '                    </div>';
-    panel += '                </div>';
-    panel += '            </div>';
-    $("#main-content").append(panel);
-
-    var data = null;
-    $.ajax({
-        type: "POST",
-        url: "ajax/getJSON.php",
-        dataType: "JSON",
-        async: false,
-        data: { option: "player_race_chart", player: player},
-        success: function(res) {
-            data = res;
-        }
-    });
-
-    var chart;
-        chart = new Highcharts.Chart({
-            chart: {
-                renderTo: 'player_race_count_chart',
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
-            },
-            title: null,
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        color: '#000000',
-                        connectorColor: '#000000'
-                    }
-                }
-            },
-            series: [{
-                type: 'pie',
-                name: 'Strength',
-                data: data
-            }]
-        });
-
-    $('.jk-nav li').removeClass("active");
-    $('#menu_player').addClass("active");
-}
-
-function player_duel_graph(){
+function player_duel_graph(){ // Problem - crashes if less than 5 total styles are found?
     var panel = "";
     panel += '<div id="third_row" class="row">';
     panel += '  <div class="col-md-6">';
@@ -2050,39 +2397,81 @@ function player_duel_graph(){
     panel += '            </div>';
     $("#main-content").append(panel);
 
-    var data = null;
-    $.ajax({
-        type: "POST",
-        url: "ajax/getJSON.php",
-        dataType: "JSON",
-        async: false,
-        data: { option: "player_duel_graph", player: player},
-        success: function(res) {
-            data = res;
-        }
-    });
+    $(document).ready(function() {
+        $.ajax({
+            type: "POST",
+            url: "ajax/getJSON.php",
+            dataType: "JSON",
+            async: true,
+            data: { option: "player_duel_graph", player: player},
+            success: function(res) {
+                data = res;
 
-    var chart;
-        chart = new Highcharts.Chart({
-            data: {
-                data: data
-            },
+                var s1 = [];
+                for (i=0; i<data.length; i++) {
+                    s1[i] = data[i][1];
+                }
 
-            chart: {
-                renderTo: 'player_duel_graph',
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
-            },
-            title: null,
-            plotOptions: {
-            },
-            series: [{
-                name: 's1',
-                }, {
-                name: 's2'
-            }]
+                var s2 = [];
+                for (i=0; i<data.length; i++) {
+                    s1[2] = data[i][1];
+                }
+
+                var s3 = [];
+                for (i=0; i<data.length; i++) {
+                    s1[3] = data[i][1];
+                }
+
+                var seriesOptions = [],
+                seriesCounter = 0,
+                names = ['MSFT', 'AAPL', 'GOOG'];
+
+
+                PlayerDuelGraph(s1, s2, s3);
+            }
         });
+
+        function PlayerDuelGraph(data) {
+        //Loda fixme, this can use the json from datatable_race_rank maybe and avoid a query?
+            var chart;
+                chart = new Highcharts.Chart({
+
+                chart: {
+                    renderTo: 'player_duel_graph',
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: null,
+                plotOptions: {
+                },
+                series: seriesOptions
+            });
+
+
+            $.each(s1, function (i, name) {
+
+                //$.getJSON('https://www.highcharts.com/samples/data/' + name.toLowerCase() + '-c.json',    function (data) {
+
+                    seriesOptions[i] = {
+                        name: name,
+                        data: data
+                    };
+
+                    // As we're loading the data asynchronously, we don't know what order it will arrive. So
+                    // we keep a counter and create the chart when all the data is loaded.
+                    seriesCounter += 1;
+
+                    if (seriesCounter === names.length) {
+                        createChart();
+                    }
+                //});
+            });
+
+
+        }
+
+    });
 
     $('.jk-nav li').removeClass("active");
     $('#menu_player').addClass("active");
@@ -2187,6 +2576,11 @@ function servers(){
         $("#main-content").html(HTML);
 
 
+        //$hangoutAdmins = "loda, ark, source, pivot, ryan, ethan, bucky, frosty";
+        //$hangoutLocation = "Atlanta, GA";
+        //$hangoutDescription = "Our hangout server is the only 24/7 server on JKA set up for racing. The server uses the jaPRO mod that allows frame-rate independent physics and persistent highscores, resulting in cheat-proof competitive play.
+
+        //backgroundImage = "http://www.upsgaming.com/levelshots/". str_replace(array('(', ')'), '', str_replace(" ","%20",$mapName)) .".jpg"; //str_replace("%2F","/",urlencode($coursename))
 
         $('.jk-nav li').removeClass("active");
         $('#menu_servers').addClass("active");

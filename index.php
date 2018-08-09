@@ -33,16 +33,19 @@ require_once('inc/page.inc.php');
                 <li class="nav-category">
                     Stats
                 </li>
-
-                <li id="menu_player">
-                    <a href="?page=player"> Player</a>
-                </li>        
+    
                 <li id="menu_duel">
                     <a href="?page=duel"> Duel</a>
                 </li>
                 <li id="menu_race">
                     <a href="?page=race"> Race</a>
                 </li>
+                <li id="menu_player">
+                    <a href="?page=player"> Player</a>
+                </li>    
+                <li id="menu_player">
+                    <a href="?page=team"> Team</a>
+                </li>    
                 
 
                 <li class="nav-info">
@@ -74,6 +77,8 @@ require_once('inc/page.inc.php');
     var page = "<?php Print($page); ?>";
     var player = "<?php Print($player); ?>";
     var race = "<?php Print($race); ?>";
+    var badge = "<?php Print($badge); ?>";
+    var team = "<?php Print($team); ?>";
 </script>
 
 <!-- Vendor scripts -->

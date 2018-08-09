@@ -7,6 +7,12 @@ if (isset($_POST['option'])) {
 	$option = $_POST["option"];
 }
 
+//Debug
+if (isset($_GET['option'])) {
+	$option = $_GET["option"];
+}
+//Debug
+
 /*
 	if ($query_stmt = mysqli_prepare($link, $query)) {
 		mysqli_stmt_bind_param($query_stmt, "ss", $lastip, $lastip);
@@ -111,6 +117,56 @@ function UpdateAccounts() {
 	}
 }
 
+function UpdateTeams() {
+	global $db;
+	$last_update = $db->query("SELECT last_update FROM Updates WHERE type = 'teams'")->fetch_object()->last_update;  
+	$time = time();
+	if ($last_update + 60 > $time) { //If last update was within 1 minute, exit.
+		return;
+	}
+
+	$data = GetStats("teams", $last_update);
+
+	$values = "";
+	if ($data) {
+		foreach ($data as $value) {
+			$values .= "('".$value[0]."', '".$value[1]."', '".$value[2]."', '".$value[3]."'),";
+		}
+	}
+	InsertStats("REPLACE INTO Teams(name, tag, longname, flags)", $values);
+
+	if ($stmt = $db->prepare("UPDATE Updates SET last_update = ? WHERE type = 'teams'")) {
+		$stmt->bind_param('i', $time);
+		$stmt->execute();
+		$stmt->close();
+	}
+}
+
+function UpdateTeamAccounts() {
+	global $db;
+	$last_update = $db->query("SELECT last_update FROM Updates WHERE type = 'team_accounts'")->fetch_object()->last_update;  
+	$time = time();
+	if ($last_update + 60 > $time) { //If last update was within 1 minute, exit.
+		return;
+	}
+
+	$data = GetStats("team_accounts", $last_update);
+
+	$values = "";
+	if ($data) {
+		foreach ($data as $value) {
+			$values .= "('".$value[0]."', '".$value[1]."', '".$value[2]."'),";
+		}
+	}
+	InsertStats("REPLACE INTO TeamAccounts(team, account, flags)", $values);
+
+	if ($stmt = $db->prepare("UPDATE Updates SET last_update = ? WHERE type = 'team_accounts'")) {
+		$stmt->bind_param('i', $time);
+		$stmt->execute();
+		$stmt->close();
+	}
+}
+
 switch ($option) {
 	case "races":	
 		UpdateRaces();
@@ -120,10 +176,12 @@ switch ($option) {
 		UpdateDuels();
 	break;
 
-	case "accounts": //Just update everything
+	case "accounts": //Just update everything, also update team names?
 		UpdateAccounts();
 		UpdateRaces();
 		UpdateDuels();
+		UpdateTeams();
+		UpdateTeamAccounts();
 	break;
 }
 

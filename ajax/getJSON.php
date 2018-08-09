@@ -10,6 +10,40 @@ if (isset($_POST['option'])) {
 	$option = $_POST["option"];
 }
 
+//Debug
+if (isset($_GET['option'])) {
+	$option = $_GET["option"];
+}
+//Debug
+
+$awards = array(
+array("jump1-jka", 				"racearena_pro (jump1)", 		"jka", 		0),
+array("jump2-jka", 				"racearena_pro (jump2)", 		"jka",		0),
+array("jump3-jka", 				"racearena_pro (jump3)", 		"jka", 		0),
+array("bhop-jka", 				"racearena_pro (bhop)", 		"jka", 		0),
+array("ysal-jka", 				"racearena_pro (ysal)", 		"jka", 		0),
+array("rocketjump-rjq3", 		"racearena_pro (rocketjump)", 	"rjq3",		0),
+array("handbreaker-jka", 		"racearena_pro (handbreaker)", 	"jka", 		0),
+array("amountain-jka", 			"racearena_pro (a-mountain)", 	"jka", 		0),
+array("climb-jka", 				"racearena_pro (climb)", 		"jka", 		0),
+array("torture-q3", 			"racepack5 (torture)", 			"q3", 		0),
+array("bmountain-jka", 			"racepack5 (b-mountain)", 		"jka", 		0),
+array("cmountain-jka", 			"racepack6 (c-mountain)", 		"jka", 		0),
+array("jump1-wsw", 				"racearena_pro (jump1)", 		"wsw", 		0),
+array("jump2-wsw", 				"racearena_pro (jump2)", 		"wsw", 		0),
+array("handbreaker-wsw", 		"racearena_pro (handbreaker)", 	"wsw", 		0),
+array("amountain-siege", 		"racearena_pro (a-mountain)", 	"siege", 	0),
+array("jumpgreenpro-jka", 		"jump_green_pro", 				"jka", 		0),
+array("hevil-jka", 				"t3_hevil", 					"jka", 		0),
+array("r724-swoop", 			"racepack6 (r7-24)", 			"swoop", 	0),
+array("yavin-under14-jka", 		"racepack4 (yavin)", 			"jka", 		14000),
+array("imperial-under5-speed", 	"racepack6 (imperial)", 		"speed",	5000),
+
+
+array("idk", 	"f", 	"j", 0) //tiered shit
+
+);
+
 switch ($option) {
 	case "duel_rank":
 		$newArray = null;
@@ -78,7 +112,7 @@ switch ($option) {
 
 		if ($season) { //Preset filter so we can use sql cache
 			$query = "SELECT SQL_CACHE username, style, CAST(((score+newscore)/2) AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(rank AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(silvers, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
-				SELECT username, 99 AS style, SUM(season_rank) AS rank, COUNT(*) as count, SUM(season_entries-season_rank) AS newscore, SUM(CAST(season_entries AS DECIMAL(10, 2))/season_rank) AS score, SUM((season_entries - CAST(season_rank-1 AS DECIMAL(10, 2)))/season_entries) AS percentile, SUM(CASE WHEN season_rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN season_rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN season_rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE season = {$season} GROUP BY username
+				SELECT username, 99 AS style, SUM(season_rank) AS rank, COUNT(*) as count, SUM(season_entries-season_rank) AS newscore, SUM(CAST(season_entries AS DECIMAL(10, 2))/season_rank) AS score, SUM((season_entries - CAST(season_rank-1 AS DECIMAL(10, 2)))/season_entries) AS percentile, SUM(CASE WHEN season_rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN season_rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN season_rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE season = {$season} AND style != 14 GROUP BY username
 				UNION ALL
 				SELECT username, style, SUM(season_rank) AS rank, COUNT(*) as count, SUM(season_entries-season_rank) AS newscore, SUM(CAST(season_entries AS DECIMAL(10, 2))/season_rank) AS score, SUM((season_entries - CAST(season_rank-1 AS DECIMAL(10, 2)))/season_entries) AS percentile, SUM(CASE WHEN season_rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN season_rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN season_rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE season = {$season} GROUP BY username, style) AS T
 				ORDER BY score DESC";
@@ -87,7 +121,7 @@ switch ($option) {
 		}
 		else {
 			$query = "SELECT SQL_CACHE username, style, CAST(((score+newscore)/2) AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(rank AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(silvers, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
-				SELECT username, 99 AS style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries-rank) AS newscore, SUM(CAST(entries AS DECIMAL(10, 2))/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE rank != 0 GROUP BY username
+				SELECT username, 99 AS style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries-rank) AS newscore, SUM(CAST(entries AS DECIMAL(10, 2))/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE rank != 0 AND style != 14 GROUP BY username
 				UNION ALL
 				SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries-rank) AS newscore, SUM(CAST(entries AS DECIMAL(10, 2))/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE rank != 0 GROUP BY username, style) AS T
 				ORDER BY score DESC";
@@ -250,9 +284,8 @@ switch ($option) {
 
 	    $json = json_encode($newArray);
 	break;
-
-
-	case "player_race_statsOLD": //Get relative strength of each race style for this player
+/*
+	case "player_race_statsOLD2": //Get relative strength of each race style for this player
 		if (!isset($_POST['player'])) {
 			break;
 		}
@@ -274,8 +307,46 @@ switch ($option) {
 
 	    $json = json_encode($newArray);
 	break;
+*/
 
-	case "player_race_stats": //Combine with other stats query
+	case "player_race_stats":
+		if (!isset($_POST['player'])) {
+			break;
+		}
+		$username = $_POST["player"]; //accept either GET or POST 
+		//dont want to use binding because then it wont sql_cache - cool, it wont anyway. cuz of stupid limitations.
+
+		$newArray = null;
+		$stmt = $db->prepare("SELECT SQL_CACHE style, diff, score, score_pct, SPR, SPR_pct, avg_rank, avg_rank_pct, percentile, percentile_pct, golds, golds_pct, silvers, bronzes, count, count_pct 
+			FROM
+			(SELECT username, style, ROUND(oldscore/global_avg, 0) AS diff, ROUND((oldscore+newscore)/2,0) as score, ROUND(PERCENT_RANK() over (partition by style order by score),2) AS score_pct, ROUND(oldscore/count,2) AS SPR, ROUND(PERCENT_RANK() over (partition by style order by SPR),2) AS SPR_pct, avg_rank, ROUND(PERCENT_RANK() over (partition by style order by avg_rank DESC),2) AS avg_rank_pct, percentile, ROUND(PERCENT_RANK() over (partition by style order by percentile),2) AS percentile_pct, golds, ROUND(PERCENT_RANK() over (partition by style order by golds),2) AS golds_pct, silvers, bronzes, count, ROUND(PERCENT_RANK() over (partition by style order by count),2) AS count_pct
+			FROM 
+			(SELECT username, style, SUM(entries-rank) AS newscore, CAST(SUM(entries/CAST(rank AS DECIMAL(10, 2))) AS INT) AS oldscore, ROUND(AVG(rank),2) as avg_rank, ROUND(AVG((entries-CAST(rank-1 AS DECIMAL(10, 2)))/entries),2) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes, COUNT(*) as count
+			FROM Races WHERE rank != 0 GROUP BY username, style) AS T1, (SELECT style AS global_style, AVG(entries/rank) AS global_avg FROM Races GROUP BY style) as T2 WHERE style = global_style) AS T3 WHERE username = ? 
+			UNION ALL 
+			SELECT style, diff, score, score_pct, SPR, SPR_pct, avg_rank, avg_rank_pct, percentile, percentile_pct, golds, golds_pct, silvers, bronzes, count, count_pct 
+			FROM
+			(SELECT username, '-1' AS style, ROUND(oldscore/global_avg, 0) AS diff, ROUND((oldscore+newscore)/2,0) as score, ROUND(PERCENT_RANK() over (order by score),2) AS score_pct, ROUND(oldscore/count,2) AS SPR, ROUND(PERCENT_RANK() over (order by SPR),2) AS SPR_pct, avg_rank, ROUND(PERCENT_RANK() over (order by avg_rank DESC),2) AS avg_rank_pct, percentile, ROUND(PERCENT_RANK() over (order by percentile),2) AS percentile_pct, golds, ROUND(PERCENT_RANK() over (order by golds),2) AS golds_pct, silvers, bronzes, count, ROUND(PERCENT_RANK() over (order by count),2) AS count_pct
+			FROM 
+			(SELECT username, style, SUM(entries-rank) AS newscore, CAST(SUM(entries/CAST(rank AS DECIMAL(10, 2))) AS INT) AS oldscore, ROUND(AVG(rank),2) as avg_rank, ROUND(AVG((entries-CAST(rank-1 AS DECIMAL(10, 2)))/entries),2) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes, COUNT(*) as count
+			FROM Races WHERE rank != 0 GROUP BY username) AS T1, (SELECT AVG(entries/rank) AS global_avg FROM Races) as T2) AS T3 WHERE username = ? ORDER BY diff DESC");
+		$stmt->bind_param('ss', $username, $username);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$arr = preparedsql2arr($result);
+		$result->free();
+		if($arr) {
+		    foreach ($arr as $key => $value) {
+				$newArray[]=array(0=>$value["style"],1=>$value["diff"],2=>$value["score"],3=>$value["score_pct"],4=>$value["SPR"],5=>$value["SPR_pct"],6=>$value["avg_rank"],7=>$value["avg_rank_pct"],8=>$value["percentile"],
+					9=>$value["percentile_pct"],10=>$value["golds"],11=>$value["golds_pct"],12=>$value["silvers"],13=>$value["bronzes"],14=>$value["count"],15=>$value["count_pct"]);
+		    }
+		}
+		
+		$json = json_encode($newArray);
+	break;
+
+/*
+	case "player_race_stats_older": //Combine with other stats query
 		if (!isset($_POST['player'])) {
 			break;
 		}
@@ -302,6 +373,7 @@ switch ($option) {
 
 	    $json = json_encode($newArray);
 	break;
+*/
 
 	case "player_best_races": //Get relative strength of each race style for this player
 		if (!isset($_POST['player'])) {
@@ -309,7 +381,7 @@ switch ($option) {
 		}
 		$username = $_POST["player"]; //accept either GET or POST 
 		$newArray = null;
-	   	$stmt = $db->prepare("SELECT coursename, style, rank, ROUND(entries/rank, 0) AS strength, duration_ms, end_time FROM Races WHERE username = ? ORDER BY strength DESC LIMIT 50");
+	   	$stmt = $db->prepare("SELECT rank, coursename, style, ROUND(entries/rank, 0) AS strength, duration_ms, end_time FROM Races WHERE username = ? ORDER BY strength DESC LIMIT 50");
 		$stmt->bind_param('s', $username);
 		$stmt->execute();
 		$result = $stmt->get_result();
@@ -318,7 +390,7 @@ switch ($option) {
 
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array(0=>$value["coursename"],1=>$value["style"],2=>$value["rank"],3=>$value["strength"],4=>$value["end_time"],5=>$value["duration_ms"]);
+		    	$newArray[]=array(0=>$value["rank"],1=>$value["coursename"],2=>$value["style"],3=>$value["strength"],4=>$value["end_time"],5=>$value["duration_ms"]);
 		    }
 	    }
 
@@ -380,6 +452,49 @@ switch ($option) {
 		}
 		$username = $_POST["player"];
 		$newArray = null;
+
+
+
+/*
+
+		$query = "";
+		foreach ($awards as $i => $row)
+		{
+			//special case for weird awards
+			//If row[3] then add duration_ms check
+		    $query += "SELECT ".$row[0]." AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = ".$row[2]." AND username = ? AND coursename = ".$row[1]." THEN 1 ELSE 0 END as 'val'";
+		    $query += " UNION ALL ";
+		}
+		//Strip the last UNION ALL
+		$stmt = $db->prepare($query);
+		//bind generate bind param
+
+*/
+
+
+
+/*
+
+		$last = count($awards) - 1;
+		foreach ($awards as $i => $row)
+		{
+		    $isFirst = ($i == 0);
+		    $isLast = ($i == $last);
+
+	    	$style = RaceNameToInteger($row[2]);
+	    	$query = "SELECT ".$row[0]." AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE coursename = '".$row[1]."'".(($style == -1) ? "": " AND style = ".$style."").(($row[3] == 0) ? "" : " AND duration_ms < ".$duration) . ") THEN 1 ELSE 0 END as 'val'";
+			
+			echo $query;
+			//append to query
+			//append s to bind
+			//append $username to bind
+		}
+
+*/
+
+
+		//Prepare this automatically from badges array..?
+
 		$stmt = $db->prepare("SELECT SQL_CACHE 'jump1-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (jump1)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
 			SELECT 'jump2-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (jump2)') THEN 1 ELSE 0 END AS 'val' 
@@ -397,6 +512,8 @@ switch ($option) {
 			SELECT 'amountain-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (a-mountain)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
 			SELECT 'climb-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (climb)') THEN 1 ELSE 0 END AS 'val' 
+			UNION ALL 
+			SELECT 'torture-q3' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 4 AND username = ? AND coursename = 'racepack5 (torture)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
 			SELECT 'bmountain-jka' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = 1 AND username = ? AND coursename = 'racepack5 (b-mountain)') THEN 1 ELSE 0 END AS 'val' 
 			UNION ALL 
@@ -423,9 +540,9 @@ switch ($option) {
 			SELECT 'dash' AS 'key', (SELECT MIN(duration_ms) FROM Races WHERE style = 1 AND username = ? AND coursename = 'racearena_pro (dash1)') AS 'val' 
 			UNION ALL 
 			SELECT 'topspeed' AS 'key', (SELECT MAX(topspeed) FROM Races WHERE username = ?) AS 'val'");
-		$stmt->bind_param('ssssssssssssssssssssss', 
+		$stmt->bind_param('sssssssssssssssssssssss', 
 			$username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, $username, 
-			$username, $username, $username, $username, $username, $username, $username);
+			$username, $username, $username, $username, $username, $username, $username, $username);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		$arr = preparedsql2arr($result);
@@ -464,6 +581,74 @@ switch ($option) {
 	    if($arr){
 		    foreach ($arr as $key => $value) {
 		    	$newArray[]=array(0=>$value["key"],1=>$value["val"]);
+		    }
+	    }
+
+	    $json = json_encode($newArray);
+	break;
+
+	case "player_badges": //Get relative strength of each race style for this player
+		if (!isset($_POST['badge'])) {
+			break;
+		}
+		$badge = $_POST["badge"]; //accept either GET or POST 
+		$newArray = null;
+
+		$last = count($awards) - 1;
+		foreach ($awards as $i => $row)
+		{
+		    $isFirst = ($i == 0);
+		    $isLast = ($i == $last);
+
+		    if ($row[0] == $badge) {
+		    	$style = RaceNameToInteger($row[2]);
+		    	//Use min(end_time to get first instance of the award completion, for multiple season support, ah but this doesnt work, cuz someone can get it first then later update it.
+		    	$query = "SELECT username, style, MIN(duration_ms) AS duration FROM Races WHERE coursename = '".$row[1]."'".(($style == -1) ? "": " AND style = ".$style."").(($row[3] == 0) ? "" : " AND duration_ms < ".$duration) . " GROUP BY username ORDER BY duration ASC";
+		    	//echo $query;
+		    	$arr = sql2arr($query);
+				if($arr) {
+				    foreach ($arr as $key => $value) {
+						$newArray[]=array(0=>$value["username"],1=>$value["style"],2=>$value["duration"]);
+				    }
+				}	
+				$json = json_encode($newArray);
+		    	break;
+		    }
+		}
+	break;
+
+	case "team_list": //This will be hard to get the race-score for each team?
+		$newArray = null;
+	    $query ="SELECT name
+	    		FROM Teams 
+	    		ORDER BY name DESC";
+	
+	    $arr = sql2arr($query);
+	    if($arr){
+		    foreach ($arr as $key => $value) {
+		    	$newArray[]=array(0=>$value["name"]);
+		    }
+	    }
+
+	    $json = json_encode($newArray);
+	break;
+
+	case "team_member_list": //Also get race score and stats of each dude?
+		if (!isset($_POST['team'])) {
+			break;
+		}
+		$teamname = $_POST["team"];
+		$newArray = null;
+		$stmt = $db->prepare("SELECT account FROM TeamAccounts WHERE team = ? ORDER BY account DESC");
+		$stmt->bind_param('s', $teamname);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$arr = preparedsql2arr($result);
+		$result->free();
+	
+	    if($arr){
+		    foreach ($arr as $key => $value) {
+		    	$newArray[]=array(0=>$value["account"]);
 		    }
 	    }
 
@@ -509,6 +694,40 @@ function sql2arr($query){
 			return false;
 		}
 	}
+}
+
+function RaceNameToInteger($name) {
+	if ($name == "siege")
+		return 0;
+	else if ($name == "jka")
+		return 1;
+	else if ($name == "qw")
+		return 2;
+	else if ($name == "cpm")
+		return 3;
+	else if ($name == "q3")
+		return 4;
+	else if ($name == "pjk")
+		return 5;
+	else if ($name == "wsw")
+		return 6;
+	else if ($name == "rjq3")
+		return 7;
+	else if ($name == "rjcpm")
+		return 8;
+	else if ($name == "swoop")
+		return 9;
+	else if ($name == "jetpack")
+		return 10;
+	else if ($name == "speed")
+		return 11;
+	else if ($name == "sp")
+		return 12;
+	else if ($name == "slick")
+		return 13;
+	else if ($name == "botcpm")
+		return 14;
+	return -1;
 }
 
 ?>

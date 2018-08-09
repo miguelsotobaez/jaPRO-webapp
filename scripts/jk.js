@@ -6,7 +6,7 @@
  var icon_width = "72px";
 
 $(document).ready(function () {
-	dashboard(page);
+    dashboard(page);
 
     if(page=="home"){
         home();
@@ -116,6 +116,11 @@ $(document).ready(function () {
             //where end time > (now - 1 month) etc
 
         
+    } else if(page=="badges"){
+        if (badge) 
+            badges();
+        else
+            badges();
     }
     else if(page=="duel"){
         duel_title();
@@ -131,6 +136,15 @@ $(document).ready(function () {
         maps();
     }else if(page=="servers"){
         servers();
+    }
+    else if(page=="team"){
+        team_title();
+        if (team) {
+            team_member_list();
+        }
+        else {
+            team_list();//idk
+        }
     }else{
 
     }
@@ -193,16 +207,19 @@ function dashboard(page) {
             success: function(res) {
                 data = res;
                 dashboardData = data;
-               	var time = parseInt(Date.now()/1000);
-	            if (page=="duel") {
-	            	UpdateButton("update_duels", time - data[5][1]);
-	        	}
-	        	else if (page=="race") {
-	            	UpdateButton("update_races", time - data[4][1]);
-	        	}
-				else if (page=="player") {
-	            	UpdateButton("update_player", time - data[3][1]);
-	        	}
+                var time = parseInt(Date.now()/1000);
+                if (page=="duel") {
+                    UpdateButton("update_duels", time - data[5][1]);
+                }
+                else if (page=="race") {
+                    UpdateButton("update_races", time - data[4][1]);
+                }
+                else if (page=="player") {
+                    UpdateButton("update_player", time - data[3][1]);
+                }
+                else if (page == "team") {
+                    UpdateButton("update_teams", time - data[3][1]);
+                }
             }
         });
 
@@ -210,32 +227,36 @@ function dashboard(page) {
 }
 
 function UpdateButton(button, since) {
-	if (since < 61) { //60+ seconds
-		document.getElementById(button).innerHTML = 'Up to date'; //Gray out the button too?
-		document.getElementById(button).setAttribute('disabled','disabled');
-	}
-	else if (since > 60*60*24) {//older than 24 hours, auto update
-		document.getElementById(button).click();
-		document.getElementById(button).innerHTML = 'Up to date'; //Gray out the button too?
-		document.getElementById(button).setAttribute('disabled','disabled');
-	}
-	else {
-		document.getElementById(button).innerHTML = 'Updated '+timeSince(since)+ ' ago';
-	}
+    if (since < 61) { //60+ seconds
+        document.getElementById(button).innerHTML = 'Up to date'; //Gray out the button too?
+        document.getElementById(button).setAttribute('disabled','disabled');
+    }
+    else if (since > 60*60*24) {//older than 24 hours, auto update
+        document.getElementById(button).click();
+        document.getElementById(button).innerHTML = 'Up to date'; //Gray out the button too?
+        document.getElementById(button).setAttribute('disabled','disabled');
+    }
+    else {
+        document.getElementById(button).innerHTML = 'Updated '+timeSince(since)+ ' ago';
+    }
 }
 
 function home(){
     var p1 = '<h1>Welcome to jaPRO Mod!</h1><p>It is a mod started by loda based on OpenJK.</p>';
     var p2 = '<h4>What does jaPRO do for me?</h4><p><ul><li>Player accounts and stat database</li><li>Improved netcode with lag compensation</li><li>Multiple duel types</li><li>Full featured race-mode</li><li>Highscores and Elo</li><li>Improved weapon balancing and new weapon abilities</li><li>Improved full force balancing and features</li><li>Skill based grapple hook</li><li>New style of jetpack</li><li>Physics based flag-throw</li><li>Advanced bot AI</li><li>Instant update server settings (no longer requiring a map restart)</li><li>Lots of JK2 gameplay options</li><li>Improved vote system</li><li>Simple admin system with low potential for abuse</li><li>Ability to configure every setting back to basejk gameplay</li></ul></p>';
-    //var p3 = '<p><a class="btn btn-default btn-lg" href="https://github.com/videoP/jaPRO/raw/master/japro3.pk3" role="button">Download jaPRO Client</a> </p>';
+    var p3 = '<p><a class="btn btn-default btn-lg" href="https://github.com/videoP/jaPRO/raw/master/japro3.pk3" role="button">Download jaPRO Client</a> </p>';
     var p3 = '<p><a class="btn btn-default btn-lg download" href="https://github.com/eternalcodes/EternalJK/releases/latest" role="button">Download jaPRO Client</a></p>'
-    $("#main-content").html('<div class="container">'+p1+' <br> '+p2+' '+p3+'</div>');
+    //var p4 = '<p><a class="btn btn-default btn-lg" href="https://github.com/eternalcodes/EternalJK/blob/master/eternaljk-pre-release.zip" role="button">Download jaPRO Beta Client</a></p>'
+    var p4 = '<p><a class="btn btn-default btn-lg download2" href="https://github.com/eternalcodes/EternalJK/releases/latest" role="button">Download jaPRO Beta Client</a></p>'
+    $("#main-content").html('<div class="container">'+p1+' <br> '+p2+' '+p3+' '+p4+'</div>');
     $('.jk-nav li').removeClass("active");
     $('#menu_home').addClass("active");
 
     $.getJSON("https://api.github.com/repos/eternalcodes/EternalJK/releases/latest").done(function(release) {
         var asset = release.assets[0];
+    var client = release.assets[4];
         $(".download").attr("href", asset.browser_download_url);
+    $(".download2").attr("href", client.browser_download_url);
     });
 }
 
@@ -272,7 +293,7 @@ function duel_title(){
             url: "ajax/updateDB.php",
             data: { option: "duels" },
             success: function(result) {
-            	location.reload();  //this is bad! it should just redraw the table..
+                location.reload();  //this is bad! it should just redraw the table..
                 //alert('ok');
             },
             error: function(result) {
@@ -303,72 +324,72 @@ function duel_count(){
             }
         });
 
-    	//Loda fixme, this can use the json from datatable_duel_rank maybe and avoid a query?
-    	function DuelCountChart (data) {
-	        var chart = new Highcharts.Chart({
-	            chart: {
-	                type: 'bar',
-	                renderTo: 'chart_duel_count',
-	                margin: 0,
-	                height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
-	            },
-	            title: null,
-	            credits: false,
-	            xAxis: {
-	                labels: {
-	                   enabled: false
-	                },
-	                lineColor: 'transparent',
-	                minorTickLength: 0,
-	                tickLength: 0,
-	            },
-	            yAxis: {
-	                labels: {
-	                    enabled: false
-	                },
-	                minorTickLength: 0,
-	                tickLength: 0,
-	                reversedStacks: false,
-	                gridLineColor: 'transparent',
-	                title: {
-	                    enabled: false,
-	                }
-	            },
-	            legend: {
-	                enabled: false
-	            },
-	                labels: {
-	                    enabled: false
-	                },
-	            plotOptions: {
-	                series: {
-	                    stacking: 'normal'
-	                }
-	            },         
-	            tooltip: {
-	              formatter: function() {
-	                return this.series.name + ' ('+ this.y +' duels)';
-	              }
-	            },   
-	            series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?  Also should skip if the item is less than like 5percent?
-	                name: DuelToString(data[0][0]),
-	                data: [Number(data[0][1])]
-	            }, {
-	                name: DuelToString(data[1][0]),
-	                data: [Number(data[1][1])]
-	            }, {
-	                name: DuelToString(data[2][0]),
-	                data: [Number(data[2][1])]
-	            }, {
-	                name: DuelToString(data[3][0]),
-	                data: [Number(data[3][1])]
-	            }, {
-	                name: DuelToString(data[4][0]),
-	                data: [Number(data[4][1])]
-	            }]
-	        });
+        //Loda fixme, this can use the json from datatable_duel_rank maybe and avoid a query?
+        function DuelCountChart (data) {
+            var chart = new Highcharts.Chart({
+                chart: {
+                    type: 'bar',
+                    renderTo: 'chart_duel_count',
+                    margin: 0,
+                    height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
+                },
+                title: null,
+                credits: false,
+                xAxis: {
+                    labels: {
+                       enabled: false
+                    },
+                    lineColor: 'transparent',
+                    minorTickLength: 0,
+                    tickLength: 0,
+                },
+                yAxis: {
+                    labels: {
+                        enabled: false
+                    },
+                    minorTickLength: 0,
+                    tickLength: 0,
+                    reversedStacks: false,
+                    gridLineColor: 'transparent',
+                    title: {
+                        enabled: false,
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                    labels: {
+                        enabled: false
+                    },
+                plotOptions: {
+                    series: {
+                        stacking: 'normal'
+                    }
+                },         
+                tooltip: {
+                  formatter: function() {
+                    return this.series.name + ' ('+ this.y +' duels)';
+                  }
+                },   
+                series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?  Also should skip if the item is less than like 5percent?
+                    name: DuelToString(data[0][0]),
+                    data: [Number(data[0][1])]
+                }, {
+                    name: DuelToString(data[1][0]),
+                    data: [Number(data[1][1])]
+                }, {
+                    name: DuelToString(data[2][0]),
+                    data: [Number(data[2][1])]
+                }, {
+                    name: DuelToString(data[3][0]),
+                    data: [Number(data[3][1])]
+                }, {
+                    name: DuelToString(data[4][0]),
+                    data: [Number(data[4][1])]
+                }]
+            });
 
-    	}
+        }
 
 
     });
@@ -416,102 +437,102 @@ function duel_rank(){
             });
         }
         else {
-        	var data = JSON.parse(localStorage.getItem("duelRankCache"));
-        	DuelRankTable(data);
+            var data = JSON.parse(localStorage.getItem("duelRankCache"));
+            DuelRankTable(data);
         }
 
         function DuelRankTable(data) {
-	        $('#datatable_duel_rank').DataTable( {
-	            "order": [[ 3, "desc" ]],
-	            "bLengthChange": false,
-	            "deferRender": true,
-	            "dom": 'lrtp', //Hide search box
-	            "data": data,
-	            "columns": [
-	                { "data": null,  "render": 
-	                    function ( data, type, row, meta ) { 
-	                     return meta.row+1 }}, //Well.. this is not quite what we want, but I guess it will be ok (shows rank of their elo compared to every other elo regardless of type)
-	                { "data": 0, "render": 
-	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
-	                { "data": 1, "render": 
-	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? DuelToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="duel_rank_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},  //id should be unique 
-	                { "data": 2 },
-	                { "data": 3 },
-	                { "data": 4 }
-	            ],
-	            "aoColumnDefs": [
-	                { "bSortable": false, "aTargets": [ 0 ] }
-	            ],
-	            "oLanguage": {
-	                        "sInfo": '',
-	                        "sInfoFiltered": ''
-	            },
-	            "aaSorting": [[ 1, 'asc' ]], // ?
+            $('#datatable_duel_rank').DataTable( {
+                "order": [[ 3, "desc" ]],
+                "bLengthChange": false,
+                "deferRender": true,
+                "dom": 'lrtp', //Hide search box
+                "data": data,
+                "columns": [
+                    { "data": null,  "render": 
+                        function ( data, type, row, meta ) { 
+                         return meta.row+1 }}, //Well.. this is not quite what we want, but I guess it will be ok (shows rank of their elo compared to every other elo regardless of type)
+                    { "data": 0, "render": 
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+                    { "data": 1, "render": 
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? DuelToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="duel_rank_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},  //id should be unique 
+                    { "data": 2 },
+                    { "data": 3 },
+                    { "data": 4 }
+                ],
+                "aoColumnDefs": [
+                    { "bSortable": false, "aTargets": [ 0 ] }
+                ],
+                "oLanguage": {
+                            "sInfo": '',
+                            "sInfoFiltered": ''
+                },
+                "aaSorting": [[ 1, 'asc' ]], // ?
 
-	            initComplete: function () {
-					$('#datatable_duel_rank').on('click', 'button[data-hook="duel_rank_filter_type"]', function () {
-						if (document.getElementById("duel_rank_typedropdown").value) {
-							$("select[id='duel_rank_typedropdown']").val("").change()
-						}
-						else {
-							$("select[id='duel_rank_typedropdown']").val($(this).val()).change()
-						}
-					});
-	                this.api().columns([1]).every( function () {
-	                    var column = this;
-	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-	                        .appendTo( $(column.footer()).empty() )
-	                        .on( 'change', function () {
-	                            var val = $.fn.dataTable.util.escapeRegex(
-	                                $(this).val()
-	                            );
-	                            column
-	                                .search( val ? '^'+val+'$' : '', true, false ) //IDK
-	                                .draw();
-	                        } );
-	                    column.data().unique().sort().each( function ( d, j ) {
-	                        select.append( '<option value="'+d+'">'+d+'</option>' )
-	                    } );
-	                } );
-	                this.api().columns([2]).every( function () {
-	                    var column = this;
-	                    var select = $('<select id="duel_rank_typedropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
-	                        .appendTo( $(column.footer()).empty() )
-	                        .on( 'change', function () {
-	                            var val = $.fn.dataTable.util.escapeRegex(
-	                                $(this).val()
-	                            );
-	                            column
-	                                .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
-	                                .draw();
-	                        } );
-	                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
-	                        select.append( '<option value="'+(d)+'">'+DuelToString(d)+'</option>' )
-	                    } );
-	                } );
-	            },
-				"drawCallback": function( settings ) { //Pagination button active fixes
-					$(document).ready(function () {
-						/*
-						if (document.getElementById("duel_rank_typedropdown").value) {
-							var buttons = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
-						    for (var i = 0; i < buttons.length; i++){
-						        buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
-						    }
-						}
-						else {
-							var buttons = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
-						    for (var i = 0; i < buttons.length; i++){
-						       	buttons[i].className = "btn btn-warning btn-xs";
-							}
-						}
-						*/
-					});
-			    }
-	        });
-		}
+                initComplete: function () {
+                    $('#datatable_duel_rank').on('click', 'button[data-hook="duel_rank_filter_type"]', function () {
+                        if (document.getElementById("duel_rank_typedropdown").value) {
+                            $("select[id='duel_rank_typedropdown']").val("").change()
+                        }
+                        else {
+                            $("select[id='duel_rank_typedropdown']").val($(this).val()).change()
+                        }
+                    });
+                    this.api().columns([1]).every( function () {
+                        var column = this;
+                        var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                            .appendTo( $(column.footer()).empty() )
+                            .on( 'change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+                                column
+                                    .search( val ? '^'+val+'$' : '', true, false ) //IDK
+                                    .draw();
+                            } );
+                        column.data().unique().sort().each( function ( d, j ) {
+                            select.append( '<option value="'+d+'">'+d+'</option>' )
+                        } );
+                    } );
+                    this.api().columns([2]).every( function () {
+                        var column = this;
+                        var select = $('<select id="duel_rank_typedropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
+                            .appendTo( $(column.footer()).empty() )
+                            .on( 'change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+                                column
+                                    .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
+                                    .draw();
+                            } );
+                        column.data().unique().sort(sortFunction).each( function ( d, j ) {
+                            select.append( '<option value="'+(d)+'">'+DuelToString(d)+'</option>' )
+                        } );
+                    } );
+                },
+                "drawCallback": function( settings ) { //Pagination button active fixes
+                    $(document).ready(function () {
+                        /*
+                        if (document.getElementById("duel_rank_typedropdown").value) {
+                            var buttons = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
+                            for (var i = 0; i < buttons.length; i++){
+                                buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
+                            }
+                        }
+                        else {
+                            var buttons = document.querySelectorAll("[data-hook=duel_rank_filter_type]");
+                            for (var i = 0; i < buttons.length; i++){
+                                buttons[i].className = "btn btn-warning btn-xs";
+                            }
+                        }
+                        */
+                    });
+                }
+            });
+        }
     });
 
     $('.jk-nav li').removeClass("active");
@@ -556,107 +577,107 @@ function duel_list(){
             });
         }
         else {
-        	var data = JSON.parse(localStorage.getItem("duelListCache"));
-        	DuelListTable(data);
+            var data = JSON.parse(localStorage.getItem("duelListCache"));
+            DuelListTable(data);
         }
 
         function DuelListTable(data) {
-	        $('#datatable_duel_list').DataTable( {
-	            "order": [[ 5, "desc" ]],
-	            "deferRender": true,
-	            "bLengthChange": false,
-	            "data": data,
-	            "dom": 'lrtp', //Hide search box
-	            "columns": [
-	                { "data": 0, "render": 
-	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
-	                { "data": 1, "render": 
-	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+            $('#datatable_duel_list').DataTable( {
+                "order": [[ 5, "desc" ]],
+                "deferRender": true,
+                "bLengthChange": false,
+                "data": data,
+                "dom": 'lrtp', //Hide search box
+                "columns": [
+                    { "data": 0, "render": 
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+                    { "data": 1, "render": 
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'>'+data+'</a>'); }},
 
 
-	                { "data": 2, "render": 
-	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? DuelToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="duel_list_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},                       
-	                { "data": 3 , sType: "num-duelhp" }, //This does not sort properly - x/y  format, sort by sum(x+y)
-	                { "data": 4, "render": 
-	                    function ( data, type, row, meta ) {
-	                    if (data <= 15) 
-	                        return '<b><font color="#bc5700">'+data+'%</font></b>'; 
-	                    else 
-	                        return data+'%'; }},
-	                { "data": 5, "render": 
-	                    function ( data, type, row, meta ) { 
-	                        var date = new Date(data*1000);
-	                        return (date.getYear()-100) + '-' + ('0'+(date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + ' ' 
-	                            + ('0'+(date.getHours()+1)).slice(-2) + ':' + ('0'+(date.getMinutes()+1)).slice(-2) + '<a>' }},
-	                { "data": 6, "sType": "num-dur", "className": "duration_ms", "render": //should be uni-time
-	                    function ( data, type, row, meta ) { 
-	                        return DuelTimeToString(data) }}
-	            ],
-	            initComplete: function () {         
-					$('#datatable_duel_list').on('click', 'button[data-hook="duel_list_filter_type"]', function () {
-						if (document.getElementById("duel_list_typedropdown").value) {
-							$("select[id='duel_list_typedropdown']").val("").change()
-						}
-						else {
-							$("select[id='duel_list_typedropdown']").val($(this).val()).change()
-						}
-					});
-	                this.api().columns([0, 1]).every( function () {
-	                    var column = this;
-	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-	                        .appendTo( $(column.footer()).empty() )
-	                        .on( 'change', function () {
-	                            var val = $.fn.dataTable.util.escapeRegex(
-	                                $(this).val()
-	                            );
-	                            column
-	                                .search( val ? '^'+val+'$' : '', true, false )
-	                                .draw();
-	                        } );
-	                    column.data().unique().sort().each( function ( d, j ) {
-	                        select.append( '<option value="'+d+'">'+d+'</option>' )
-	                    } );
-	                } );
-	                this.api().columns([2]).every( function () {
-	                    var column = this;
-	                    var select = $('<select id="duel_list_typedropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
-	                        .appendTo( $(column.footer()).empty() )
-	                        .on( 'change', function () {
-	                            var val = $.fn.dataTable.util.escapeRegex(
-	                                $(this).val()
-	                            );
-	                            column
-	                                .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
-	                                .draw();
-	                        } );
-	                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
-	                        select.append( '<option value="'+d+'">'+DuelToString(d)+'</option>' )
-	                    } );
-	                } );
-	            },
-				"drawCallback": function( settings ) { //Pagination button active fixes	
-					$(document).ready(function () {
+                    { "data": 2, "render": 
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? DuelToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="duel_list_filter_type" value="'+data+'">' + DuelToString(data) + '</button>') }},                       
+                    { "data": 3 , sType: "num-duelhp" }, //This does not sort properly - x/y  format, sort by sum(x+y)
+                    { "data": 4, "render": 
+                        function ( data, type, row, meta ) {
+                        if (data <= 15) 
+                            return '<b><font color="#bc5700">'+data+'%</font></b>'; 
+                        else 
+                            return data+'%'; }},
+                    { "data": 5, "render": 
+                        function ( data, type, row, meta ) { 
+                            var date = new Date(data*1000);
+                            return (date.getYear()-100) + '-' + ('0'+(date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + ' ' 
+                                + ('0'+(date.getHours()+1)).slice(-2) + ':' + ('0'+(date.getMinutes()+1)).slice(-2) + '<a>' }},
+                    { "data": 6, "sType": "num-dur", "className": "duration_ms", "render": //should be uni-time
+                        function ( data, type, row, meta ) { 
+                            return DuelTimeToString(data) }}
+                ],
+                initComplete: function () {         
+                    $('#datatable_duel_list').on('click', 'button[data-hook="duel_list_filter_type"]', function () {
+                        if (document.getElementById("duel_list_typedropdown").value) {
+                            $("select[id='duel_list_typedropdown']").val("").change()
+                        }
+                        else {
+                            $("select[id='duel_list_typedropdown']").val($(this).val()).change()
+                        }
+                    });
+                    this.api().columns([0, 1]).every( function () {
+                        var column = this;
+                        var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                            .appendTo( $(column.footer()).empty() )
+                            .on( 'change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+                                column
+                                    .search( val ? '^'+val+'$' : '', true, false )
+                                    .draw();
+                            } );
+                        column.data().unique().sort().each( function ( d, j ) {
+                            select.append( '<option value="'+d+'">'+d+'</option>' )
+                        } );
+                    } );
+                    this.api().columns([2]).every( function () {
+                        var column = this;
+                        var select = $('<select id="duel_list_typedropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
+                            .appendTo( $(column.footer()).empty() )
+                            .on( 'change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+                                column
+                                    .search( val ? '^'+DuelToString(val)+'$' : '', true, false )
+                                    .draw();
+                            } );
+                        column.data().unique().sort(sortFunction).each( function ( d, j ) {
+                            select.append( '<option value="'+d+'">'+DuelToString(d)+'</option>' )
+                        } );
+                    } );
+                },
+                "drawCallback": function( settings ) { //Pagination button active fixes 
+                    $(document).ready(function () {
                         /*
-						if (document.getElementById("duel_list_typedropdown").value) {
-							var buttons = document.querySelectorAll("[data-hook=duel_list_filter_type]");
-						    for (var i = 0; i < buttons.length; i++){
-						        buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
-						    }
-						}
-						else {
-							var buttons = document.querySelectorAll("[data-hook=duel_list_filter_type]");
-						    for (var i = 0; i < buttons.length; i++){
-						       	buttons[i].className = "btn btn-warning btn-xs";
-							}
-						}
+                        if (document.getElementById("duel_list_typedropdown").value) {
+                            var buttons = document.querySelectorAll("[data-hook=duel_list_filter_type]");
+                            for (var i = 0; i < buttons.length; i++){
+                                buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
+                            }
+                        }
+                        else {
+                            var buttons = document.querySelectorAll("[data-hook=duel_list_filter_type]");
+                            for (var i = 0; i < buttons.length; i++){
+                                buttons[i].className = "btn btn-warning btn-xs";
+                            }
+                        }
                         */
-					});
-			    }
-	        });
-		}
+                    });
+                }
+            });
+        }
     });
 
 
@@ -700,7 +721,7 @@ function race_title(){
             url: "ajax/updateDB.php",
             data: { option: "races" },
             success: function(result) {
-            	location.reload();  //this is bad! it should just redraw the table..
+                location.reload();  //this is bad! it should just redraw the table..
                 //alert('ok');
             },
             error: function(result) {
@@ -735,69 +756,69 @@ function race_count(){
 
         function RaceCountChart(data) {
         //Loda fixme, this can use the json from datatable_race_rank maybe and avoid a query?
-	        var chart = new Highcharts.Chart({
-	            chart: {
-	                type: 'bar',
-	                renderTo: 'chart_race_count',
-	                margin: 0,
-	                height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
-	            },
-	            title: null,
-	            credits: false,
-	            xAxis: {
-	                labels: {
-	                   enabled: false
-	                },
-	                lineColor: 'transparent',
-	                minorTickLength: 0,
-	                tickLength: 0,
-	            },
-	            yAxis: {
-	                labels: {
-	                    enabled: false
-	                },
-	                minorTickLength: 0,
-	                tickLength: 0,
-	                reversedStacks: false,
-	                gridLineColor: 'transparent',
-	                title: {
-	                    enabled: false,
-	                }
-	            },
-	            legend: {
-	                enabled: false
-	            },
-	            labels: {
-	                    enabled: false
-	            },
-	            plotOptions: {
-	                series: {
-	                    stacking: 'normal'
-	                }
-	            },         
-	            tooltip: {
-	              formatter: function() {
-	                return this.series.name + ' ('+ this.y +' races)';
-	              }
-	            },      
-	            series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?
-	                name: RaceToString(data[0][0]),
-	                data: [Number(data[0][1])]
-	            }, {
-	                name: RaceToString(data[1][0]),
-	                data: [Number(data[1][1])]
-	            }, {
-	                name: RaceToString(data[2][0]),
-	                data: [Number(data[2][1])]
-	            }, {
-	                name: RaceToString(data[3][0]),
-	                data: [Number(data[3][1])]
-	            }, {
-	                name: RaceToString(data[4][0]),
-	                data: [Number(data[4][1])]
-	            }]
-	        });
-	    }
+            var chart = new Highcharts.Chart({
+                chart: {
+                    type: 'bar',
+                    renderTo: 'chart_race_count',
+                    margin: 0,
+                    height: 50 //Not ideal, should be controlled by css. Also the width isnt the full page, I think cuz of highcharts branding?
+                },
+                title: null,
+                credits: false,
+                xAxis: {
+                    labels: {
+                       enabled: false
+                    },
+                    lineColor: 'transparent',
+                    minorTickLength: 0,
+                    tickLength: 0,
+                },
+                yAxis: {
+                    labels: {
+                        enabled: false
+                    },
+                    minorTickLength: 0,
+                    tickLength: 0,
+                    reversedStacks: false,
+                    gridLineColor: 'transparent',
+                    title: {
+                        enabled: false,
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                labels: {
+                        enabled: false
+                },
+                plotOptions: {
+                    series: {
+                        stacking: 'normal'
+                    }
+                },         
+                tooltip: {
+                  formatter: function() {
+                    return this.series.name + ' ('+ this.y +' races)';
+                  }
+                },      
+                series: [{ //This should be more dynamic.. if theres less than 5 results it shouldnt bother trying to make 5 series?
+                    name: RaceToString(data[0][0]),
+                    data: [Number(data[0][1])]
+                }, {
+                    name: RaceToString(data[1][0]),
+                    data: [Number(data[1][1])]
+                }, {
+                    name: RaceToString(data[2][0]),
+                    data: [Number(data[2][1])]
+                }, {
+                    name: RaceToString(data[3][0]),
+                    data: [Number(data[3][1])]
+                }, {
+                    name: RaceToString(data[4][0]),
+                    data: [Number(data[4][1])]
+                }]
+            });
+        }
     });
 
     $('.jk-nav li').removeClass("active");
@@ -816,15 +837,15 @@ function race_rank(){
     panel += '          </div>';
     panel += '          <div class="panel-body">';
 
-    panel += '						<select id="race_rank_seasondropdown" class="filter form-control input-sm"><option value="0">Show all</option></select>'; //Make this get populated by season numbers.  Make it send POST to getJSON to requery with season number
+    panel += '                      <select id="race_rank_seasondropdown" class="filter form-control input-sm"><option value="0">Show all</option></select>'; //Make this get populated by season numbers.  Make it send POST to getJSON to requery with season number
 
 /*
-    panel += '						<div class="btn-group" data-toggle="buttons">';
-    panel += '                      	<label class="btn btn-warning active" id="race_rank_all"><input type="radio" checked>All</input></label>';
-    panel += ' 						 	<label class="btn btn-warning" id="race_rank_365"><input type="radio">Last year</input></label>';
-    panel += ' 						 	<label class="btn btn-warning" id="race_rank_90"><input type="radio">Last 3 months</input></label>';
-    panel += '							<label class="btn btn-warning" id="race_rank_7"><input type="radio">Last week</input></label>'; //Get dashboard getJSON info to show last update time 
-	panel += '          			</div>';
+    panel += '                      <div class="btn-group" data-toggle="buttons">';
+    panel += '                          <label class="btn btn-warning active" id="race_rank_all"><input type="radio" checked>All</input></label>';
+    panel += '                          <label class="btn btn-warning" id="race_rank_365"><input type="radio">Last year</input></label>';
+    panel += '                          <label class="btn btn-warning" id="race_rank_90"><input type="radio">Last 3 months</input></label>';
+    panel += '                          <label class="btn btn-warning" id="race_rank_7"><input type="radio">Last week</input></label>'; //Get dashboard getJSON info to show last update time 
+    panel += '                      </div>';
 */
 
 
@@ -840,16 +861,16 @@ function race_rank(){
     $("#main-content").append(panel);
 
     $(document).ready(function() {
-		var last_update = dashboardData[4][1];
-    	var seasonSelect = document.getElementById('race_rank_seasondropdown');
+        var last_update = dashboardData[4][1];
+        var seasonSelect = document.getElementById('race_rank_seasondropdown');
 
-    	for (var i = 1; i <= dashboardData[6][1]; i++) { //Seasons start at 1 and are consecutive.  //dashboardData[6][1]
-	    	seasonSelect.options.add( new Option("Season " + i, i));
-	    }
+        for (var i = 1; i <= dashboardData[6][1]; i++) { //Seasons start at 1 and are consecutive.  //dashboardData[6][1]
+            seasonSelect.options.add( new Option("Season " + i, i));
+        }
 
-		$('#race_rank_seasondropdown').change(function(e){
-	        e.preventDefault(); //idk why
-	        var season = $(this).val();
+        $('#race_rank_seasondropdown').change(function(e){
+            e.preventDefault(); //idk why
+            var season = $(this).val();
 
             var cacheName = "raceRankCache" + (season > 0 ? season : "All");
             var updateTimeName = "raceRankCacheTime" + (season > 0 ? season : "All");
@@ -858,180 +879,182 @@ function race_rank(){
             //localStorage.removeItem(updateTimeName);
 
 
-	        if(last_update > localStorage.getItem(updateTimeName) || !localStorage.getItem(cacheName)) { //Out of date
-	        	//alert("Querying " + updateTimeName + " " + cacheName);
-				GetRaceRank(season);
-	        }
-	        else 
-	        {
-	        	//alert("From Cache " + updateTimeName + " " + cacheName);
-	        	data = JSON.parse(localStorage.getItem(cacheName));
-	        	RaceRankTable(data);
-	        }
+            if(last_update > localStorage.getItem(updateTimeName) || !localStorage.getItem(cacheName)) { //Out of date
+                //alert("Querying " + updateTimeName + " " + cacheName);
+                GetRaceRank(season);
+            }
+            else 
+            {
+                //alert("From Cache " + updateTimeName + " " + cacheName);
+                data = JSON.parse(localStorage.getItem(cacheName));
+                RaceRankTable(data);
+            }
 
-	    });
+        });
 
-	    $("#race_rank_seasondropdown").val(0).change(); //Need to trigger so onchange function is called on pageload
+        $("#race_rank_seasondropdown").val(0).change(); //Need to trigger so onchange function is called on pageload
 
-		function GetRaceRank(season) {
-	        $.ajax({
-	            type: "POST",
-	            url: "ajax/getJSON.php",
-	            dataType: "JSON",
-	            async: true,
-	            data: { option: "race_rank", season: season},
-	            success: function(res) {
-					RaceRankTable(res);
+        function GetRaceRank(season) {
+            $.ajax({
+                type: "POST",
+                url: "ajax/getJSON.php",
+                dataType: "JSON",
+                async: true,
+                data: { option: "race_rank", season: season},
+                success: function(res) {
+                    RaceRankTable(res);
 
-					var cacheName = "raceRankCache" + (season > 0 ? season : "All");
-            		var updateTimeName = "raceRankCacheTime" + (season > 0 ? season : "All");
-            		localStorage.setItem(cacheName, JSON.stringify(res));
+                    var cacheName = "raceRankCache" + (season > 0 ? season : "All");
+                    var updateTimeName = "raceRankCacheTime" + (season > 0 ? season : "All");
+                    localStorage.setItem(cacheName, JSON.stringify(res));
                     localStorage.setItem(updateTimeName, last_update);
-	            }
-	        });
-	    }
+                }
+            });
+        }
 
         function RaceRankTable(data) {
-	        rank_table = $('#datatable_race_rank').DataTable( {
-	        	 destroy: true,
-	            "order": [[ 3, "desc" ]],
-	            "bLengthChange": false,
-	            "deferRender": true,
-	            "dom": 'lrtp', //Hide search box
-	            "data": data,
-	            "columns": [                
-	                { "data": null,  "render":
-	                    function ( data, type, row, meta ) { 
-	                     return meta.row+1 }}, //This is not what we want since it counts combined styles as a style.          
-	                { "data": 0, "render": 
-	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'&race=1>'+data+'</a>'); }},   
-	                { "data": 1, "sType": "numeric", "render": 
-	                    function ( data, type, row, meta ) { 
-	                        return RaceToString(data) }},
-	                { "data": 2 },
-	                { "data": 3 },
-	                { "data": 4 },
-	                { "data": 5 },
-	                { "data": 6 },
-	                { "data": 7 },
-	                { "data": 8 },
-	                { "data": 9 }
-	            ],
-	            "aoColumnDefs": [
-	                { "bSortable": false, "aTargets": [ 0,2 ] }
-	            ],
-	             "oLanguage": {
-	                        "sInfo": '',
-	                        "sInfoFiltered": ''
-	            },  
-	            "aaSorting": [[ 1, 'asc' ]],
-	            initComplete: function () {
-	                this.api().columns([1]).every( function () {
-	                    var column = this;
-	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-	                        .appendTo( $(column.footer()).empty() )
-	                        .on( 'change', function () {
-	                            var val = $.fn.dataTable.util.escapeRegex(
-	                                $(this).val()
-	                            );
-	                            column
-	                                .search( val ? '^'+val+'$' : '', true, false )
-	                                .draw();
-	                        } );
-	                    column.data().unique().sort().each( function ( d, j ) {
-	                        select.append( '<option value="'+d+'">'+d+'</option>' )
-	                    } );
-	                } );
-	                this.api().columns([2]).every( function () {
-	                    var column = this;
-	                    var select = $('<select class="filter form-control input-sm"></select>') //Why does jetpack and swoop show up in middle - because it sorts by string not numeric? Why does it not filter by all on pageload even though its selected
-	                        .appendTo( $(column.footer()).empty() )
-	                        .on( 'change', function () {
-	                            var val = $.fn.dataTable.util.escapeRegex(
-	                                $(this).val()
-	                            );
-	                            column
-	                                .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
-	                                .draw();
-	                        } );
-	                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
-	                        if (d == 99) //Style for "ALL"
-	                            select.append( '<option selected="selected" value="'+d+'">'+RaceToString(d)+'</option>' )
-	                        else
-	                            select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
-	                    } );
-	                } );
-	                this.api().columns(2).search('All')
-	                this.api().draw();
-	            }
-	        });
-		}
+            rank_table = $('#datatable_race_rank').DataTable( {
+                 destroy: true,
+                "order": [[ 3, "desc" ]],
+                "bLengthChange": false,
+                "deferRender": true,
+                "dom": 'lrtp', //Hide search box
+                "data": data,
+                "columns": [                
+                    { "data": null,  "render":
+                        function ( data, type, row, meta ) { 
+                         return meta.row+1 }}, //This is not what we want since it counts combined styles as a style.          
+                    { "data": 0, "render": 
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'&race=1>'+data+'</a>'); }},   
+                    { "data": 1, "sType": "numeric", "render": 
+                        function ( data, type, row, meta ) { 
+                            return RaceToString(data) }},
+                    { "data": 2 },
+                    { "data": 3 },
+                    { "data": 4, "sType": "num-html", "render": 
+                        function ( data, type, row, meta ) { 
+                            return parseInt(data*100) }},
+                    { "data": 5 },
+                    { "data": 6 },
+                    { "data": 7 },
+                    { "data": 8 },
+                    { "data": 9 }
+                ],
+                "aoColumnDefs": [
+                    { "bSortable": false, "aTargets": [ 0,2 ] }
+                ],
+                 "oLanguage": {
+                            "sInfo": '',
+                            "sInfoFiltered": ''
+                },  
+                "aaSorting": [[ 1, 'asc' ]],
+                initComplete: function () {
+                    this.api().columns([1]).every( function () {
+                        var column = this;
+                        var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                            .appendTo( $(column.footer()).empty() )
+                            .on( 'change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+                                column
+                                    .search( val ? '^'+val+'$' : '', true, false )
+                                    .draw();
+                            } );
+                        column.data().unique().sort().each( function ( d, j ) {
+                            select.append( '<option value="'+d+'">'+d+'</option>' )
+                        } );
+                    } );
+                    this.api().columns([2]).every( function () {
+                        var column = this;
+                        var select = $('<select class="filter form-control input-sm"></select>') //Why does jetpack and swoop show up in middle - because it sorts by string not numeric? Why does it not filter by all on pageload even though its selected
+                            .appendTo( $(column.footer()).empty() )
+                            .on( 'change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+                                column
+                                    .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
+                                    .draw();
+                            } );
+                        column.data().unique().sort(sortFunction).each( function ( d, j ) {
+                            if (d == 99) //Style for "ALL"
+                                select.append( '<option selected="selected" value="'+d+'">'+RaceToString(d)+'</option>' )
+                            else
+                                select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
+                        } );
+                    } );
+                    this.api().columns(2).search('All')
+                    this.api().draw();
+                }
+            });
+        }
 
 /*
-	    $("#race_rank_all").click(function(e) { //idk
-	        var start_time = "0"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
-	        var end_time = "0"; //0 for all. If set it specifies end filter.
-	        e.preventDefault();
-	        $.ajax({
-	            type: "POST",
-	            url: "ajax/getJSON.php",
-	            dataType: "JSON",
-	            async: true,
-	            data: { option: "race_rank", start_time: start_time, end_time: end_time },
-	            success: function(res) {
-	            	RaceRankTable(res);
-	            }
-	        });
-	    });
+        $("#race_rank_all").click(function(e) { //idk
+            var start_time = "0"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
+            var end_time = "0"; //0 for all. If set it specifies end filter.
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "ajax/getJSON.php",
+                dataType: "JSON",
+                async: true,
+                data: { option: "race_rank", start_time: start_time, end_time: end_time },
+                success: function(res) {
+                    RaceRankTable(res);
+                }
+            });
+        });
 
-	    $("#race_rank_365").click(function(e) {
-	        var start_time = "-365"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
-	        var end_time = "0"; //0 for all. If set it specifies end filter.
-	        e.preventDefault();
-	        $.ajax({
-	            type: "POST",
-	            url: "ajax/getJSON.php",
-	            dataType: "JSON",
-	            async: true,
-	            data: { option: "race_rank", start_time: start_time, end_time: end_time },
-	            success: function(res) {
-	            	RaceRankTable(res);
-	            }
-	        });
-	    });
+        $("#race_rank_365").click(function(e) {
+            var start_time = "-365"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
+            var end_time = "0"; //0 for all. If set it specifies end filter.
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "ajax/getJSON.php",
+                dataType: "JSON",
+                async: true,
+                data: { option: "race_rank", start_time: start_time, end_time: end_time },
+                success: function(res) {
+                    RaceRankTable(res);
+                }
+            });
+        });
 
-	    $("#race_rank_90").click(function(e) {
-	        var start_time = "-90"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
-	        var end_time = "0"; //0 for all. If set it specifies end filter.
-	        e.preventDefault();
-	        $.ajax({
-	            type: "POST",
-	            url: "ajax/getJSON.php",
-	            dataType: "JSON",
-	            async: true,
-	            data: { option: "race_rank", start_time: start_time, end_time: end_time },
-	            success: function(res) {
-	            	RaceRankTable(res);
-	            }
-	        });
-	    });
+        $("#race_rank_90").click(function(e) {
+            var start_time = "-90"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
+            var end_time = "0"; //0 for all. If set it specifies end filter.
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "ajax/getJSON.php",
+                dataType: "JSON",
+                async: true,
+                data: { option: "race_rank", start_time: start_time, end_time: end_time },
+                success: function(res) {
+                    RaceRankTable(res);
+                }
+            });
+        });
 
-	    $("#race_rank_7").click(function(e) {
-	        var start_time = "-7"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
-	        var end_time = "0"; //0 for all. If set it specifies end filter.
-	        e.preventDefault();
-	        $.ajax({
-	            type: "POST",
-	            url: "ajax/getJSON.php",
-	            dataType: "JSON",
-	            async: true,
-	            data: { option: "race_rank", start_time: start_time, end_time: end_time },
-	            success: function(res) {
-	            	RaceRankTable(res);
-	            }
-	        });
-	    });
+        $("#race_rank_7").click(function(e) {
+            var start_time = "-7"; //-90 for last 3 months. -7 for last week(?) //0 for all. If set positive it specifies start filter. //TODO come up with good preset ranges (1 week, 3month?)
+            var end_time = "0"; //0 for all. If set it specifies end filter.
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "ajax/getJSON.php",
+                dataType: "JSON",
+                async: true,
+                data: { option: "race_rank", start_time: start_time, end_time: end_time },
+                success: function(res) {
+                    RaceRankTable(res);
+                }
+            });
+        });
 */
 
 
@@ -1054,7 +1077,7 @@ function race_list(){
     panel += '          </div>';
     panel += '          <div class="panel-body">';
 
-    panel += '						<select id="race_list_seasondropdown" class="filter form-control input-sm"><option value="0">Show all</option></select>'; //Make this get populated by season numbers.  Make it send POST to getJSON to requery with season number
+    panel += '                      <select id="race_list_seasondropdown" class="filter form-control input-sm"><option value="0">Show all</option></select>'; //Make this get populated by season numbers.  Make it send POST to getJSON to requery with season number
 
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_race_list" width="100%" class="table table-striped table-hover">';
@@ -1069,67 +1092,67 @@ function race_list(){
 
 
     $(document).ready(function() {
-    	/*
-		var last_update = dashboardData[4][1];
-    	var seasonSelect = document.getElementById('race_list_seasondropdown');
+        /*
+        var last_update = dashboardData[4][1];
+        var seasonSelect = document.getElementById('race_list_seasondropdown');
 
-    	for (var i = 1; i <= dashboardData[6][1]; i++) { //Seasons start at 1 and are consecutive.  //dashboardData[6][1]
-	    	seasonSelect.options.add( new Option("Season " + i, i));
-	    }
+        for (var i = 1; i <= dashboardData[6][1]; i++) { //Seasons start at 1 and are consecutive.  //dashboardData[6][1]
+            seasonSelect.options.add( new Option("Season " + i, i));
+        }
 
-		$('#race_list_seasondropdown').change(function(e){
-	        e.preventDefault(); //idk why
-	        var season = $(this).val();
+        $('#race_list_seasondropdown').change(function(e){
+            e.preventDefault(); //idk why
+            var season = $(this).val();
 
             var cacheName = "raceListCache" + (season > 0 ? season : "All");
             var updateTimeName = "raceListCacheTime" + (season > 0 ? season : "All");
 
 
-	        if(last_update > localStorage.getItem(updateTimeName) || !localStorage.getItem(cacheName)) { //Out of date
-	        	//alert("Querying " + updateTimeName + " " + cacheName);
-				GetRaceList(season);
-	        }
-	        else 
-	        {
-	        	//alert("From Cache " + updateTimeName + " " + cacheName);
-	        	data = JSON.parse(localStorage.getItem(cacheName));
-	        	RaceListTable(data);
-	        }
+            if(last_update > localStorage.getItem(updateTimeName) || !localStorage.getItem(cacheName)) { //Out of date
+                //alert("Querying " + updateTimeName + " " + cacheName);
+                GetRaceList(season);
+            }
+            else 
+            {
+                //alert("From Cache " + updateTimeName + " " + cacheName);
+                data = JSON.parse(localStorage.getItem(cacheName));
+                RaceListTable(data);
+            }
 
-	    });
+        });
 
-	    $("#race_list_seasondropdown").val(0).change(); //Need to trigger so onchange function is called on pageload
+        $("#race_list_seasondropdown").val(0).change(); //Need to trigger so onchange function is called on pageload
 
-		function GetRaceList(season) {
-	        $.ajax({
-	            type: "POST",
-	            url: "ajax/getJSON.php",
-	            dataType: "JSON",
-	            async: true,
-	            data: { option: "race_list", season: season},
-	            success: function(res) {
-					RaceListTable(res);
+        function GetRaceList(season) {
+            $.ajax({
+                type: "POST",
+                url: "ajax/getJSON.php",
+                dataType: "JSON",
+                async: true,
+                data: { option: "race_list", season: season},
+                success: function(res) {
+                    RaceListTable(res);
 
-					var cacheName = "raceListCache" + (season > 0 ? season : "All");
-            		var updateTimeName = "raceListCacheTime" + (season > 0 ? season : "All");
-            		localStorage.setItem(cacheName, JSON.stringify(res));
+                    var cacheName = "raceListCache" + (season > 0 ? season : "All");
+                    var updateTimeName = "raceListCacheTime" + (season > 0 ? season : "All");
+                    localStorage.setItem(cacheName, JSON.stringify(res));
                     localStorage.setItem(updateTimeName, last_update);
-	            }
-	        });
-	    }
-	    */
+                }
+            });
+        }
+        */
 
 
-	    var last_update = dashboardData[4][1];
-    	var seasonSelect = document.getElementById('race_list_seasondropdown');
+        var last_update = dashboardData[4][1];
+        var seasonSelect = document.getElementById('race_list_seasondropdown');
 
-    	for (var i = 1; i <= dashboardData[6][1]; i++) { //Seasons start at 1 and are consecutive.  //dashboardData[6][1]
-	    	seasonSelect.options.add( new Option("Season " + i, i));
-	    }
+        for (var i = 1; i <= dashboardData[6][1]; i++) { //Seasons start at 1 and are consecutive.  //dashboardData[6][1]
+            seasonSelect.options.add( new Option("Season " + i, i));
+        }
 
-		$('#race_list_seasondropdown').change(function(e){
-	        e.preventDefault(); //idk why
-	        var season = $(this).val();
+        $('#race_list_seasondropdown').change(function(e){
+            e.preventDefault(); //idk why
+            var season = $(this).val();
 
             var cacheName = "raceListCache" + (season > 0 ? season : "All");
             var updateTimeName = "raceListCacheTime" + (season > 0 ? season : "All");
@@ -1138,189 +1161,205 @@ function race_list(){
             //localStorage.removeItem(updateTimeName);
 
 
-	        if(last_update > localStorage.getItem(updateTimeName) || !localStorage.getItem(cacheName)) { //Out of date
-	        	//alert("Querying " + updateTimeName + " " + cacheName);
-				GetRaceList(season);
-	        }
-	        else 
-	        {
-	        	//alert("From Cache " + updateTimeName + " " + cacheName);
-	        	data = JSON.parse(localStorage.getItem(cacheName));
-	        	RaceListTable(data);
-	        }
+            if(last_update > localStorage.getItem(updateTimeName) || !localStorage.getItem(cacheName)) { //Out of date
+                //alert("Querying " + updateTimeName + " " + cacheName);
+                GetRaceList(season);
+            }
+            else 
+            {
+                //alert("From Cache " + updateTimeName + " " + cacheName);
+                data = JSON.parse(localStorage.getItem(cacheName));
+                RaceListTable(data);
+            }
 
-	    });
+        });
 
-		//AT END?s
-	    $("#race_list_seasondropdown").val(0).change(); //Need to trigger so onchange function is called on pageload
+        //AT END?s
+        $("#race_list_seasondropdown").val(0).change(); //Need to trigger so onchange function is called on pageload
 
-		function GetRaceList(season) {
-	        $.ajax({
-	            type: "POST",
-	            url: "ajax/getJSON.php",
-	            dataType: "JSON",
-	            async: true,
-	            data: { option: "race_list", season: season},
-	            success: function(res) {
-					RaceListTable(res);
+        function GetRaceList(season) {
+            $.ajax({
+                type: "POST",
+                url: "ajax/getJSON.php",
+                dataType: "JSON",
+                async: true,
+                data: { option: "race_list", season: season},
+                success: function(res) {
+                    RaceListTable(res);
 
-					var cacheName = "raceListCache" + (season > 0 ? season : "All");
-            		var updateTimeName = "raceListCacheTime" + (season > 0 ? season : "All");
-            		localStorage.setItem(cacheName, JSON.stringify(res));
+                    var cacheName = "raceListCache" + (season > 0 ? season : "All");
+                    var updateTimeName = "raceListCacheTime" + (season > 0 ? season : "All");
+                    localStorage.setItem(cacheName, JSON.stringify(res));
                     localStorage.setItem(updateTimeName, last_update);
-	            }
-	        });
-	    }
+                }
+            });
+        }
 
         function RaceListTable(data) {
-        	//if (!data)
-        		//return; //Why does data being null fuck up the entire race table formatting???
+            //if (!data)
+                //return; //Why does data being null fuck up the entire race table formatting???
 
-	        $('#datatable_race_list').DataTable( {
-	        	destroy: true,
-	            "order": [[ 6, "desc" ]],
-	            "deferRender": true,
-	            "bLengthChange": false,
-	            "dom": 'lrtp', //Hide search box
-	            "data": data,
-	            "columns": [
-	                { "data": 0, "sType": "num-html", "render": 
-	                    function ( data, type, row, meta ) {
-	                    if (data == 1) 
-	                        return '<b><font color="#bc5700">1</font></b>'; //Muted orange
-	                    else 
-	                        return data; }},
-	                { "data": 1, "render": 
-	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? data : ('<a href=?page=player&name='+encodeURIComponent(data)+'&race=1>'+data+'</a>'); }},
-	                { "data": 2, "render": 
-	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? data : ('<button type="button" class="btn btn-warning btn-xs" data-hook="race_list_filter_course" value="'+data+'">' + data + '</button>') }},  
-	                { "data": 3, "render": 
-	                    function ( data, type, row, meta ) { 
-	                        return (type == 'filter') ? RaceToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="race_list_filter_style" value="'+data+'">' + RaceToString(data) + '</button>') }},  
-	                { "data": 4 },
-	                { "data": 5 },
-	                { "data": 6, "render": 
-	                    function ( data, type, row, meta ) { 
-	                        var date = new Date(data*1000); //fixme the IP should be a global variable defined somewhere?
+            $('#datatable_race_list').DataTable( {
+                destroy: true,
+                "order": [[ 6, "desc" ]],
+                "deferRender": true,
+                "bLengthChange": false,
+                "dom": 'lrtp', //Hide search box
+                "data": data,
+                "columns": [
+                    { "data": 0, "sType": "num-html", "render": 
+                        function ( data, type, row, meta ) {
+                        //if (data == 1) 
+                            //return '<b><font color="#bc5700">1</font></b>'; //Muted orange
+                            return (type == 'filter') ? data : ('<button type="button" class="btn btn-warning btn-xs" data-hook="race_list_filter_coursestyle" data-value2="'+row[3]+'" value="'+row[2]+'">' + (data == 1 ? '<b><font color="#bc5700">1</font></b>' : data) + '</button>') }},  
+                        //else 
+                            //return data; }},
+                    { "data": 1, "render": 
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? data : ('<a href=?page=player&name='+encodeURIComponent(data)+'&race=1>'+data+'</a>'); }},
+                    { "data": 2, "render": 
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? data : ('<button type="button" class="btn btn-warning btn-xs" data-hook="race_list_filter_course" value="'+data+'">' + data + '</button>') }},  
+                    { "data": 3, "render": 
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? RaceToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="race_list_filter_style" value="'+data+'">' + RaceToString(data) + '</button>') }},  
+                    { "data": 4 },
+                    { "data": 5 },
+                    { "data": 6, "render": 
+                        function ( data, type, row, meta ) { 
+                            var date = new Date(data*1000); //fixme the IP should be a global variable defined somewhere?
                             var playerHTML = encodeURIComponent(row[1]);
-	                        return '<a href="http://162.248.89.208/races/'+playerHTML+'/'+playerHTML+'-'+encodeURIComponent(row[2].replace(/ |\//g,""))+'-'+RaceToString(row[3]).toLowerCase()+'.dm_26">'+
+                            return '<a href="http://162.248.89.208/races/'+playerHTML+'/'+playerHTML+'-'+encodeURIComponent(row[2].replace(/ |\//g,""))+'-'+RaceToString(row[3]).toLowerCase()+'.dm_26">'+
                                 (date.getYear()-100)+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+date.getDate()).slice(-2)+' '+('0'+(date.getHours()+1)).slice(-2)+':'+('0'+(date.getMinutes()+1)).slice(-2)+'<a>'}},
-	                { "data": 7, "sType": "num-durhtml", "className": "duration_ms", "render":
-	                    function ( data, type, row, meta ) { 
-	                        return '<td style="text-align: right;">'+RaceTimeToString(data)+'</td>' }} //Why doesnt this work..
-	            ],  
-	            initComplete: function () {     
-					$('#datatable_race_list').on('click', 'button[data-hook="race_list_filter_style"]', function () {
-						if (document.getElementById("race_list_styledropdown").value) {
-							$("select[id='race_list_styledropdown']").val("").change()
-						}
-						else {
-							$("select[id='race_list_styledropdown']").val($(this).val()).change()
-						}
-					});
-					$('#datatable_race_list').on('click', 'button[data-hook="race_list_filter_course"]', function () {
-						if (document.getElementById("race_list_coursedropdown").value) {
-							$("select[id='race_list_coursedropdown']").val("").change()
-						}
-						else {
-							$("select[id='race_list_coursedropdown']").val($(this).val()).change()
-						}
-					});
-					this.api().columns([1]).every( function () {
-	                    var column = this;
-	                    var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
-	                        .appendTo( $(column.footer()).empty() )
-	                        .on( 'change', function () {
-	                            var val = $.fn.dataTable.util.escapeRegex(
-	                                $(this).val()
-	                            );
-	                            column
-	                                .search( val ? '^'+val+'$' : '', true, false )
-	                                .draw();
-	                        } );
-	                    column.data().unique().sort().each( function ( d, j ) {
-	                        select.append( '<option value="'+d+'">'+d+'</option>' )
-	                    } );
-	                } );
-	                this.api().columns([2]).every( function () {
-	                    var column = this;
-	                    var select = $('<select id="race_list_coursedropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
-	                        .appendTo( $(column.footer()).empty() )
-	                        .on( 'change', function () {
-	                            var val = $.fn.dataTable.util.escapeRegex(
-	                                $(this).val()
-	                            );	                            
-	                            if ($(this).val() == "") { //Update background image
-	                            	document.getElementById("content-background").style.backgroundImage = null;
-	                            }
-	                            else {
-		                           	var mapname = encodeURIComponent($(this).val());
-		                           	mapname = mapname.replace(/%2F/gi, "/"); //Hmm
-		                            document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/'+mapname+'.jpg")';
-	                        	}
-	                            column
-	                                .search( val ? '^'+val+'$' : '', true, false )
-	                                .draw();
-		                        } );
-	                    column.data().unique().sort().each( function ( d, j ) {
-	                        select.append( '<option value="'+d+'">'+d+'</option>' )
-	                    } );
-	                } );
-	                this.api().columns([3]).every( function () {
-	                    var column = this;
-	                    var select = $('<select id="race_list_styledropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
-	                        .appendTo( $(column.footer()).empty() )
-	                        .on( 'change', function () {
-	                            var val = $.fn.dataTable.util.escapeRegex(
-	                                $(this).val()
-	                            );
-	                            column
-	                                .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
-	                                .draw();	
-	                        } );
-	                    column.data().unique().sort(sortFunction).each( function ( d, j ) {
-	                        select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
-	                    } );
-	                } );
-	            },
-				"drawCallback": function( settings ) { //Pagination button active fixes - This causes a problem ?
-					$(document).ready(function () {
+                    { "data": 7, "sType": "num-durhtml", "className": "duration_ms", "render":
+                        function ( data, type, row, meta ) { 
+                            return '<td style="text-align: right;">'+RaceTimeToString(data)+'</td>' }} //Why doesnt this work..
+                ],  
+                initComplete: function () {     
+                    $('#datatable_race_list').on('click', 'button[data-hook="race_list_filter_style"]', function () {
+                        if (document.getElementById("race_list_styledropdown").value) {
+                            $("select[id='race_list_styledropdown']").val("").change()
+                        }
+                        else {
+                            $("select[id='race_list_styledropdown']").val($(this).val()).change()
+                        }
+                    });
+                    $('#datatable_race_list').on('click', 'button[data-hook="race_list_filter_course"]', function () {
+                        if (document.getElementById("race_list_coursedropdown").value) {
+                            $("select[id='race_list_coursedropdown']").val("").change()
+                        }
+                        else {
+                            $("select[id='race_list_coursedropdown']").val($(this).val()).change()
+                        }
+                    });
+                    $('#datatable_race_list').on('click', 'button[data-hook="race_list_filter_coursestyle"]', function () {
+                        if (document.getElementById("race_list_coursedropdown").value) {
+                            $("select[id='race_list_coursedropdown']").val("").change()
+                        }
+                        else {
+                            $("select[id='race_list_coursedropdown']").val($(this).val()).change()
+                        }
+
+                        if (document.getElementById("race_list_styledropdown").value) {
+                            $("select[id='race_list_styledropdown']").val("").change()
+                        }
+                        else {
+                            $("select[id='race_list_styledropdown']").val($(this).data('value2')).change()
+                        }
+                    });
+                    this.api().columns([1]).every( function () {
+                        var column = this;
+                        var select = $('<select class="filter form-control input-sm"><option value="">Show all</option></select>')
+                            .appendTo( $(column.footer()).empty() )
+                            .on( 'change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+                                column
+                                    .search( val ? '^'+val+'$' : '', true, false )
+                                    .draw();
+                            } );
+                        column.data().unique().sort().each( function ( d, j ) {
+                            select.append( '<option value="'+d+'">'+d+'</option>' )
+                        } );
+                    } );
+                    this.api().columns([2]).every( function () {
+                        var column = this;
+                        var select = $('<select id="race_list_coursedropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
+                            .appendTo( $(column.footer()).empty() )
+                            .on( 'change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );                              
+                                if ($(this).val() == "") { //Update background image
+                                    document.getElementById("content-background").style.backgroundImage = null;
+                                }
+                                else {
+                                    var mapname = encodeURIComponent($(this).val());
+                                    mapname = mapname.replace(/%2F/gi, "/"); //Hmm
+                                    document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/'+mapname+'.jpg")';
+                                }
+                                column
+                                    .search( val ? '^'+val+'$' : '', true, false )
+                                    .draw();
+                                } );
+                        column.data().unique().sort().each( function ( d, j ) {
+                            select.append( '<option value="'+d+'">'+d+'</option>' )
+                        } );
+                    } );
+                    this.api().columns([3]).every( function () {
+                        var column = this;
+                        var select = $('<select id="race_list_styledropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
+                            .appendTo( $(column.footer()).empty() )
+                            .on( 'change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+                                column
+                                    .search( val ? '^'+RaceToString(val)+'$' : '', true, false )
+                                    .draw();    
+                            } );
+                        column.data().unique().sort(sortFunction).each( function ( d, j ) {
+                            select.append( '<option value="'+d+'">'+RaceToString(d)+'</option>' )
+                        } );
+                    } );
+                },
+                "drawCallback": function( settings ) { //Pagination button active fixes - This causes a problem ?
+                    $(document).ready(function () {
 
 /*
-						$("#race_list_seasondropdown").val(0).change();
+                        $("#race_list_seasondropdown").val(0).change();
 
-						if (document.getElementById("race_list_styledropdown").value) {
-							var buttons = document.querySelectorAll("[data-hook=race_list_filter_style]");
-						    for (var i = 0; i < buttons.length; i++){
-						        buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
-						    }
-						}
-						else {
-							var buttons = document.querySelectorAll("[data-hook=race_list_filter_style]");
-						    for (var i = 0; i < buttons.length; i++){
-						       	buttons[i].className = "btn btn-warning btn-xs";
-							}
-						}
+                        if (document.getElementById("race_list_styledropdown").value) {
+                            var buttons = document.querySelectorAll("[data-hook=race_list_filter_style]");
+                            for (var i = 0; i < buttons.length; i++){
+                                buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
+                            }
+                        }
+                        else {
+                            var buttons = document.querySelectorAll("[data-hook=race_list_filter_style]");
+                            for (var i = 0; i < buttons.length; i++){
+                                buttons[i].className = "btn btn-warning btn-xs";
+                            }
+                        }
 
-						if (document.getElementById("race_list_coursedropdown").value) {
-							var buttons = document.querySelectorAll("[data-hook=race_list_filter_course]");
-						    for (var i = 0; i < buttons.length; i++){
-						        buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
-						    }
-						}
-						else {
-							var buttons = document.querySelectorAll("[data-hook=race_list_filter_course]");
-						    for (var i = 0; i < buttons.length; i++){
-						       	buttons[i].className = "btn btn-warning btn-xs";
-							}
-						}
-						*/
-					});
-			    }
-	        });
-		}
+                        if (document.getElementById("race_list_coursedropdown").value) {
+                            var buttons = document.querySelectorAll("[data-hook=race_list_filter_course]");
+                            for (var i = 0; i < buttons.length; i++){
+                                buttons[i].className = "btn btn-warning btn-xs active"; //Use addclass / removeclass ?
+                            }
+                        }
+                        else {
+                            var buttons = document.querySelectorAll("[data-hook=race_list_filter_course]");
+                            for (var i = 0; i < buttons.length; i++){
+                                buttons[i].className = "btn btn-warning btn-xs";
+                            }
+                        }
+                        */
+                    });
+                }
+            });
+        }
 
     });
 
@@ -1429,7 +1468,7 @@ function player_title(){ //Show total number of players, get each playername for
             url: "ajax/updateDB.php",
             data: { option: "accounts" },
             success: function(result) {
-            	location.reload();  //this is bad! it should just redraw the table..
+                location.reload();  //this is bad! it should just redraw the table..
                 //alert('ok');
             },
             error: function(result) {
@@ -1819,20 +1858,46 @@ function player_race_stats(){ // Problem - crashes if less than 5 total styles a
                   [0, 0]
                 ];
                 var diffCount = 0;
+
+                //alert(data[0]["style"]);
+
                 for (i=0; i<data.length; i++) { //Get largest 5 diffs? Excluding style=-1
+                    //style, diff, score, score_pct, SPR, SPR_pct, avg_rank, avg_rank_pct, percentile, percentile_pct, golds, golds_pct, silvers, bronzes, count, count_pct
                     var style = Number(data[i][0]);
-                    var score = (Number(data[i][1])+Number(data[i][2]))/2;
-                    var diff = Number(data[i][3]);
-                    var avg_rank = Number(data[i][4]);
-                    var percentile = Number(data[i][5]);
-                    var golds = Number(data[i][6]);
-                    var silvers = Number(data[i][7]);
-                    var bronzes = Number(data[i][8]);
-                    var count = Number(data[i][9]);
-                    var SPR = (Number(data[i][2])/count).toFixed(2);
+                    var diff = Number(data[i][1]);
+                    var score = Number(data[i][2]);
+                    var score_pct = parseInt(100-Number(data[i][3])*100); //Use the _pct data to graph a bar next to the number to show the percentile
+                    if (score_pct < 1) score_pct = "<1";
+                    var SPR = Number(data[i][4]);
+                    var spr_pct = parseInt(100-Number(data[i][5])*100);
+                    if (spr_pct < 1) spr_pct = "<1";
+                    var avg_rank = Number(data[i][6]);
+                    var avg_rank_pct = parseInt(100-Number(data[i][7])*100);
+                    if (avg_rank_pct < 1) avg_rank_pct = "<1";
+                    var percentile = parseInt(Number(data[i][8])*100);
+                    var percentile_pct = parseInt(100-Number(data[i][9])*100); //lmao
+                    if (percentile_pct < 1) percentile_pct = "<1";
+                    var golds = Number(data[i][10]);
+                    var golds_pct = 100-Number(data[i][11])*100;
+                    if (golds_pct < 1) golds_pct = "<1";
+                    var silvers = Number(data[i][12]);
+                    var bronzes = Number(data[i][13]);
+                    var count = Number(data[i][14]);
+                    var count_pct = parseInt(100-Number(data[i][15])*100);
+                    if (count_pct < 1) count_pct = "<1";
+
+                    //how ..
 
                     if (style == -1) {//Do stats up top for this one
-                        document.getElementById('player_race_stats').innerHTML='Score:'+score+' SPR:'+SPR+' Avg rank:'+avg_rank+' Percentile:'+percentile+' Golds:'+golds+' Silvers:'+silvers+' Bronzes:'+bronzes+' Count:'+count;
+                        document.getElementById('player_race_stats').innerHTML=
+                        '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Score: '+score+' (top '+score_pct+'%)</span></strong>'+
+                        '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">SPR: '+SPR+' (top '+spr_pct+'%)</span></strong>'+
+                        '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Average Rank: '+avg_rank+' (top '+avg_rank_pct+'%)</span></strong>'+
+                        '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Avg Percentile: '+percentile+' (top '+percentile_pct+'%)</span></strong>'+
+                        '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Golds: '+golds+' (top '+golds_pct+'%)</span></strong>'+
+                        '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Silvers: '+silvers+'</span></strong>'+
+                        '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Bronzes: '+bronzes+'</span></strong>'+
+                        '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Races: '+count+' (top '+count_pct+'%)</span></strong>';
 
                         //Remove row from data so we can reliably chart it?
                     }
@@ -1843,7 +1908,7 @@ function player_race_stats(){ // Problem - crashes if less than 5 total styles a
                             panel += '  <div class="col-md-12">';
                             panel += '                    <div class="panel panel-filled">';
                             panel += '                      <div class="panel-heading">';
-                            panel += '                      <span id="player_race_award_count">Style ('+RaceToString(style)+')</span>'
+                            panel += '                      <span id="player_race_award_count">'+RaceToString(style)+'</span>'
                             panel += '                      </div>';
                             panel += '                        <div class="panel-body">';
                             panel += '                            <div id="player_race_style_'+style+'">';
@@ -1854,7 +1919,15 @@ function player_race_stats(){ // Problem - crashes if less than 5 total styles a
                             panel += '            </div>';
                             $("#main-content").append(panel);
 
-                            document.getElementById('player_race_style_'+data[i][0]).innerHTML='Score:'+score+' SPR'+SPR+' Avg rank:'+avg_rank+' Percentile:'+percentile+' Golds:'+golds+' Silvers:'+silvers+' Bronzes:'+bronzes+' Count:'+count+' Diff: '+diff;
+                            document.getElementById('player_race_style_'+data[i][0]).innerHTML=
+                            '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Score: '+score+' (top '+score_pct+'%)</span></strong>'+
+                            '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">SPR: '+SPR+' (top '+spr_pct+'%)</span></strong>'+
+                            '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Average Rank: '+avg_rank+' (top '+avg_rank_pct+'%)</span></strong>'+
+                            '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Avg Percentile: '+percentile+' (top '+percentile_pct+'%)</span></strong>'+
+                            '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Golds: '+golds+' (top '+golds_pct+'%)</span></strong>'+
+                            '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Silvers: '+silvers+'</span></strong>'+
+                            '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Bronzes: '+bronzes+'</span></strong>'+
+                            '<strong><span style="color:#bc5700;margin-right:1.25em; display:inline-block;">Races: '+count+' (top '+count_pct+'%)</span></strong>';
                             //assoc array from JSON here even tho its bigger, so we can avoid the stupid [0] shit?
                         }
                         if (diffCount < 5) {
@@ -1970,6 +2043,9 @@ function player_race_awards(){//Most popular duels, total number of duels
     function PlayerRaceAwards(data) {
         //ajax should return 2d array [award][value], JS should loop through and print name-png if value is 1
         var count = 0;
+        var maxAwards = data.length;
+        maxAwards += 5;//3 from topspeed, 2 from dash
+
         for (i=0; i<data.length; i++) {
             if (data[i][1] > 0) {
                 var img = document.createElement('img');
@@ -1990,9 +2066,11 @@ function player_race_awards(){//Most popular duels, total number of duels
                         count++;
                     }
                     if (award > 0) {
-                        img.src = "images/awards/" + "dash-" + award + ".png";
+                        img.id = data[i][0]+"-"+award;
+                        img.src = "images/awards/" + img.id + ".png";
                         img.title =  "Completed dash1 in faster than " + award/1000 + " seconds"; //eh need 3rd column for description?
                         document.getElementById('player_race_awards').appendChild(img) //Scale to right size?
+                        $("#"+img.id).wrap("<a href=?page=badges&badge="+img.id+"></a>");
                     }
                 }
                 else if (data[i][0] == "topspeed") {
@@ -2014,21 +2092,25 @@ function player_race_awards(){//Most popular duels, total number of duels
                         count++;
                     }
                     if (award > 0) {
-                        img.src = "images/awards/" + "topspeed-" + award + ".png";
+                        img.id = data[i][0]+"-"+award;
+                        img.src = "images/awards/" + img.id + ".png";
                         img.title =  "Achieved topspeed faster than " + award; //eh need 3rd column for description?
                         document.getElementById('player_race_awards').appendChild(img) //Scale to right size?
+                        $("#"+img.id).wrap("<a href=?page=badges&badge="+img.id+"></a>");
                     }
                 }
                 else {
+                    img.id = data[i][0];
                     img.src = "images/awards/" + data[i][0] + ".png";
                     img.title =  "Completed " + data[i][0]; //eh need 3rd column for description?
                     document.getElementById('player_race_awards').appendChild(img) //Scale to right size?
+                    $("#"+img.id).wrap("<a href=?page=badges&badge="+img.id+"></a>");
                     count++;
                 }
             }
         }
 
-        document.getElementById('player_race_award_count').innerHTML='Race awards ('+count+')';
+        document.getElementById('player_race_award_count').innerHTML='Race awards ('+count+'/'+maxAwards+')';
         //Edit in the count at top
 
     }
@@ -2049,7 +2131,7 @@ function player_best_races(){
     panel += '          <div class="panel-body">';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_player_best_races" width="100%" class="table table-striped table-hover">';
-    panel += '                      <thead><tr><th>Course</th><th>Style</th><th>Rank</th><th>Strength</th><th>Date</th><th>Duration</th></tr></thead>';
+    panel += '                      <thead><tr><th>Rank</th><th>Course</th><th>Style</th><th>Strength</th><th>Date</th><th>Duration</th></tr></thead>';
     panel += '                      <tfoot><tr><th></th><th></th><th></th><th></th><th></th><th></th></tr></tfoot></table>';
     panel += '              </div>';
     panel += '          </div>';
@@ -2078,24 +2160,24 @@ function player_best_races(){
                 "dom": 'lrtp', //Hide search box
                 "data": data,
                 "columns": [
-                    { "data": 0,  "render": //Course
-                        function ( data, type, row, meta ) { 
-                            return (type == 'filter') ? (data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="player_race_filter_course" value="'+data+'">' + (data) + '</button>') }},  
-                    { "data": 1, "render": //Style
-                        function ( data, type, row, meta ) { 
-                            return (type == 'filter') ? RaceToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="player_race_filter_style" value="'+data+'">' + RaceToString(data) + '</button>') }},  
-                    { "data": 2, "sType": "num-html", "render": 
+                    { "data": 0, "sType": "num-html", "render": 
                         function ( data, type, row, meta ) {
                         if (data == 1) 
                             return '<b><font color="#bc5700">1</font></b>'; //Muted orange
                         else 
                             return data; }},
+                    { "data": 1,  "render": //Course
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? (data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="player_race_filter_course" value="'+data+'">' + (data) + '</button>') }},  
+                    { "data": 2, "render": //Style
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? RaceToString(data) : ('<button type="button" class="btn btn-warning btn-xs" data-hook="player_race_filter_style" value="'+data+'">' + RaceToString(data) + '</button>') }},  
                     { "data": 3 }, //Strength
                     { "data": 4, "render": //Date
                         function ( data, type, row, meta ) { 
                             var date = new Date(data*1000)
                             var playerHTML = encodeURIComponent(player);
-                            return '<a href="http://162.248.89.208/races/'+playerHTML+'/'+playerHTML+'-'+encodeURIComponent(row[0].replace(/ |\//g,""))+'-'+RaceToString(row[1]).toLowerCase()+'.dm_26">'+
+                            return '<a href="http://162.248.89.208/races/'+playerHTML+'/'+playerHTML+'-'+encodeURIComponent(row[1].replace(/ |\//g,""))+'-'+RaceToString(row[2]).toLowerCase()+'.dm_26">'+
                                 (date.getYear()-100)+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+date.getDate()).slice(-2)+' '+('0'+(date.getHours()+1)).slice(-2)+':'+('0'+(date.getMinutes()+1)).slice(-2) +'</a>'}},  
                     { "data": 5, "render": //Duration
                         function ( data, type, row, meta ) { 
@@ -2127,7 +2209,7 @@ function player_best_races(){
                             $("select[id='player_best_styledropdown']").val($(this).val()).change()
                         }
                     });
-                    this.api().columns([0]).every( function () {
+                    this.api().columns([1]).every( function () {
                         var column = this;
                         var select = $('<select id="player_best_coursedropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
                             .appendTo( $(column.footer()).empty() )
@@ -2143,7 +2225,7 @@ function player_best_races(){
                             select.append( '<option value="'+d+'">'+d+'</option>' )
                         } );
                     } );
-                    this.api().columns([1]).every( function () {
+                    this.api().columns([2]).every( function () {
                         var column = this;
                         var select = $('<select id="player_best_styledropdown" class="filter form-control input-sm"><option value="">Show all</option></select>')
                             .appendTo( $(column.footer()).empty() )
@@ -2477,6 +2559,84 @@ function player_duel_graph(){ // Problem - crashes if less than 5 total styles a
     $('#menu_player').addClass("active");
 }
 
+
+function badges(){ // Problem - crashes if less than 5 total styles are found?
+    var panel;
+    panel = '<div id="second_row" class="row">';
+    panel += '  <div class="col-md-12">';
+
+    panel += '      <div class="panel panel-filled">';
+    panel += '          <div class="panel-heading">';
+    panel += '              players who have the ' +badge+' badge:';
+    panel += '          </div>';
+    panel += '          <div class="panel-body">';
+    panel += '              <div class="table-responsive">';
+    panel += '                  <table id="datatable_award_list" width="100%" class="table table-striped table-hover">';
+    panel += '                      <thead><tr><th>Username</th><th>Style</th><th>Time</th></tr></thead>';
+    panel += '                      <tfoot><tr><th></th><th></th><th></th></tr></tfoot></table>';
+    panel += '              </div>';
+    panel += '          </div>';
+    panel += '      </div>';
+
+    panel += '                </div>';
+    panel += '                </div>';
+    $("#main-content").append(panel);
+
+    $(document).ready(function() {
+        $.ajax({
+            type: "POST",
+            url: "ajax/getJSON.php",
+            dataType: "JSON",
+            async: true,
+            data: { option: "player_badges", badge: badge},
+            success: function(res) {
+                PlayerBadges(res);
+            }
+        });
+
+        function PlayerBadges(data) {
+            $('#datatable_award_list').DataTable( {
+                "order": [[ 2, "asc" ]],
+                "bLengthChange": false,
+                "deferRender": true,
+                "dom": 'lrtp', //Hide search box
+                "data": data,
+                "pageLength": 20,
+                "columns": [
+                    { "data": 0, "render": 
+                        function ( data, type, row, meta ) { 
+                            return ('<a href=?page=player&name='+encodeURIComponent(data)+'&race=1>'+data+'</a>') }},
+                    { "data": 1, "render": 
+                        function ( data, type, row, meta ) { 
+                            return (RaceToString(data)) }},
+                    { "data": 2, "sType": "num-durhtml", "className": "duration_ms", "render":
+                        function ( data, type, row, meta ) { 
+                            return '<td style="text-align: right;">'+RaceTimeToString(data)+'</td>' }} //Why doesnt this work..
+                ],
+                "aoColumnDefs": [
+                    { "bSortable": false, "aTargets": [ 0 ] }
+                ],
+                "oLanguage": {
+                            "sInfo": '',
+                            "sInfoFiltered": ''
+                },
+                "aaSorting": [[ 1, 'asc' ]], // ?
+
+                initComplete: function () {
+
+                    
+                },
+                "drawCallback": function( settings ) { //Pagination button active fixes
+                }
+            });
+        }
+
+    });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_player').addClass("active");
+}
+
 /////////////////////////////////////////////////////////////////////
 ///////////////////////////////RACE//////////////////////////////////
 ///////////////////////////////RACE//////////////////////////////////
@@ -2484,7 +2644,7 @@ function player_duel_graph(){ // Problem - crashes if less than 5 total styles a
 /////////////////////////////////////////////////////////////////////
 
 function maps(){
-		var HTML='';
+        var HTML='';
         HTML+='<div class="row">';
         HTML+='<div class="col-md-4">';
         HTML+='  <h2>Trick Arena</h2>';
@@ -2537,53 +2697,282 @@ function maps(){
         $('#menu_maps').addClass("active");
 
         $(document).ready(function () {
-			$( "#trickarena" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/trickarena.jpg")';
-			});
-			$( "#racearena" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racearena.jpg")';
-			});
-			$( "#racepack1" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack1.jpg")';
-			});
-			$( "#racepack2" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack2.jpg")';
-			});
-			$( "#racepack3" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack3.jpg")';
-			});
-			$( "#racepack4" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack4.jpg")';
-			});
-			$( "#racepack5" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack5.jpg")';
-			});
-			$( "#racepack6" ).mouseover(function() {
-        		document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack6.jpg")';
-			});
-		});
-	}
+            $( "#trickarena" ).mouseover(function() {
+                document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/trickarena.jpg")';
+            });
+            $( "#racearena" ).mouseover(function() {
+                document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racearena.jpg")';
+            });
+            $( "#racepack1" ).mouseover(function() {
+                document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack1.jpg")';
+            });
+            $( "#racepack2" ).mouseover(function() {
+                document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack2.jpg")';
+            });
+            $( "#racepack3" ).mouseover(function() {
+                document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack3.jpg")';
+            });
+            $( "#racepack4" ).mouseover(function() {
+                document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack4.jpg")';
+            });
+            $( "#racepack5" ).mouseover(function() {
+                document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack5.jpg")';
+            });
+            $( "#racepack6" ).mouseover(function() {
+                document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/levelshots/racepack6.jpg")';
+            });
+        });
+    }
 
 function servers(){
-	var HTML = '';
-   		HTML+='<div class="row">';
-        HTML+='<div class="col-md-4">';
-        HTML+='  <h2>.ups playja.pro</h2>';
-        HTML+='  <p>/connect s.playja.pro</p>';
-        HTML+='  <a id="tracker">k</a>';
-        HTML+='</div>';
-        HTML+='</div>';
-        $("#main-content").html(HTML);
+    var HTML = '';
+    HTML+='<div class="row">';
+    HTML+='<div class="col-md-4">';
+    HTML+='  <h2>.ups playja.pro</h2>';
+    HTML+='  <p>/connect s.playja.pro</p>';
+    HTML+='  <a id="tracker">k</a>';
+    HTML+='</div>';
+    HTML+='</div>';
+    $("#main-content").html(HTML);
 
 
-        //$hangoutAdmins = "loda, ark, source, pivot, ryan, ethan, bucky, frosty";
-        //$hangoutLocation = "Atlanta, GA";
-        //$hangoutDescription = "Our hangout server is the only 24/7 server on JKA set up for racing. The server uses the jaPRO mod that allows frame-rate independent physics and persistent highscores, resulting in cheat-proof competitive play.
+    //$hangoutAdmins = "loda, ark, source, pivot, ryan, ethan, bucky, frosty";
+    //$hangoutLocation = "Atlanta, GA";
+    //$hangoutDescription = "Our hangout server is the only 24/7 server on JKA set up for racing. The server uses the jaPRO mod that allows frame-rate independent physics and persistent highscores, resulting in cheat-proof competitive play.
 
-        //backgroundImage = "http://www.upsgaming.com/levelshots/". str_replace(array('(', ')'), '', str_replace(" ","%20",$mapName)) .".jpg"; //str_replace("%2F","/",urlencode($coursename))
+    //backgroundImage = "http://www.upsgaming.com/levelshots/". str_replace(array('(', ')'), '', str_replace(" ","%20",$mapName)) .".jpg"; //str_replace("%2F","/",urlencode($coursename))
 
-        $('.jk-nav li').removeClass("active");
-        $('#menu_servers').addClass("active");
+    $('.jk-nav li').removeClass("active");
+    $('#menu_servers').addClass("active");
+}
+
+function team_title(){
+    var HTML = '';
+    HTML+='<div class="row">';
+    HTML+='            <div class="col-lg-12">';
+    HTML+='                <div class="view-header">';
+    HTML+='                    <div class="pull-right text-right" style="line-height: 14px">';
+    HTML+='                        <small>Stats<br><span class="c-white">Teams</span></small>';
+    HTML+='                    </div>';
+    HTML+='                    <div class="header-icon">';
+    HTML+='                        <i class="pe page-header-icon pe-7s-shield"></i>';
+    HTML+='                    </div>';
+    HTML+='                    <div class="header-title">';
+    HTML+='                        <h3>'+ (team ? team : "Teams") + ' (WIP) <button class="btn btn-warning" id="update_teams">Update</button></h3>';
+
+    HTML+='                    </div>';
+    HTML+='                </div>';
+    HTML+='                <hr>';
+    HTML+='            </div>';
+    HTML+='        </div>';
+    $("#main-content").append(HTML);
+
+    $("#update_teams").click(function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "ajax/updateDB.php",
+            data: { option: "accounts" },
+            success: function(result) {
+                location.reload();  //this is bad! it should just redraw the table..
+            },
+            error: function(result) {
+                //alert('error');
+            }
+        });
+    });
+
+    //Team list table, with aggregate scores
+    //Click a team, leads to that specific team page and shows members, with their individual scores
+    //Dont think we need to localcache teams, w/e though.
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_teams').addClass("active");
+}
+
+
+function team_list(){
+    var panel = '<div id="second_row" class="row">';
+    panel += '  <div class="col-md-12">';
+    panel += '      <div class="panel panel-filled">';
+    panel += '          <div class="panel-heading">';
+    panel += '              Teams';
+    panel += '          </div>';
+    panel += '          <div class="panel-body">';
+    panel += '              <div class="table-responsive">';
+    panel += '                  <table id="datatable_team_list" width="100%" class="table table-striped table-hover">';
+    panel += '                      <thead><tr><th>Rank</th><th>Team</th></tr></thead>';
+    panel += '                      <tfoot><tr><th></th><th>Team</th></tr></tfoot></table>';
+    panel += '              </div>';
+    panel += '          </div>';
+    panel += '      </div>';
+    panel += '  </div>';
+    panel += '</div>';
+    $("#main-content").append(panel);
+
+    //Team list table, with aggregate scores
+    //Click a team, leads to that specific team page and shows members, with their individual scores
+    //Dont think we need to localcache teams, w/e though.
+
+
+    $(document).ready(function() {
+        /*
+        var last_update = dashboardData[5][1];
+        if(last_update > localStorage.getItem("duelUpdateTime") || !localStorage.getItem("duelRankCache")) { //Out of date
+        //if (1) {
+            $.ajax({
+                type: "POST",
+                url: "ajax/getJSON.php",
+                dataType: "JSON",
+                async: true,
+                data: { option: "duel_rank" },
+                success: function(res) {//JSON
+                    DuelRankTable(res);
+                    localStorage.setItem("duelRankCache", JSON.stringify(res));
+                    localStorage.setItem("duelUpdateTime", last_update);
+                }
+            });
+        }
+        else {
+            var data = JSON.parse(localStorage.getItem("duelRankCache"));
+            DuelRankTable(data);
+        }
+        */
+
+         $.ajax({
+                type: "POST",
+                url: "ajax/getJSON.php",
+                dataType: "JSON",
+                async: true,
+                data: { option: "team_list" },
+                success: function(res) {//JSON
+                    TeamListTable(res);
+                }
+        });
+
+        function TeamListTable(data) {
+            $('#datatable_team_list').DataTable( {
+                "order": [[ 1, "desc" ]],
+                "bLengthChange": false,
+                "deferRender": true,
+                "dom": 'lrtp', //Hide search box
+                "data": data,
+                "columns": [
+                    { "data": null,  "render": 
+                        function ( data, type, row, meta ) { 
+                         return meta.row+1 }}, //Well.. this is not quite what we want, but I guess it will be ok (shows rank of their elo compared to every other elo regardless of type)
+                    { "data": 0, "render": 
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? (data) : ('<a href=?page=team&team='+encodeURIComponent(data)+'>'+data+'</a>'); }}
+                ],
+                "aoColumnDefs": [
+                    { "bSortable": false, "aTargets": [ 0 ] }
+                ],
+                "oLanguage": {
+                            "sInfo": '',
+                            "sInfoFiltered": ''
+                },
+                "aaSorting": [[ 1, 'asc' ]], // ?
+
+
+            });
+        }
+    });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_teams').addClass("active");
+}
+
+function team_member_list(){
+    var panel = '<div id="second_row" class="row">';
+    panel += '  <div class="col-md-12">';
+    panel += '      <div class="panel panel-filled">';
+    panel += '          <div class="panel-heading">';
+    panel += '              Team members';
+    panel += '          </div>';
+    panel += '          <div class="panel-body">';
+    panel += '              <div class="table-responsive">';
+    panel += '                  <table id="datatable_team_member_list" width="100%" class="table table-striped table-hover">';
+    panel += '                      <thead><tr><th>Rank</th><th>Player</th></tr></thead>';
+    panel += '                      <tfoot><tr><th></th><th>Player</th></tr></tfoot></table>';
+    panel += '              </div>';
+    panel += '          </div>';
+    panel += '      </div>';
+    panel += '  </div>';
+    panel += '</div>';
+    $("#main-content").append(panel);
+
+    //Team list table, with aggregate scores
+    //Click a team, leads to that specific team page and shows members, with their individual scores
+    //Dont think we need to localcache teams, w/e though.
+
+
+    $(document).ready(function() {
+        /*
+        var last_update = dashboardData[5][1];
+        if(last_update > localStorage.getItem("duelUpdateTime") || !localStorage.getItem("duelRankCache")) { //Out of date
+        //if (1) {
+            $.ajax({
+                type: "POST",
+                url: "ajax/getJSON.php",
+                dataType: "JSON",
+                async: true,
+                data: { option: "duel_rank" },
+                success: function(res) {//JSON
+                    DuelRankTable(res);
+                    localStorage.setItem("duelRankCache", JSON.stringify(res));
+                    localStorage.setItem("duelUpdateTime", last_update);
+                }
+            });
+        }
+        else {
+            var data = JSON.parse(localStorage.getItem("duelRankCache"));
+            DuelRankTable(data);
+        }
+        */
+
+         $.ajax({
+                type: "POST",
+                url: "ajax/getJSON.php",
+                dataType: "JSON",
+                async: true,
+                data: { option: "team_member_list", team: team},
+                success: function(res) {//JSON
+                    TeamMemberListTable(res);
+                }
+        });
+
+        function TeamMemberListTable(data) {
+            $('#datatable_team_member_list').DataTable( {
+                "order": [[ 1, "desc" ]],
+                "bLengthChange": false,
+                "deferRender": true,
+                "dom": 'lrtp', //Hide search box
+                "data": data,
+                "columns": [
+                    { "data": null,  "render": 
+                        function ( data, type, row, meta ) { 
+                         return meta.row+1 }}, //Well.. this is not quite what we want, but I guess it will be ok (shows rank of their elo compared to every other elo regardless of type)
+                    { "data": 0, "render": 
+                        function ( data, type, row, meta ) { 
+                            return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'&race=1>'+data+'</a>'); }},   
+                ],
+                "aoColumnDefs": [
+                    { "bSortable": false, "aTargets": [ 0 ] }
+                ],
+                "oLanguage": {
+                            "sInfo": '',
+                            "sInfoFiltered": ''
+                },
+                "aaSorting": [[ 1, 'asc' ]], // ?
+
+
+            });
+        }
+    });
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_teams').addClass("active");
 }
 
 var duelnames = [
@@ -2611,111 +3000,39 @@ var duelnames = [
 ];
 
 function DuelToString(type) {
-	var number = Number(type);
+    var number = Number(type);
 
-	if (number >= 0 && number < duelnames.length)
-		return duelnames[number];
-	else return "Unknown";
+    if (number >= 0 && number < duelnames.length)
+        return duelnames[number];
+    else return "Unknown";
 }
 
 racenames = [
-	"Siege",
-	"JKA",
-	"QW",
-	"CPM",
-	"Q3",
-	"PJK",
-	"WSW",
-	"RJQ3",
-	"RJCPM",
-	"Swoop",
-	"Jetpack",
-	"Speed",
-	"SP"
+    "Siege",
+    "JKA",
+    "QW",
+    "CPM",
+    "Q3",
+    "PJK",
+    "WSW",
+    "RJQ3",
+    "RJCPM",
+    "Swoop",
+    "Jetpack",
+    "Speed",
+    "SP",
+    "Slick",
+    "BOTCPM"
 ];
 
 function RaceToString(type) {
-	var number = Number(type);
+    var number = Number(type);
 
-	if (number >= 0 && number < racenames.length)
-		return racenames[number];
-	else if (number == 99)
-		return "All";
-	else return "Unknown";
-}
-
-function DuelToString2(type) {
-  typeStr = "Unknown";
-  if (type == 0)
-    typeStr = "Saber";
-  else if (type == 1)
-    typeStr =  "Force";
-  else if (type == 4)
-    typeStr =  "Melee";
-  else if (type == 6)
-    typeStr =  "Pistol";
-  else if (type == 7)
-    typeStr =  "Blaster";
-  else if (type == 8)
-    typeStr =  "Sniper";
-  else if (type == 9)
-    typeStr =  "Bowcaster";
-  else if (type == 10)
-    typeStr =  "Repeater";
-  else if (type == 11)
-    typeStr =  "Demp2";
-  else if (type == 12)
-    typeStr =  "Flechette";
-  else if (type == 13)
-    typeStr =  "Rocket";
-  else if (type == 14)
-    typeStr =  "Thermal";
-  else if (type == 15)
-    typeStr =  "Trip mine";
-  else if (type == 16)
-    typeStr =  "Det pack";
-  else if (type == 17)
-    typeStr =  "Concussion";
-  else if (type == 18)
-    typeStr =  "Bryar pistol";
-  else if (type == 19)
-    typeStr =  "Stun baton";
-  else if (type == 20)
-    typeStr =  "All weapons";
-  return typeStr;
-}
-
-function RaceToString2(val){
-    style="Unknown";
-    if (val==99)
-        style="All";
-    else if (val==0)
-        style="Siege";
-    else if(val==1)
-        style="JKA";
-    else if(val==2)
-        style="QW";
-    else if(val==3)
-        style="CPM";
-    else if(val==4)
-        style="Q3";
-    else if(val==5)
-        style="PJK";
-    else if(val==6)
-        style="WSW";
-    else if(val==7)
-        style="RJQ3";
-    else if(val==8)
-        style="RJCPM";
-    else if(val==9)
-        style="Swoop";
-    else if(val==10)
-        style="Jetpack";
-    else if(val==11)
-        style="Speed";
-    else if(val==12)
-        style="SP";
-    return style;
+    if (number >= 0 && number < racenames.length)
+        return racenames[number];
+    else if (number == 99)
+        return "All";
+    else return "Unknown";
 }
 
 function RaceTimeToString(duration_ms) {

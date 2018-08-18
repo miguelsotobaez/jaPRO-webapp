@@ -1229,7 +1229,7 @@ function race_list(){
                         function ( data, type, row, meta ) { 
                             var date = new Date(data*1000); //fixme the IP should be a global variable defined somewhere?
                             var playerHTML = encodeURIComponent(row[1]);
-                            return '<a href="http://162.248.89.208/races/'+playerHTML+'/'+playerHTML+'-'+encodeURIComponent(row[2].replace(/ |\//g,""))+'-'+RaceToString(row[3]).toLowerCase()+'.dm_26">'+
+                            return '<a href="http://74.91.123.99/races/'+playerHTML+'/'+playerHTML+'-'+encodeURIComponent(row[2].replace(/ |\//g,""))+'-'+RaceToString(row[3]).toLowerCase()+'.dm_26">'+
                                 (date.getYear()-100)+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+date.getDate()).slice(-2)+' '+('0'+(date.getHours()+1)).slice(-2)+':'+('0'+(date.getMinutes()+1)).slice(-2)+'<a>'}},
                     { "data": 7, "sType": "num-durhtml", "className": "duration_ms", "render":
                         function ( data, type, row, meta ) { 
@@ -2177,7 +2177,7 @@ function player_best_races(){
                         function ( data, type, row, meta ) { 
                             var date = new Date(data*1000)
                             var playerHTML = encodeURIComponent(player);
-                            return '<a href="http://162.248.89.208/races/'+playerHTML+'/'+playerHTML+'-'+encodeURIComponent(row[1].replace(/ |\//g,""))+'-'+RaceToString(row[2]).toLowerCase()+'.dm_26">'+
+                            return '<a href="http://74.91.123.99/races/'+playerHTML+'/'+playerHTML+'-'+encodeURIComponent(row[1].replace(/ |\//g,""))+'-'+RaceToString(row[2]).toLowerCase()+'.dm_26">'+
                                 (date.getYear()-100)+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+date.getDate()).slice(-2)+' '+('0'+(date.getHours()+1)).slice(-2)+':'+('0'+(date.getMinutes()+1)).slice(-2) +'</a>'}},  
                     { "data": 5, "render": //Duration
                         function ( data, type, row, meta ) { 
@@ -2730,7 +2730,8 @@ function servers(){
     HTML+='<div class="col-md-4">';
     HTML+='  <h2>.ups playja.pro</h2>';
     HTML+='  <p>/connect s.playja.pro</p>';
-    HTML+='  <a id="tracker">k</a>';
+    HTML+='     <iframe id="ParaTracker" src="https://pt.dogi.us/?ip=74.91.123.99&port=29070&skin=Bigflat%20-%20Dark&filterOffendingServerNameSymbols=true&displayGameName=true&enableAutoRefresh=true&levelshotsEnabled=true&enableGeoIP=true&levelshotTransitionAnimation=3" width="600" height="600" sandbox="allow-forms allow-popups allow-scripts allow-same-origin" style="border:none;background:none transparent;" allowtransparency="true" scrolling="no"></iframe>';
+    HTML+='  <a href="https://www.nfoservers.com/donate.pl?force_recipient=1&recipient=videoprofess%40hotmail.com" id="donate">Donate to the server fund</a>';
     HTML+='</div>';
     HTML+='</div>';
     $("#main-content").html(HTML);
@@ -2801,8 +2802,8 @@ function team_list(){
     panel += '          <div class="panel-body">';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_team_list" width="100%" class="table table-striped table-hover">';
-    panel += '                      <thead><tr><th>Rank</th><th>Team</th></tr></thead>';
-    panel += '                      <tfoot><tr><th></th><th>Team</th></tr></tfoot></table>';
+    panel += '                      <thead><tr><th>Rank</th><th>Team</th><th>Count</th><th>Membership</th></tr></thead>';
+    panel += '                      <tfoot><tr><th></th><th>Team</th><th></th><th></th></tr></tfoot></table>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -2852,7 +2853,7 @@ function team_list(){
 
         function TeamListTable(data) {
             $('#datatable_team_list').DataTable( {
-                "order": [[ 1, "desc" ]],
+                "order": [[ 2, "desc" ]],
                 "bLengthChange": false,
                 "deferRender": true,
                 "dom": 'lrtp', //Hide search box
@@ -2863,7 +2864,11 @@ function team_list(){
                          return meta.row+1 }}, //Well.. this is not quite what we want, but I guess it will be ok (shows rank of their elo compared to every other elo regardless of type)
                     { "data": 0, "render": 
                         function ( data, type, row, meta ) { 
-                            return (type == 'filter') ? (data) : ('<a href=?page=team&team='+encodeURIComponent(data)+'>'+data+'</a>'); }}
+                            return (type == 'filter') ? (data) : ('<a href=?page=team&team='+encodeURIComponent(data)+'>'+data+'</a>'); }},
+                    { "data": 1 },
+                    { "data": 2, "render": 
+                        function ( data, type, row, meta ) { 
+                            return (data == 0) ? "Public" : "Private"; }}
                 ],
                 "aoColumnDefs": [
                     { "bSortable": false, "aTargets": [ 0 ] }
@@ -2893,8 +2898,8 @@ function team_member_list(){
     panel += '          <div class="panel-body">';
     panel += '              <div class="table-responsive">';
     panel += '                  <table id="datatable_team_member_list" width="100%" class="table table-striped table-hover">';
-    panel += '                      <thead><tr><th>Rank</th><th>Player</th></tr></thead>';
-    panel += '                      <tfoot><tr><th></th><th>Player</th></tr></tfoot></table>';
+    panel += '                      <thead><tr><th>Rank</th><th>Player</th><th>Score</th><th>Count</th></tr></thead>';
+    panel += '                      <tfoot><tr><th></th><th>Player</th><th></th><th></th></tr></tfoot></table>';
     panel += '              </div>';
     panel += '          </div>';
     panel += '      </div>';
@@ -2944,7 +2949,7 @@ function team_member_list(){
 
         function TeamMemberListTable(data) {
             $('#datatable_team_member_list').DataTable( {
-                "order": [[ 1, "desc" ]],
+                "order": [[ 2, "desc" ]],
                 "bLengthChange": false,
                 "deferRender": true,
                 "dom": 'lrtp', //Hide search box
@@ -2956,6 +2961,8 @@ function team_member_list(){
                     { "data": 0, "render": 
                         function ( data, type, row, meta ) { 
                             return (type == 'filter') ? (data) : ('<a href=?page=player&name='+encodeURIComponent(data)+'&race=1>'+data+'</a>'); }},   
+                    { "data": 1 },
+                    { "data": 2 }
                 ],
                 "aoColumnDefs": [
                     { "bSortable": false, "aTargets": [ 0 ] }

@@ -619,14 +619,16 @@ switch ($option) {
 
 	case "team_list": //This will be hard to get the race-score for each team?
 		$newArray = null;
-	    $query ="SELECT name
-	    		FROM Teams 
-	    		ORDER BY name DESC";
-	
+	    //$query = "SELECT name, flags FROM Teams ORDER BY name ASC";
+	    $query = "SELECT T.name AS name, TA.count AS count, T.flags AS flags FROM 
+				(SELECT name, flags From Teams) AS T
+				INNER JOIN
+				(SELECT team, COUNT(*) AS count From TeamAccounts WHERE (flags & 2 != 2) GROUP BY team) AS TA
+				ON T.name = TA.team ORDER BY count DESC";
 	    $arr = sql2arr($query);
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array(0=>$value["name"]);
+		    	$newArray[]=array(0=>$value["name"],1=>$value["count"],2=>$value["flags"]);
 		    }
 	    }
 
@@ -639,7 +641,7 @@ switch ($option) {
 		}
 		$teamname = $_POST["team"];
 		$newArray = null;
-		$stmt = $db->prepare("SELECT account FROM TeamAccounts WHERE team = ? ORDER BY account DESC");
+		$stmt = $db->prepare("SELECT username, ROUND(SUM((entries/rank + entries-rank))/2,0) AS score, COUNT(*) AS count FROM Races WHERE rank != 0 AND username IN (SELECT account FROM TeamAccounts WHERE team = ? AND (flags & 2 != 2)) GROUP BY username ORDER BY score DESC"); //Dont show pending invites (flags = 2)
 		$stmt->bind_param('s', $teamname);
 		$stmt->execute();
 		$result = $stmt->get_result();
@@ -648,7 +650,7 @@ switch ($option) {
 	
 	    if($arr){
 		    foreach ($arr as $key => $value) {
-		    	$newArray[]=array(0=>$value["account"]);
+		    	$newArray[]=array(0=>$value["username"],1=>$value["score"],2=>$value["count"]);
 		    }
 	    }
 

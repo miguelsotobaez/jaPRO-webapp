@@ -188,7 +188,7 @@ switch ($option) {
 $db->close();
 
 function GetStats($type, $last_update) {
-	$url = "http://162.248.89.208/stats/update.php";
+	$url = "http://74.91.123.99/stats/update.php";
 	$postdata = http_build_query(
 	    array(
 	        'username' => 'ups',

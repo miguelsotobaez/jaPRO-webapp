@@ -38,9 +38,13 @@ array("hevil-jka", 				"t3_hevil", 					"jka", 		0),
 array("r724-swoop", 			"racepack6 (r7-24)", 			"swoop", 	0),
 array("yavin-under14-jka", 		"racepack4 (yavin)", 			"jka", 		14000),
 array("imperial-under5-speed", 	"racepack6 (imperial)", 		"speed",	5000),
+array("brusef-jka", 			"racepack7 (brusef)", 			"jka",		0),
+array("brusef-wsw", 			"racepack7 (brusef)", 			"wsw",		0),
+array("invalid-jka", 			"racepack7 (invalid)", 			"jka",		0),
+array("jump_green_pro-jka", 	"racepack7 (jump_green_pro)", 	"jka",		0)
 
-
-array("idk", 	"f", 	"j", 0) //tiered shit
+//array("idk", 	"f", 	"j", 0) //tiered shit
+//add rp7 stuff
 
 );
 
@@ -453,6 +457,30 @@ switch ($option) {
 		$username = $_POST["player"];
 		$newArray = null;
 
+		$query = "";
+		$usernameCleaned = substr($username, 0, 16);
+		$usernameCleaned = str_replace(str_split(" ;:.?*<>!#$&'()+@=`~{}[]^_|\\/\""), '', $usernameCleaned); //terrible, but only way to sql_cache it?
+
+		foreach ($awards as $i => $row)
+		{
+			//special case for weird awards
+			//If row[3] then add duration_ms check
+		    $query .= "SELECT '".$row[0]."' AS 'key', CASE WHEN EXISTS (SELECT id FROM Races WHERE style = ".RaceNameToInteger($row[2])." AND username = '".$usernameCleaned."' AND coursename = '".$row[1]."'";
+		    if ($row[3] > 0) {
+		    	$query .= " AND duration_ms < ".$row[3];
+		    }
+		    $query .= ") THEN 1 ELSE 0 END as 'val' UNION ALL ";
+		}
+		$query = substr($query, 0, -11); //Remove trailing union all
+
+		$arr = sql2arr($query);
+		if($arr) {
+		    foreach ($arr as $key => $value) {
+				$newArray[]=array(0=>$value["key"],1=>$value["val"]);
+		    }
+		}	
+		$json = json_encode($newArray);
+
 
 
 /*
@@ -491,7 +519,7 @@ switch ($option) {
 		}
 
 */
-
+/*
 
 		//Prepare this automatically from badges array..?
 
@@ -555,6 +583,7 @@ switch ($option) {
 	    }
 
 	    $json = json_encode($newArray);
+	    */
 	break;
 
 	case "player_duel_awards": //Should select type, and let client filter that.. should apply smoothing? 
@@ -603,7 +632,7 @@ switch ($option) {
 		    if ($row[0] == $badge) {
 		    	$style = RaceNameToInteger($row[2]);
 		    	//Use min(end_time to get first instance of the award completion, for multiple season support, ah but this doesnt work, cuz someone can get it first then later update it.
-		    	$query = "SELECT username, style, MIN(duration_ms) AS duration FROM Races WHERE coursename = '".$row[1]."'".(($style == -1) ? "": " AND style = ".$style."").(($row[3] == 0) ? "" : " AND duration_ms < ".$duration) . " GROUP BY username ORDER BY duration ASC";
+		    	$query = "SELECT username, style, MIN(duration_ms) AS duration FROM Races WHERE rank != 0 AND coursename = '".$row[1]."'".(($style == -1) ? "": " AND style = ".$style."").(($row[3] == 0) ? "" : " AND duration_ms < ".$row[3]) . " GROUP BY username ORDER BY duration ASC";
 		    	//echo $query;
 		    	$arr = sql2arr($query);
 				if($arr) {
@@ -615,6 +644,16 @@ switch ($option) {
 		    	break;
 		    }
 		}
+	break;
+
+	case "badge_list": //Get relative strength of each race style for this player
+		$newArray = null;
+		foreach ($awards as $i => $row)
+		{
+		    	//$style = RaceNameToInteger($row[2]);
+		    	$newArray[]=array(0=>$row[0],1=>$row[1],2=>$row[2],3=>$row[3]);
+		}
+		$json = json_encode($newArray);
 	break;
 
 	case "team_list": //This will be hard to get the race-score for each team?
@@ -659,7 +698,7 @@ switch ($option) {
 
 }
 
-ob_start('ob_gzhandler'); //Compress json
+//ob_start('ob_gzhandler'); //Compress json
 echo $json;
 $db->close();
 

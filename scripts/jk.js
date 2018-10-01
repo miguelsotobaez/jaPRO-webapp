@@ -118,7 +118,7 @@ $(document).ready(function () {
         
     } else if(page=="badges"){
         if (badge) 
-            badges();
+            badge_info();
         else
             badges();
     }
@@ -247,8 +247,8 @@ function home(){
     var p3 = '<p><a class="btn btn-default btn-lg" href="https://github.com/videoP/jaPRO/raw/master/japro3.pk3" role="button">Download jaPRO Client</a> </p>';
     var p3 = '<p><a class="btn btn-default btn-lg download" href="https://github.com/eternalcodes/EternalJK/releases/latest" role="button">Download jaPRO Client</a></p>'
     //var p4 = '<p><a class="btn btn-default btn-lg" href="https://github.com/eternalcodes/EternalJK/blob/master/eternaljk-pre-release.zip" role="button">Download jaPRO Beta Client</a></p>'
-    var p4 = '<p><a class="btn btn-default btn-lg download2" href="https://github.com/eternalcodes/EternalJK/releases/latest" role="button">Download jaPRO Beta Client</a></p>'
-    $("#main-content").html('<div class="container">'+p1+' <br> '+p2+' '+p3+' '+p4+'</div>');
+   // var p4 = '<p><a class="btn btn-default btn-lg download2" href="https://github.com/eternalcodes/EternalJK/releases/latest" role="button">Download jaPRO Beta Client</a></p>'
+    $("#main-content").html('<div class="container">'+p1+' <br> '+p2+' '+p3+'</div>');
     $('.jk-nav li').removeClass("active");
     $('#menu_home').addClass("active");
 
@@ -258,6 +258,8 @@ function home(){
         $(".download").attr("href", asset.browser_download_url);
     $(".download2").attr("href", client.browser_download_url);
     });
+
+    document.getElementById("content-background").style.backgroundImage = 'linear-gradient(rgba(51, 53, 62, 0.7),rgba(51, 53, 62, 0.7)),url("../images/backgrounds/JKAJ1.jpg")';
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2018,7 +2020,7 @@ function player_race_awards(){//Most popular duels, total number of duels
     panel += '  <div class="col-md-12">';
     panel += '                    <div class="panel panel-filled">';
     panel += '                      <div class="panel-heading">';
-    panel += '                      <span id="player_race_award_count">Race awards (#)</span>'
+    panel += '                      <span id="player_race_award_count"><a href=?page=badges">Race awards (#)</a></span>'
     panel += '                      </div>';
     panel += '                        <div class="panel-body">';
     panel += '                            <div id="player_race_awards">';
@@ -2110,7 +2112,7 @@ function player_race_awards(){//Most popular duels, total number of duels
             }
         }
 
-        document.getElementById('player_race_award_count').innerHTML='Race awards ('+count+'/'+maxAwards+')';
+        document.getElementById('player_race_award_count').innerHTML='<a href="?page=badges">Race awards</a> ('+count+'/'+maxAwards+')';
         //Edit in the count at top
 
     }
@@ -2559,8 +2561,91 @@ function player_duel_graph(){ // Problem - crashes if less than 5 total styles a
     $('#menu_player').addClass("active");
 }
 
+function badges() {
+	//All Badges
+	var panel;
+    panel = '<div id="second_row" class="row">';
+    panel += '  <div class="col-md-12">';
 
-function badges(){ // Problem - crashes if less than 5 total styles are found?
+    panel += '      <div class="panel panel-filled">';
+    panel += '          <div class="panel-heading">';
+    panel += '              Badge list';
+    panel += '          </div>';
+    panel += '          <div class="panel-body">';
+    panel += '              <div class="table-responsive">';
+    panel += '                  <table id="datatable_award_list" width="100%" class="table table-striped table-hover">';
+    panel += '                      <thead><tr><th>Badge</th><th>Map</th><th>Style</th><th>Time</th></tr></thead>';
+    panel += '                      <tfoot><tr><th></th><th></th><th></th></tr></tfoot></table>';
+    panel += '              </div>';
+    panel += '          </div>';
+    panel += '      </div>';
+
+    panel += '                </div>';
+    panel += '                </div>';
+    $("#main-content").append(panel);
+
+
+    $(document).ready(function() {
+        $.ajax({
+            type: "POST",
+            url: "ajax/getJSON.php",
+            dataType: "JSON",
+            async: true,
+            data: { option: "badge_list" },
+            success: function(res) {
+                PlayerBadges(res);
+            }
+        });
+
+        function PlayerBadges(data) {
+            $('#datatable_award_list').DataTable( {
+                "order": [[ 2, "asc" ]],
+                "bLengthChange": false,
+                "deferRender": true,
+                "dom": 'lrtp', //Hide search box
+                "data": data,
+                "pageLength": 20,
+                "columns": [
+                    { "data": 0, "render": 
+                        function ( data, type, row, meta ) { 
+                            return ('<a href=?page=badges&badge='+encodeURIComponent(data)+'>'+data+'</a>') }},
+                    { "data": 1, "render": 
+                        function ( data, type, row, meta ) { 
+                            return ((data)) }},
+                    { "data": 2, "render": 
+                        function ( data, type, row, meta ) { 
+                            return ((data)) }},
+                    { "data": 3, "sType": "num-durhtml", "className": "duration_ms", "render":
+                        function ( data, type, row, meta ) { 
+                            return '<td style="text-align: right;">'+ (Number(data) ? RaceTimeToString(data) : "Any") +'</td>' }} //Why doesnt this work..
+                ],
+                "aoColumnDefs": [
+                    { "bSortable": false, "aTargets": [ 0 ] }
+                ],
+                "oLanguage": {
+                            "sInfo": '',
+                            "sInfoFiltered": ''
+                },
+                "aaSorting": [[ 1, 'asc' ]], // ?
+
+                initComplete: function () {
+
+                    
+                },
+                "drawCallback": function( settings ) { //Pagination button active fixes
+                }
+            });
+        }
+
+    });
+
+
+    $('.jk-nav li').removeClass("active");
+    $('#menu_player').addClass("active");
+}
+
+
+function badge_info(){ // Problem - crashes if less than 5 total styles are found?
     var panel;
     panel = '<div id="second_row" class="row">';
     panel += '  <div class="col-md-12">';
@@ -2679,6 +2764,10 @@ function maps(){
         HTML+='  <p><a id="racepack6" class="btn btn-default" href="https://www.dropbox.com/s/ii6hc1dt1jobnoi/mapRacepack6.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
         HTML+='<div class="col-md-4">';
+        HTML+='  <h2>Race Pack 7</h2>';
+        HTML+='  <p><a id="racepack7" class="btn btn-default" href="https://www.dropbox.com/s/b46vv09sqo6j87g/mapRacepack7.pk3?dl=1" role="button">Download</a></p>';
+        HTML+='</div>';
+        HTML+='<div class="col-md-4">';
         HTML+='  <h2>Tritoch Pack</h2>';
         HTML+='  <p><a id="tritoch" class="btn btn-default" href="https://www.dropbox.com/s/bwescubuoh4u53l/mapTritoch_pack.pk3?dl=1" role="button">Download</a></p>';
         HTML+='</div>';
@@ -2731,10 +2820,16 @@ function servers(){
     HTML+='  <h2>.ups playja.pro</h2>';
     HTML+='  <p>/connect s.playja.pro</p>';
     HTML+='     <iframe id="ParaTracker" src="https://pt.dogi.us/?ip=74.91.123.99&port=29070&skin=Bigflat%20-%20Dark&filterOffendingServerNameSymbols=true&displayGameName=true&enableAutoRefresh=true&levelshotsEnabled=true&enableGeoIP=true&levelshotTransitionAnimation=3" width="600" height="600" sandbox="allow-forms allow-popups allow-scripts allow-same-origin" style="border:none;background:none transparent;" allowtransparency="true" scrolling="no"></iframe>';
-    HTML+='  <a href="https://www.nfoservers.com/donate.pl?force_recipient=1&recipient=videoprofess%40hotmail.com" id="donate">Donate to the server fund</a>';
+    HTML+='  <a href="https://www.nfoservers.com/donate.pl?force_recipient=1&recipient=videoprofess%40hotmail.com" id="donate">Donate to the ups playja.pro server fund</a>';
+    HTML+='  <h2>.ups full force</h2>';
+    HTML+='  <p>/connect et.jk3.in</p>';
+    HTML+='     <iframe id="ParaTracker" src="https://pt.dogi.us/?ip=45.55.234.173&port=29070&skin=Banner%20Ad%20-%20Light&filterOffendingServerNameSymbols=true&displayGameName=true&enableAutoRefresh=true&levelshotsEnabled=true&enableGeoIP=true&levelshotTransitionAnimation=3" width="728" height="90" sandbox="allow-forms allow-popups allow-scripts allow-same-origin" style="border:none;background:none transparent;" allowtransparency="true" scrolling="no"></iframe>';
     HTML+='</div>';
     HTML+='</div>';
     $("#main-content").html(HTML);
+
+
+
 
 
     //$hangoutAdmins = "loda, ark, source, pivot, ryan, ethan, bucky, frosty";

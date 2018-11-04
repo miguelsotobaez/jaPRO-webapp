@@ -1449,12 +1449,13 @@ function player_title(){ //Show total number of players, get each playername for
                     HTML+='Created: ' + (created.getYear()-100) + '-' + ('0'+(created.getMonth()+1)).slice(-2) + '-' + ('0' + created.getDate()).slice(-2) + ' ' 
                                     + ('0'+(created.getHours()+1)).slice(-2) + ':' + ('0'+(created.getMinutes()+1)).slice(-2);
                     HTML+='<br>';
-                }
+                }/*
                 if (v[2] > 1) {
                     var lastlogin = new Date(v[2]*1000);
                     HTML+= 'Lastlogin: ' + (lastlogin.getYear()-100) + '-' + ('0'+(lastlogin.getMonth()+1)).slice(-2) + '-' + ('0' + lastlogin.getDate()).slice(-2) + ' ' 
                                     + ('0'+(lastlogin.getHours()+1)).slice(-2) + ':' + ('0'+(lastlogin.getMinutes()+1)).slice(-2);
                 }
+                */
                 return false; 
             }
         });

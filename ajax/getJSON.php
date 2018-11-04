@@ -471,7 +471,12 @@ switch ($option) {
 		    }
 		    $query .= ") THEN 1 ELSE 0 END as 'val' UNION ALL ";
 		}
-		$query = substr($query, 0, -11); //Remove trailing union all
+		//$query = substr($query, 0, -11); //Remove trailing union all
+
+		//Add cumulative awards..?
+		$query .= "SELECT 'dash' AS 'key', (SELECT MIN(duration_ms) FROM Races WHERE style = 1 AND username = '".$usernameCleaned."' AND coursename = 'racearena_pro (dash1)') AS 'val' 
+			UNION ALL 
+			SELECT 'topspeed' AS 'key', (SELECT MAX(topspeed) FROM Races WHERE username = '".$usernameCleaned."') AS 'val'";
 
 		$arr = sql2arr($query);
 		if($arr) {
@@ -480,7 +485,6 @@ switch ($option) {
 		    }
 		}	
 		$json = json_encode($newArray);
-
 
 
 /*
@@ -698,7 +702,7 @@ switch ($option) {
 
 }
 
-//ob_start('ob_gzhandler'); //Compress json
+ob_start('ob_gzhandler'); //Compress json
 echo $json;
 $db->close();
 

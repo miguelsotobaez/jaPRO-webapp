@@ -116,7 +116,7 @@ switch ($option) {
 
 		if ($season) { //Preset filter so we can use sql cache
 			$query = "SELECT SQL_CACHE username, style, CAST(((score+newscore)/2) AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(rank AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(silvers, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
-				SELECT username, 99 AS style, SUM(season_rank) AS rank, COUNT(*) as count, SUM(season_entries-season_rank) AS newscore, SUM(CAST(season_entries AS DECIMAL(10, 2))/season_rank) AS score, SUM((season_entries - CAST(season_rank-1 AS DECIMAL(10, 2)))/season_entries) AS percentile, SUM(CASE WHEN season_rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN season_rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN season_rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE season = {$season} AND style != 14 GROUP BY username
+				SELECT username, 99 AS style, SUM(season_rank) AS rank, COUNT(*) as count, SUM(season_entries-season_rank) AS newscore, SUM(CAST(season_entries AS DECIMAL(10, 2))/season_rank) AS score, SUM((season_entries - CAST(season_rank-1 AS DECIMAL(10, 2)))/season_entries) AS percentile, SUM(CASE WHEN season_rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN season_rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN season_rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE season = {$season} GROUP BY username
 				UNION ALL
 				SELECT username, style, SUM(season_rank) AS rank, COUNT(*) as count, SUM(season_entries-season_rank) AS newscore, SUM(CAST(season_entries AS DECIMAL(10, 2))/season_rank) AS score, SUM((season_entries - CAST(season_rank-1 AS DECIMAL(10, 2)))/season_entries) AS percentile, SUM(CASE WHEN season_rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN season_rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN season_rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE season = {$season} GROUP BY username, style) AS T
 				ORDER BY score DESC";
@@ -125,7 +125,7 @@ switch ($option) {
 		}
 		else {
 			$query = "SELECT SQL_CACHE username, style, CAST(((score+newscore)/2) AS INT) AS score, ROUND(CAST(score AS DECIMAL(10, 2))/count, 2) AS avg_score, ROUND(percentile/count, 2) AS avg_percentile, ROUND(CAST(rank AS DECIMAL(10, 2))/count, 2) AS avg_rank, COALESCE(golds, 0) AS golds, COALESCE(silvers, 0) AS silvers, COALESCE(bronzes, 0) AS bronzes, count FROM (
-				SELECT username, 99 AS style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries-rank) AS newscore, SUM(CAST(entries AS DECIMAL(10, 2))/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE rank != 0 AND style != 14 GROUP BY username
+				SELECT username, 99 AS style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries-rank) AS newscore, SUM(CAST(entries AS DECIMAL(10, 2))/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE rank != 0 GROUP BY username
 				UNION ALL
 				SELECT username, style, SUM(rank) AS rank, COUNT(*) as count, SUM(entries-rank) AS newscore, SUM(CAST(entries AS DECIMAL(10, 2))/rank) AS score, SUM((entries - CAST(rank-1 AS DECIMAL(10, 2)))/entries) AS percentile, SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS golds, SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS silvers, SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS bronzes FROM Races WHERE rank != 0 GROUP BY username, style) AS T
 				ORDER BY score DESC";
@@ -385,7 +385,7 @@ switch ($option) {
 		}
 		$username = $_POST["player"]; //accept either GET or POST 
 		$newArray = null;
-	   	$stmt = $db->prepare("SELECT rank, coursename, style, ROUND(entries/rank, 0) AS strength, duration_ms, end_time FROM Races WHERE username = ? ORDER BY strength DESC LIMIT 50");
+		$stmt = $db->prepare("SELECT rank, coursename, style, ROUND(entries/rank, 0) AS strength, duration_ms, end_time FROM Races WHERE username = ? AND rank != 0 ORDER BY strength DESC LIMIT 50");
 		$stmt->bind_param('s', $username);
 		$stmt->execute();
 		$result = $stmt->get_result();
